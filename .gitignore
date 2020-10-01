@@ -285,3 +285,6 @@ src/SFA.DAS.Payments.AcceptanceTests.EndToEnd/App.Debug.config-das
 
 # Azure Functions localsettings file
 local.settings.json
+
+# Internal nlog log
+internal-nlog.txt
