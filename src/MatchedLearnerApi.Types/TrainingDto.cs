@@ -5,7 +5,6 @@ namespace MatchedLearnerApi.Types
 {
     public class TrainingDto
     {
-        // "Training" info
         public string Reference { get; set; }
         public int ProgrammeType { get; set; }
         public int StandardCode { get; set; }
@@ -13,7 +12,7 @@ namespace MatchedLearnerApi.Types
         public int PathwayCode { get; set; }
         public string FundingLineType { get; set; }
         public DateTime StartDate { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } //todo not used - why?
 
 
         public List<PriceEpisodeDto> PriceEpisodes { get; set; } = new List<PriceEpisodeDto>();

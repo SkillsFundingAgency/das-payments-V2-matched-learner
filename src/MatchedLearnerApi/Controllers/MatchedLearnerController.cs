@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using MatchedLearnerApi.Application.Repositories;
 using MatchedLearnerApi.Types;
@@ -39,32 +38,6 @@ namespace MatchedLearnerApi.Controllers
                 return NotFound();
             
             return Ok(result);
-
-            //var result = new MatchedLearnerResultDto
-            //{
-            //    Training = new List<TrainingDto>
-            //    {
-            //        new TrainingDto
-            //        {
-            //            PriceEpisodes = new List<PriceEpisodeDto>
-            //            {
-            //                new PriceEpisodeDto
-            //                {
-            //                    Periods = new List<PeriodDto>
-            //                    {
-            //                        new PeriodDto
-            //                        {
-            //                            DataLockFailures = new List<int>
-            //                            {
-            //                                1, 7
-            //                            }
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //};
         }
     }
 }
