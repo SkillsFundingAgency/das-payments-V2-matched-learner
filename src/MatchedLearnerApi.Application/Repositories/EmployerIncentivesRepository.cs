@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MatchedLearnerApi.Application.Mappers;
 using MatchedLearnerApi.Types;
 using Microsoft.EntityFrameworkCore;
 

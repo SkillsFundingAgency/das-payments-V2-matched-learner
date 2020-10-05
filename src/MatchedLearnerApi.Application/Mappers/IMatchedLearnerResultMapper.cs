@@ -2,7 +2,7 @@
 using MatchedLearnerApi.Application.Models;
 using MatchedLearnerApi.Types;
 
-namespace MatchedLearnerApi.Application.Repositories
+namespace MatchedLearnerApi.Application.Mappers
 {
     public interface IMatchedLearnerResultMapper
     {

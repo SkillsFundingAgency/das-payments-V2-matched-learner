@@ -3,7 +3,7 @@ using System.Linq;
 using MatchedLearnerApi.Application.Models;
 using MatchedLearnerApi.Types;
 
-namespace MatchedLearnerApi.Application.Repositories
+namespace MatchedLearnerApi.Application.Mappers
 {
     public class MatchedLearnerResultMapper : IMatchedLearnerResultMapper
     {
