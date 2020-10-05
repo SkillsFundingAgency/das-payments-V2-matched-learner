@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MatchedLearnerApi.Extensions;
+using MatchedLearnerApi.IoC;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,7 +33,11 @@ namespace MatchedLearnerApi
         {
             services.AddApiConfigurationSections(Configuration);
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.IgnoreNullValues = true;
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
 
             services.AddSwaggerGen(c =>
             {
@@ -41,6 +47,8 @@ namespace MatchedLearnerApi
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            new MatchedLearnerApiRegistry().Register(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

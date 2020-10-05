@@ -287,4 +287,4 @@ src/SFA.DAS.Payments.AcceptanceTests.EndToEnd/App.Debug.config-das
 local.settings.json
 
 # Internal nlog log
-internal-nlog.txt
+**/internal-nlog.txt
