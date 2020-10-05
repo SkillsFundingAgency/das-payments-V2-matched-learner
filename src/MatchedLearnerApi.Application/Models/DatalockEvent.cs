@@ -14,11 +14,8 @@ namespace MatchedLearnerApi.Application.Models
         public DateTimeOffset EventTime { get; set; }
         public DateTime IlrSubmissionDateTime { get; set; }
         public int IlrSubmissionWindowPeriod { get; set; }
-        public string LearnerReferenceNumber { get; set; }
         public long Ukprn { get; set; }
-
-
-        public Learner Learner { get; set; }
+        public long Uln { get; set; }
 
 
         // "Training" info
@@ -28,33 +25,21 @@ namespace MatchedLearnerApi.Application.Models
         public int FrameworkCode { get; set; }
         public int PathwayCode { get; set; }
         public string FundingLineType { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime? PlannedEndDate { get; set; }
-        public DateTime? ActualEndDate { get; set; }
-        public byte CompletionStatus { get; set; }
+        //public DateTime StartDate { get; set; }
+        //public DateTime? PlannedEndDate { get; set; }
+        //public DateTime? ActualEndDate { get; set; }
+        //public byte CompletionStatus { get; set; }
 
 
         public List<DatalockEventPriceEpisode> PriceEpisodes { get; set; } = new List<DatalockEventPriceEpisode>();
         
 
-
-        
-
-
-
-
-
-
-        public decimal CompletionAmount { get; set; }
-        public decimal InstalmentAmount { get; set; }
-        public short NumberOfInstalments { get; set; }
         public DateTime? LearningStartDate { get; set; }
         
         
         
         public ContractType ContractType { get; set; }
         public string AgreementId { get; set; }
-        public long? LearningAimSequenceNumber { get; set; }
         public bool IsPayable { get; set; }
     }
 }

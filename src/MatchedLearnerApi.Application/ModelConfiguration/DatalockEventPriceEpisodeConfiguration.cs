@@ -8,6 +8,8 @@ namespace MatchedLearnerApi.Application.ModelConfiguration
     {
         public void Configure(EntityTypeBuilder<DatalockEventPriceEpisode> builder)
         {
+            builder.ToTable("DataLockEventPriceEpisode");
+
             builder.Property(x => x.Identifier)
                 .HasColumnName("PriceEpisodeIdentifier");
 

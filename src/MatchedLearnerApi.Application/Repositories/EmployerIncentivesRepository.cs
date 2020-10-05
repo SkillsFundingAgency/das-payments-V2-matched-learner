@@ -22,11 +22,12 @@ namespace MatchedLearnerApi.Application.Repositories
         public async Task<MatchedLearnerResultDto> MatchedLearner(long ukprn, long uln)
         {
             var datalockEvent = await _context.DatalockEvents
-                .Where(x => x.Ukprn == ukprn && x.Learner.Uln == uln)
-                .GroupBy(x => new {x.AcademicYear, x.IlrSubmissionWindowPeriod})
-                .OrderByDescending(x => x.Key.AcademicYear)
-                .ThenByDescending(x => x.Key.IlrSubmissionWindowPeriod)
-                .FirstOrDefaultAsync();
+                .Where(x => x.Ukprn == ukprn && x.Uln == uln)
+                .Where(x => x.AcademicYear == _context.DatalockEvents
+                    .Where(y => y.Ukprn == ukprn && y.Uln == uln).OrderByDescending(y => y.AcademicYear).ThenByDescending(y => y.IlrSubmissionWindowPeriod).Select(y => y.AcademicYear).FirstOrDefault())
+                .Where(x => x.IlrSubmissionWindowPeriod == _context.DatalockEvents
+                    .Where(y => y.Ukprn == ukprn && y.Uln == uln).OrderByDescending(y => y.AcademicYear).ThenByDescending(y => y.IlrSubmissionWindowPeriod).Select(y => y.IlrSubmissionWindowPeriod).FirstOrDefault())
+                .ToListAsync();
 
             return _matchedLearnerResultMapper.Map(datalockEvent);
         }
@@ -41,7 +42,7 @@ namespace MatchedLearnerApi.Application.Repositories
     {
         public MatchedLearnerResultDto Map(IEnumerable<DatalockEvent> datalockEvents)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

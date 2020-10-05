@@ -1,4 +1,5 @@
-﻿using MatchedLearnerApi.Application.Models;
+﻿using System.Security.Cryptography.X509Certificates;
+using MatchedLearnerApi.Application.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,6 +9,7 @@ namespace MatchedLearnerApi.Application.ModelConfiguration
     {
         public void Configure(EntityTypeBuilder<DatalockEvent> builder)
         {
+            builder.ToTable("DataLockEvent");
             builder.Property(x => x.IlrSubmissionWindowPeriod)
                 .HasColumnName("CollectionPeriod");
 
@@ -23,12 +25,8 @@ namespace MatchedLearnerApi.Application.ModelConfiguration
                 .HasColumnName("LearningAimPathwayCode");
             builder.Property(x => x.FundingLineType)
                 .HasColumnName("LearningAimFundingLineType");
-
-            builder.OwnsOne(x => x.Learner, learner =>
-                {
-                    learner.Property(x => x.ReferenceNumber);
-                    learner.Property(x => x.Uln);
-                });
+            builder.Property(x => x.Uln)
+                .HasColumnName("LearnerUln");
 
             builder.HasMany(x => x.PriceEpisodes)
                 .WithOne()

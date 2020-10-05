@@ -2,7 +2,7 @@
 
 namespace MatchedLearnerApi.Types
 {
-    public class DatalockEventNonPayablePeriodFailureDto
+    public class DataLockFailureDto
     {
         public long Id { get; set; }
         public Guid DataLockEventNonPayablePeriodId { get; set; }

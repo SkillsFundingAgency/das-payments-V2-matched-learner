@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MatchedLearnerApi.Application.Repositories;
 using MatchedLearnerApi.Types;
@@ -33,6 +34,31 @@ namespace MatchedLearnerApi.Controllers
         public async Task<ActionResult> Get(long ukprn, long uln)
         {
             var result = await _employerIncentivesRepository.MatchedLearner(ukprn, uln);
+            //var result = new MatchedLearnerResultDto
+            //{
+            //    Training = new List<TrainingDto>
+            //    {
+            //        new TrainingDto
+            //        {
+            //            PriceEpisodes = new List<PriceEpisodeDto>
+            //            {
+            //                new PriceEpisodeDto
+            //                {
+            //                    Periods = new List<PeriodDto>
+            //                    {
+            //                        new PeriodDto
+            //                        {
+            //                            DataLockFailures = new List<int>
+            //                            {
+            //                                1, 7
+            //                            }
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //};
             return Ok(result);
         }
     }

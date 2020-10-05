@@ -28,7 +28,7 @@ namespace MatchedLearnerApi.Application.Models
         public DateTime StartDate { get; set; }
         public DateTime PlannedEndDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
-        
+
         public int NumberOfInstalments { get; set; }
         public decimal InstalmentAmount { get; set; }
         public decimal CompletionAmount { get; set; }
