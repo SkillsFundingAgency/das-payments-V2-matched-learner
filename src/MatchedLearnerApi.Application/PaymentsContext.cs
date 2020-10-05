@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MatchedLearnerApi.Application
 {
-    public class PaymentsContext : DbContext
+    public class PaymentsContext : DbContext, IPaymentsContext
     {
         public DbSet<DatalockEvent> DatalockEvents { get; set; }
 

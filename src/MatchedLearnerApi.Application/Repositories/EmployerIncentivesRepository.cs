@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MatchedLearnerApi.Application.Repositories
 {
-    public class EmployerIncentivesRepository
+    public class EmployerIncentivesRepository : IEmployerIncentivesRepository
     {
-        private readonly PaymentsContext _context;
+        private readonly IPaymentsContext _context;
 
-        public EmployerIncentivesRepository(PaymentsContext context)
+        public EmployerIncentivesRepository(IPaymentsContext context)
         {
             _context = context;
         }
