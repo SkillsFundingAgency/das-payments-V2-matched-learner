@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MatchedLearnerApi.Application.Models;
+using MatchedLearnerApi.Types;
 using Microsoft.EntityFrameworkCore;
 
 namespace MatchedLearnerApi.Application.Repositories
@@ -10,31 +11,37 @@ namespace MatchedLearnerApi.Application.Repositories
     public class EmployerIncentivesRepository : IEmployerIncentivesRepository
     {
         private readonly IPaymentsContext _context;
+        private readonly IMatchedLearnerResultMapper _matchedLearnerResultMapper;
 
-        public EmployerIncentivesRepository(IPaymentsContext context)
+        public EmployerIncentivesRepository(IPaymentsContext context, IMatchedLearnerResultMapper matchedLearnerResultMapper)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _matchedLearnerResultMapper = matchedLearnerResultMapper ?? throw new ArgumentNullException(nameof(matchedLearnerResultMapper));
         }
 
-        public Task<MatchedLearnerResult> MatchedLearner(long ukprn, long uln)
+        public async Task<MatchedLearnerResultDto> MatchedLearner(long ukprn, long uln)
         {
-            return _context.DatalockEvents
+            var datalockEvent = await _context.DatalockEvents
                 .Where(x => x.Ukprn == ukprn && x.Learner.Uln == uln)
-                .Select(x => new MatchedLearnerResult())
+                .GroupBy(x => new {x.AcademicYear, x.IlrSubmissionWindowPeriod})
+                .OrderByDescending(x => x.Key.AcademicYear)
+                .ThenByDescending(x => x.Key.IlrSubmissionWindowPeriod)
                 .FirstOrDefaultAsync();
+
+            return _matchedLearnerResultMapper.Map(datalockEvent);
         }
     }
 
-    public class MatchedLearnerResult
+    public interface IMatchedLearnerResultMapper
     {
-        public DateTimeOffset StartDate { get; set; }
-        public DateTimeOffset EventTime { get; set; }
-        public Guid EventId { get; set; }
-        public DateTimeOffset IlrSubmissionDate { get; set; }
-        public int IlrSubmissionWindowPeriod { get; set; }
-        public int AcademicYear { get; set; }
-        public long Ukprn { get; set; }
-        public Learner Learner { get; set; }
-        public List<DatalockEvent> Training { get; set; } = new List<DatalockEvent>();
+        MatchedLearnerResultDto Map(IEnumerable<DatalockEvent> datalockEvents);
+    }
+
+    public class MatchedLearnerResultMapper : IMatchedLearnerResultMapper
+    {
+        public MatchedLearnerResultDto Map(IEnumerable<DatalockEvent> datalockEvents)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using MatchedLearnerApi.Types;
 
 namespace MatchedLearnerApi.Application.Repositories
 {
     public interface IEmployerIncentivesRepository
     {
-        Task<MatchedLearnerResult> MatchedLearner(long ukprn, long uln);
+        Task<MatchedLearnerResultDto> MatchedLearner(long ukprn, long uln);
     }
 }
