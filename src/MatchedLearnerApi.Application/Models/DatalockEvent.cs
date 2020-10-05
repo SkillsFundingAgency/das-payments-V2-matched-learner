@@ -13,7 +13,7 @@ namespace MatchedLearnerApi.Application.Models
         public short AcademicYear { get; set; }
         public DateTimeOffset EventTime { get; set; }
         public DateTime IlrSubmissionDateTime { get; set; }
-        public int IlrSubmissionWindowPeriod { get; set; }
+        public byte IlrSubmissionWindowPeriod { get; set; }
         public long Ukprn { get; set; }
         public long Uln { get; set; }
 
@@ -35,11 +35,5 @@ namespace MatchedLearnerApi.Application.Models
         
 
         public DateTime? LearningStartDate { get; set; }
-        
-        
-        
-        public ContractType ContractType { get; set; }
-        public string AgreementId { get; set; }
-        public bool IsPayable { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace MatchedLearnerApi.Application.Models
         public Guid DataLockEventNonPayablePeriodId { get; set; }
         public long? ApprenticeshipId { get; set; }
 
-        public DatalockErrorCode DataLockFailure { get; set; }
+        public byte DataLockFailureId { get; set; }
         public virtual Apprenticeship Apprenticeship { get; set; }
     }
 }

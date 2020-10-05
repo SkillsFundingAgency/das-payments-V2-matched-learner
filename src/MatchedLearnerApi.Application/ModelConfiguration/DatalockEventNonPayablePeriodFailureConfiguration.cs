@@ -8,6 +8,7 @@ namespace MatchedLearnerApi.Application.ModelConfiguration
     {
         public void Configure(EntityTypeBuilder<DatalockEventNonPayablePeriodFailure> builder)
         {
+            builder.ToTable("DatalockEventNonPayablePeriodFailures");
             builder.HasOne(x => x.Apprenticeship)
                 .WithMany()
                 .HasForeignKey(x => x.ApprenticeshipId);

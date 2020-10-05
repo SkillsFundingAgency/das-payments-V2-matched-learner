@@ -9,9 +9,9 @@ namespace MatchedLearnerApi.Application.Models
         public string PriceEpisodeIdentifier { get; set; }
         public long? ApprenticeshipId { get; set; }
 
-        public int Period { get; set; }
+        public byte Period { get; set; }
         public bool IsPayable => true;
-        public ApprenticeshipEmployerType? ApprenticeshipEmployerType { get; set; }
+        public byte ApprenticeshipEmployerType { get; set; }
         public virtual Apprenticeship Apprenticeship { get; set; }
     }
 }

@@ -34,6 +34,12 @@ namespace MatchedLearnerApi.Controllers
         public async Task<ActionResult> Get(long ukprn, long uln)
         {
             var result = await _employerIncentivesRepository.MatchedLearner(ukprn, uln);
+
+            if (result == null)
+                return NotFound();
+            
+            return Ok(result);
+
             //var result = new MatchedLearnerResultDto
             //{
             //    Training = new List<TrainingDto>
@@ -59,7 +65,6 @@ namespace MatchedLearnerApi.Controllers
             //        }
             //    }
             //};
-            return Ok(result);
         }
     }
 }
