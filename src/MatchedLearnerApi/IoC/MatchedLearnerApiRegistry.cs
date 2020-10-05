@@ -10,6 +10,7 @@ namespace MatchedLearnerApi.IoC
         {
             services.AddTransient<IPaymentsContext, PaymentsContext>();
             services.AddTransient<IEmployerIncentivesRepository, EmployerIncentivesRepository>();
+            services.AddTransient<IMatchedLearnerResultMapper, MatchedLearnerResultMapper>();
         }
     }
 }
