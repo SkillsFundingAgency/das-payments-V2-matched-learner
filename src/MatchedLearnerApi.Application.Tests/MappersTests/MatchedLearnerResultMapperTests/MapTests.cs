@@ -208,18 +208,34 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
             _actual.Training.Single().StartDate.Should().Be(_expectedLearningStartDate);
         }
 
-        //private readonly string _expectedPriceEpisodeIdentifier = "1-1-1";
-        //private readonly DateTime _expectedPriceEpisodeStartDate = new DateTime(2020, 01, 01);
-        //private readonly DateTime _expectedPriceEpisodeEndDate = new DateTime(2021, 08, 08);
-        //private readonly int _expectedPriceEpisodeNumberOfInstalments = 5;
-        //private readonly decimal _expectedPriceEpisodeInstalmentAmount = 2m;
-        //private readonly decimal _expectedPriceEpisodeCompletionAmount = 1m;
+        [Test]
+        public void InputWithPayablePeriod_Should_MapPriceEpisodeIdentifier()
+        {
+            _actual.Training.Single().PriceEpisodes.Single().Identifier.Should().Be(_expectedPriceEpisodeIdentifier);
+        }
 
-        //[Test]
-        //public void InputWithPayablePeriod_Should_MapPriceEpisodeIdentifier()
-        //{
-        //    _actual.Training.Count().Should().Be(1);
-        //    _actual.Training.Any(x => x.PriceEpisodes)
-        //}
+        [Test]
+        public void InputWithPayablePeriod_Should_MapPriceEpisodeStartDate()
+        {
+            _actual.Training.Single().PriceEpisodes.Single().StartDate.Should().Be(_expectedPriceEpisodeStartDate);
+        }
+
+        [Test]
+        public void InputWithPayablePeriod_Should_MapPriceEpisodeEndDate()
+        {
+            _actual.Training.Single().PriceEpisodes.Single().EndDate.Should().Be(_expectedPriceEpisodeEndDate);
+        }
+
+        [Test]
+        public void InputWithPayablePeriod_Should_MapPriceEpisodeNumberOfInstalments()
+        {
+            _actual.Training.Single().PriceEpisodes.Single().InstalmentAmount.Should().Be(_expectedPriceEpisodeInstalmentAmount);
+        }
+
+        [Test]
+        public void InputWithPayablePeriod_Should_MapPriceEpisodeCompletionAmount()
+        {
+            _actual.Training.Single().PriceEpisodes.Single().CompletionAmount.Should().Be(_expectedPriceEpisodeCompletionAmount);
+        }
     }
 }
