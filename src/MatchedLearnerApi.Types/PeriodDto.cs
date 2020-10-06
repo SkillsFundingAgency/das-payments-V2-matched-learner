@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MatchedLearnerApi.Types
 {
-    public class PeriodDto
+    public struct PeriodDto
     {
         public int Period { get; set; }
         public bool IsPayable { get; set; }
