@@ -8,7 +8,5 @@ namespace MatchedLearnerApi.Interfaces
     public interface IMatchedLearnerApiConfiguration
     {
         string DasPaymentsDatabaseConnectionString { get; set; }
-        string LoggingConnectionString { get; set; }
-        string LoggingKey { get; set; }
     }
 }

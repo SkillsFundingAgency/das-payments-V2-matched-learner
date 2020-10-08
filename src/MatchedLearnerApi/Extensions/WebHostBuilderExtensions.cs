@@ -8,7 +8,7 @@ using SFA.DAS.Configuration.AzureTableStorage;
 
 namespace MatchedLearnerApi.Extensions
 {
-    public static class IWebHostBuilderExtensions
+    public static class WebHostBuilderExtensions
     {
         public static IWebHostBuilder ConfigureDasAppConfiguration(this IWebHostBuilder builder)
         {
