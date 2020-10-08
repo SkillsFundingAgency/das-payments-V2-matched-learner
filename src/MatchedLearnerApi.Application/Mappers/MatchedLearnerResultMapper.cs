@@ -14,6 +14,27 @@ namespace MatchedLearnerApi.Application.Mappers
             var orderedDatalockEvents = datalockEvents.OrderBy(x => x.LearningStartDate).ToList();
             var firstEvent = orderedDatalockEvents.First();
 
+            foreach (var datalockEvent in datalockEvents)
+            {
+                if (datalockEvent.PriceEpisodes == null)
+                    datalockEvent.PriceEpisodes = new List<DatalockEventPriceEpisode>();
+                
+                foreach (var datalockEventPriceEpisode in datalockEvent.PriceEpisodes)
+                {
+                    if (datalockEventPriceEpisode.NonPayablePeriods == null)
+                        datalockEventPriceEpisode.NonPayablePeriods = new List<DatalockEventNonPayablePeriod>();
+
+                    if (datalockEventPriceEpisode.PayablePeriods == null)
+                        datalockEventPriceEpisode.PayablePeriods = new List<DatalockEventPayablePeriod>();
+
+                    foreach (var datalockEventPayablePeriod in datalockEventPriceEpisode.PayablePeriods)
+                    {
+                        if (datalockEventPayablePeriod.Apprenticeship == null)
+                            datalockEventPayablePeriod.Apprenticeship = new Apprenticeship();
+                    }
+                }
+            }
+
             return new MatchedLearnerResultDto
             {
                 StartDate = firstEvent.LearningStartDate.GetValueOrDefault(),
@@ -48,7 +69,7 @@ namespace MatchedLearnerApi.Application.Mappers
                             IsPayable = true,
                             AccountId = payablePeriod.Apprenticeship.AccountId,
                             ApprenticeshipId = payablePeriod.ApprenticeshipId,
-                            ApprenticeshipEmployerType = payablePeriod.ApprenticeshipEmployerType,
+                            ApprenticeshipEmployerType = payablePeriod.Apprenticeship.ApprenticeshipEmployerType,
                             TransferSenderAccountId = payablePeriod.Apprenticeship.TransferSendingEmployerAccountId
                         }).Union(priceEpisode.NonPayablePeriods.SelectMany(nonPayablePeriod => nonPayablePeriod.Failures.GroupBy(failure => new PeriodDto
                         {

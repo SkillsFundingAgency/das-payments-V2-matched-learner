@@ -22,6 +22,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         private readonly short _expectedAcademicYear = 2021;
         private readonly long _expectedUkprn = 3457922;
         private readonly long _expectedUln = 228711;
+        private readonly byte _expectedApprenticeshipEmployerType = 2;
 
         private readonly string _expectedTrainingReference = "TrainingRef1";
         private readonly int _expectedTrainingProgrammeType = 14;
@@ -80,6 +81,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                                         Apprenticeship = new Apprenticeship
                                         {
                                             Id = 123,
+                                            ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
                                         },
                                         DataLockFailureId = 2,
                                     },
@@ -88,6 +90,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                                         Apprenticeship = new Apprenticeship
                                         {
                                             Id = 123,
+                                            ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
                                         },
                                         DataLockFailureId = 3,
                                     },
@@ -100,7 +103,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                             {
                                 Apprenticeship = new Apprenticeship
                                 {
-
+                                    ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
                                 },
                                 Period = 1,
                             },
@@ -127,6 +130,16 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         public void InputWithPayablePeriod_Should_MapStartDate()
         {
             _actual.StartDate.Should().Be(_expectedLearningStartDate);
+        }
+
+        [Test]
+        public void InputWithPayablePeriod_Should_MapApprenticeshipEmployerType()
+        {
+            _actual.Training
+                .SelectMany(x => x.PriceEpisodes)
+                .SelectMany(x => x.Periods)
+                .Should()
+                .AllBeEquivalentTo(new {ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType});
         }
 
         [Test]
