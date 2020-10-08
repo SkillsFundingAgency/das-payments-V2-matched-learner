@@ -6,61 +6,73 @@ using FluentAssertions;
 using FluentAssertions.Common;
 using MatchedLearnerApi.Types;
 using Microsoft.Extensions.Configuration;
-using NUnit.Framework;
+using TechTalk.SpecFlow;
 
-namespace MatchedLearnerApi.AcceptanceTests.SmokeTests
+namespace MatchedLearnerApi.AcceptanceTests.Bindings
 {
-    [TestFixture]
-    public class RequestALearnerThatExistsWorks
+    public class SmokeTestContext
     {
-        private readonly string _connectionString;
+        public Func<Task> FailedRequest { get; set; }
+        public MatchedLearnerResultDto MatchedLearnerResultDto { get; set; }
+    }
 
-        public RequestALearnerThatExistsWorks()
+    [Binding]
+    public class SmokeTestBindings
+    {
+        private SmokeTestContext _context;
+
+        public SmokeTestBindings(SmokeTestContext context)
+        {
+            _context = context;
+        }
+
+        private const string ApiCallResultKey = "ApiCallResult";
+
+        [When(@"we call the API with a learner that does not exist")]
+        public void WhenWeCallTheApiWithALearnerThatDoesNotExist()
+        {
+            var request = new TestClient();
+            Func<Task> act = request.Awaiting(async x => await x.Handle(0, 0));
+            act.Should().Throw<Exception>()
+                .WithMessage("404");
+            _context.FailedRequest = act;
+        }
+
+        [Then(@"the result should be a (.*)")]
+        public void ThenTheResultShouldBeA(int p0)
+        {
+            _context.FailedRequest.Should().Throw<Exception>().WithMessage($"{p0}");
+        }
+
+        [Given(@"we have created a sample learner")]
+        public void GivenWeHaveCreatedASampleLearner()
         {
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddEnvironmentVariables();
             configurationBuilder.SetBasePath(System.IO.Directory.GetCurrentDirectory());
             configurationBuilder.AddJsonFile("appsettings.json");
-
             var configuration = configurationBuilder.Build();
-
-            _connectionString = configuration.GetConnectionString("DasPayments");
-
-            
-        }
-
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            var repository = new TestRepository(_connectionString);
+            var connectionString = configuration.GetConnectionString("DasPayments");
+            var repository = new TestRepository(connectionString);
             repository.ClearLearner(-1000, -2000).Wait();
             repository.AddDatalockEvent(-1000, -2000).Wait();
         }
 
-        [OneTimeTearDown]
-        public void Teardown()
-        {
-
-        }
-
-        [Test]
-        public async Task RequestWithGoodData_Should_Return200()
+        [When(@"we call the API with the sample learners details")]
+        public async Task WhenWeCallTheApiWithTheSampleLearnersDetails()
         {
             var request = new TestClient();
-
-            var actual = await request.Handle(-1000, -2000);
-
-            actual.Should().BeAssignableTo<MatchedLearnerResultDto>();
+            _context.MatchedLearnerResultDto = await request.Handle(-1000, -2000);
         }
 
-        [Test]
-        public async Task RequestWithGoodData_Should_ReturnCorrectValues()
+        [Then(@"the result matches the sample learner")]
+        public void ThenTheResultMatchesTheSampleLearner()
         {
-            var request = new TestClient();
+            var actual = _context.MatchedLearnerResultDto;
 
-            var actual = await request.Handle(-1000, -2000);
-
-            actual.StartDate.Should().Be(new DateTime(2020, 10, 9).ToDateTimeOffset(TimeSpan.FromHours(1)));
+            actual.Should().NotBeNull();
+            
+            actual!.StartDate.Should().Be(new DateTime(2020, 10, 9).ToDateTimeOffset(TimeSpan.FromHours(1)));
             actual.IlrSubmissionDate.Should().Be(new DateTime(2020, 10, 10).ToDateTimeOffset(TimeSpan.FromHours(1)));
             actual.IlrSubmissionWindowPeriod.Should().Be(1);
             actual.AcademicYear.Should().Be(2021);

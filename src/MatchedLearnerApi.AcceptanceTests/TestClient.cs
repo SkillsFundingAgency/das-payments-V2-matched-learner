@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using MatchedLearnerApi.Types;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -33,22 +32,15 @@ namespace MatchedLearnerApi.AcceptanceTests
         {
             var request = new HttpRequestMessage(HttpMethod.Get, _url + $"/api/v1/{ukprn}/{uln}");
             
-            try
-            {
-                var response = await _client.SendAsync(request);
+            var response = await _client.SendAsync(request);
 
-                if(!response.IsSuccessStatusCode)
-                    throw new Exception($"{(int)response.StatusCode}");
+            if(!response.IsSuccessStatusCode)
+                throw new Exception($"{(int)response.StatusCode}");
 
-                var responseAsString = await response.Content.ReadAsStringAsync();
-                var responseAsObjectGraph = JsonConvert.DeserializeObject<MatchedLearnerResultDto>(responseAsString);
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            var responseAsObjectGraph = JsonConvert.DeserializeObject<MatchedLearnerResultDto>(responseAsString);
 
-                return responseAsObjectGraph;
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+            return responseAsObjectGraph;
         }
     }
 }
