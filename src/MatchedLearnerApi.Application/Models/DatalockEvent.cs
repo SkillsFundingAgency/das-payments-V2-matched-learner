@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MatchedLearnerApi.Application.Models
 {
@@ -25,10 +24,6 @@ namespace MatchedLearnerApi.Application.Models
         public int FrameworkCode { get; set; }
         public int PathwayCode { get; set; }
         public string FundingLineType { get; set; }
-        //public DateTime StartDate { get; set; }
-        //public DateTime? PlannedEndDate { get; set; }
-        //public DateTime? ActualEndDate { get; set; }
-        //public byte CompletionStatus { get; set; }
 
 
         public List<DatalockEventPriceEpisode> PriceEpisodes { get; set; } = new List<DatalockEventPriceEpisode>();
