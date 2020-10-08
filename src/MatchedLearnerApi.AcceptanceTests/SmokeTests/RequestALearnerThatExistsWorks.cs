@@ -32,7 +32,7 @@ namespace MatchedLearnerApi.AcceptanceTests.SmokeTests
         [OneTimeSetUp]
         public void Setup()
         {
-            var repository = new Repository(_connectionString);
+            var repository = new TestRepository(_connectionString);
             repository.ClearLearner(-1000, -2000).Wait();
             repository.AddDatalockEvent(-1000, -2000).Wait();
         }
@@ -46,7 +46,7 @@ namespace MatchedLearnerApi.AcceptanceTests.SmokeTests
         [Test]
         public async Task RequestWithGoodData_Should_Return200()
         {
-            var request = new Request();
+            var request = new TestClient();
 
             var actual = await request.Handle(-1000, -2000);
 
@@ -56,7 +56,7 @@ namespace MatchedLearnerApi.AcceptanceTests.SmokeTests
         [Test]
         public async Task RequestWithGoodData_Should_ReturnCorrectValues()
         {
-            var request = new Request();
+            var request = new TestClient();
 
             var actual = await request.Handle(-1000, -2000);
 

@@ -5,11 +5,11 @@ using Microsoft.Data.SqlClient;
 
 namespace MatchedLearnerApi.AcceptanceTests
 {
-    public class Repository
+    public class TestRepository
     {
         private readonly string _connectionString;
 
-        public Repository(string connectionString)
+        public TestRepository(string connectionString)
         {
             _connectionString = connectionString;
         }

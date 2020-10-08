@@ -7,12 +7,12 @@ using Newtonsoft.Json;
 
 namespace MatchedLearnerApi.AcceptanceTests
 {
-    public class Request
+    public class TestClient
     {
         private static readonly HttpClient Client = new HttpClient();
         private readonly string _url;
 
-        public Request()
+        public TestClient()
         {
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddEnvironmentVariables();

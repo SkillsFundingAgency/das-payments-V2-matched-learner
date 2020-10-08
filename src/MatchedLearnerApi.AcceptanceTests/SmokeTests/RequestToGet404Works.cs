@@ -12,7 +12,7 @@ namespace MatchedLearnerApi.AcceptanceTests.SmokeTests
         [Test]
         public async Task RequestWithBadData_Should_Return404()
         {
-            var request = new Request();
+            var request = new TestClient();
             Func<Task> act = request.Awaiting(async x => await x.Handle(0, 0));
             act.Should().Throw<Exception>()
                 .WithMessage("404");
