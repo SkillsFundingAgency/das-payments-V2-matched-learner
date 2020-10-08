@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MatchedLearnerApi.Application\MatchedLearnerApi.Application.csproj" />
+    <ProjectReference Include="..\MatchedLearnerApi\MatchedLearnerApi.csproj" />
   </ItemGroup>
 
 </Project>

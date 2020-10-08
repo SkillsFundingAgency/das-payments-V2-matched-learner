@@ -38,7 +38,7 @@ namespace MatchedLearnerApi.Application.Mappers
                         Identifier = priceEpisode.Identifier,
                         AgreedPrice = priceEpisode.AgreedPrice,
                         StartDate = priceEpisode.StartDate,
-                        //todo end date - which to use? Actual or Planned or both?
+                        EndDate = priceEpisode.ActualEndDate,
                         NumberOfInstalments = priceEpisode.NumberOfInstalments,
                         InstalmentAmount = priceEpisode.InstalmentAmount,
                         CompletionAmount = priceEpisode.CompletionAmount,

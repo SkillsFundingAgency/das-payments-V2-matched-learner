@@ -26,7 +26,6 @@ namespace MatchedLearnerApi.Application.Models
         public decimal TotalNegotiatedPrice4 { get; set; }
 
         public DateTime StartDate { get; set; }
-        public DateTime PlannedEndDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
 
         public int NumberOfInstalments { get; set; }
