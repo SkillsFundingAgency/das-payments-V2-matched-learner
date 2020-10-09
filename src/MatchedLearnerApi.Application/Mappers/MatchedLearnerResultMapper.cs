@@ -63,31 +63,41 @@ namespace MatchedLearnerApi.Application.Mappers
                         NumberOfInstalments = priceEpisode.NumberOfInstalments,
                         InstalmentAmount = priceEpisode.InstalmentAmount,
                         CompletionAmount = priceEpisode.CompletionAmount,
-                        Periods = priceEpisode.PayablePeriods.Select(payablePeriod => new PeriodDto
-                        {
-                            Period = payablePeriod.Period,
-                            IsPayable = true,
-                            AccountId = payablePeriod.Apprenticeship.AccountId,
-                            ApprenticeshipId = payablePeriod.ApprenticeshipId,
-                            ApprenticeshipEmployerType = payablePeriod.Apprenticeship.ApprenticeshipEmployerType,
-                            TransferSenderAccountId = payablePeriod.Apprenticeship.TransferSendingEmployerAccountId
-                        }).Union(priceEpisode.NonPayablePeriods.SelectMany(nonPayablePeriod => nonPayablePeriod.Failures.GroupBy(failure => new PeriodDto
-                        {
-                            Period = nonPayablePeriod.Period,
-                            IsPayable = false,
-                            AccountId = failure.Apprenticeship.AccountId,
-                            ApprenticeshipId = failure.ApprenticeshipId,
-                            ApprenticeshipEmployerType = failure.Apprenticeship.ApprenticeshipEmployerType,
-                            TransferSenderAccountId = failure.Apprenticeship.TransferSendingEmployerAccountId
-                        }).Select(group =>
-                        {
-                            var period = group.Key;
-                            period.DataLockFailures = group.Select(failure => (int)failure.DataLockFailureId).ToList();
-                            return period;
-                        }))).ToList()
+                        Periods = CollatePeriods(priceEpisode),
                     }).ToList()
                 }).ToList()
             };
+        }
+
+        private List<PeriodDto> CollatePeriods(DatalockEventPriceEpisode priceEpisode)
+        {
+            var collatedFailedPeriods = priceEpisode.NonPayablePeriods
+                .SelectMany(nonPayablePeriod => nonPayablePeriod.Failures.GroupBy(failure => new PeriodDto
+                {
+                    Period = nonPayablePeriod.Period,
+                    IsPayable = false,
+                    AccountId = failure.Apprenticeship.AccountId,
+                    ApprenticeshipId = failure.ApprenticeshipId,
+                    ApprenticeshipEmployerType = failure.Apprenticeship.ApprenticeshipEmployerType,
+                    TransferSenderAccountId = failure.Apprenticeship.TransferSendingEmployerAccountId
+                }).Select(group =>
+                {
+                    var period = group.Key;
+                    period.DataLockFailures = group.Select(failure => (int) failure.DataLockFailureId).ToList();
+                    return period;
+                }));
+
+            var payablePeriods = priceEpisode.PayablePeriods.Select(payablePeriod => new PeriodDto
+            {
+                Period = payablePeriod.Period,
+                IsPayable = true,
+                AccountId = payablePeriod.Apprenticeship.AccountId,
+                ApprenticeshipId = payablePeriod.ApprenticeshipId,
+                ApprenticeshipEmployerType = payablePeriod.Apprenticeship.ApprenticeshipEmployerType,
+                TransferSenderAccountId = payablePeriod.Apprenticeship.TransferSendingEmployerAccountId
+            });
+
+            return payablePeriods.Union(collatedFailedPeriods).ToList();
         }
     }
 }

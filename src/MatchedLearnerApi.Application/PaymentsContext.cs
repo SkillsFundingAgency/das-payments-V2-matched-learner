@@ -1,24 +1,13 @@
 ﻿using MatchedLearnerApi.Application.ModelConfiguration;
 using MatchedLearnerApi.Application.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace MatchedLearnerApi.Application
 {
     public class PaymentsContext : DbContext, IPaymentsContext
     {
-        private readonly string _connectionString;
-
-        public PaymentsContext(IConfiguration configuration)
-        {
-            _connectionString = configuration.GetConnectionString("PaymentsConnectionString");
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_connectionString);
-        }
+        public PaymentsContext(DbContextOptions options) : base(options)
+        { }
 
         public DbSet<DatalockEvent> DatalockEvents { get; set; }
 

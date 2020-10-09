@@ -52,7 +52,7 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
             configurationBuilder.SetBasePath(System.IO.Directory.GetCurrentDirectory());
             configurationBuilder.AddJsonFile("appsettings.json");
             var configuration = configurationBuilder.Build();
-            var connectionString = configuration.GetConnectionString("DasPayments");
+            var connectionString = configuration.GetConnectionString("PaymentsConnectionString");
             var repository = new TestRepository(connectionString);
             repository.ClearLearner(-1000, -2000).Wait();
             repository.AddDatalockEvent(-1000, -2000).Wait();
