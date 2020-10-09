@@ -1,14 +1,13 @@
-using System;
-using System.IO;
-using System.Reflection;
 using MatchedLearnerApi.Extensions;
-using MatchedLearnerApi.IoC;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace MatchedLearnerApi
 {
@@ -25,6 +24,7 @@ namespace MatchedLearnerApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApiConfigurationSections(Configuration);
+            services.AddAppDependencies();
 
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -40,8 +40,6 @@ namespace MatchedLearnerApi
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-
-            services.AddMatchedLearner();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
