@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using MatchedLearnerApi.AcceptanceTests.Services;
 using MatchedLearnerApi.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace MatchedLearnerApi.AcceptanceTests
@@ -15,14 +15,9 @@ namespace MatchedLearnerApi.AcceptanceTests
 
         public TestClient()
         {
-            var configurationBuilder = new ConfigurationBuilder();
-            configurationBuilder.AddEnvironmentVariables();
-            configurationBuilder.SetBasePath(System.IO.Directory.GetCurrentDirectory());
-            configurationBuilder.AddJsonFile("appsettings.json");
-
-            var configuration = configurationBuilder.Build();
-
-            _url = configuration["TargetUrl"];
+            var configuration = MatchedLearnerApiTestConfigurationProvider.Configuration;
+            
+            _url = configuration.TargetUrl;
 
             if (string.IsNullOrEmpty(_url))
                 _client = new WebApplicationFactory<Startup>().CreateClient();

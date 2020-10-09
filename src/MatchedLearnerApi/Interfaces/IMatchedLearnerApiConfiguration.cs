@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace MatchedLearnerApi.Interfaces
+﻿namespace MatchedLearnerApi.Interfaces
 {
     public interface IMatchedLearnerApiConfiguration
     {
         string DasPaymentsDatabaseConnectionString { get; set; }
+        string TargetUrl { get; set; }
     }
 }

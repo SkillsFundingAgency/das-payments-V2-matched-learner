@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Dapper;
+using MatchedLearnerApi.AcceptanceTests.Services;
 using Microsoft.Data.SqlClient;
 
 namespace MatchedLearnerApi.AcceptanceTests
@@ -9,9 +10,10 @@ namespace MatchedLearnerApi.AcceptanceTests
     {
         private readonly string _connectionString;
 
-        public TestRepository(string connectionString)
+        public TestRepository()
         {
-            _connectionString = connectionString;
+            var apiConfig = MatchedLearnerApiTestConfigurationProvider.Configuration;
+            _connectionString = apiConfig.DasPaymentsDatabaseConnectionString;
         }
 
         public async Task AddDatalockEvent(long ukprn, long uln)

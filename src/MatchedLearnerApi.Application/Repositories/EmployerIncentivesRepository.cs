@@ -20,14 +20,21 @@ namespace MatchedLearnerApi.Application.Repositories
 
         public async Task<MatchedLearnerResultDto> MatchedLearner(long ukprn, long uln)
         {
+            var latestPeriod = await _context.DatalockEvents
+                .Where(y => y.Ukprn == ukprn && y.Uln == uln)
+                .OrderByDescending(y => y.AcademicYear)
+                .ThenByDescending(y => y.IlrSubmissionWindowPeriod)
+                .FirstOrDefaultAsync();
+
+            if (latestPeriod == null)
+                return null;
+
             var datalockEvent = await _context.DatalockEvents
                 .Include(x => x.PriceEpisodes).ThenInclude(x => x.NonPayablePeriods).ThenInclude(x => x.Failures).ThenInclude(x => x.Apprenticeship)
                 .Include(x => x.PriceEpisodes).ThenInclude(x => x.PayablePeriods).ThenInclude(x => x.Apprenticeship)
                 .Where(x => x.Ukprn == ukprn && x.Uln == uln)
-                .Where(x => x.AcademicYear == _context.DatalockEvents
-                    .Where(y => y.Ukprn == ukprn && y.Uln == uln).OrderByDescending(y => y.AcademicYear).ThenByDescending(y => y.IlrSubmissionWindowPeriod).Select(y => y.AcademicYear).FirstOrDefault())
-                .Where(x => x.IlrSubmissionWindowPeriod == _context.DatalockEvents
-                    .Where(y => y.Ukprn == ukprn && y.Uln == uln).OrderByDescending(y => y.AcademicYear).ThenByDescending(y => y.IlrSubmissionWindowPeriod).Select(y => y.IlrSubmissionWindowPeriod).FirstOrDefault())
+                .Where(x => x.AcademicYear == latestPeriod.AcademicYear)
+                .Where(x => x.IlrSubmissionWindowPeriod == latestPeriod.IlrSubmissionWindowPeriod)
                 .ToListAsync();
 
             return _matchedLearnerResultMapper.Map(datalockEvent);

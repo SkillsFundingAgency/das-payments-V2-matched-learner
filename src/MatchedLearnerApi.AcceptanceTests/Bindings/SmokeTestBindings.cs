@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Common;
 using MatchedLearnerApi.Types;
-using Microsoft.Extensions.Configuration;
 using TechTalk.SpecFlow;
 
 namespace MatchedLearnerApi.AcceptanceTests.Bindings
@@ -19,7 +18,7 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
     [Binding]
     public class SmokeTestBindings
     {
-        private SmokeTestContext _context;
+        private readonly SmokeTestContext _context;
 
         public SmokeTestBindings(SmokeTestContext context)
         {
@@ -47,13 +46,7 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
         [Given(@"we have created a sample learner")]
         public void GivenWeHaveCreatedASampleLearner()
         {
-            var configurationBuilder = new ConfigurationBuilder();
-            configurationBuilder.AddEnvironmentVariables();
-            configurationBuilder.SetBasePath(System.IO.Directory.GetCurrentDirectory());
-            configurationBuilder.AddJsonFile("appsettings.json");
-            var configuration = configurationBuilder.Build();
-            var connectionString = configuration.GetConnectionString("PaymentsConnectionString");
-            var repository = new TestRepository(connectionString);
+            var repository = new TestRepository();
             repository.ClearLearner(-1000, -2000).Wait();
             repository.AddDatalockEvent(-1000, -2000).Wait();
         }
