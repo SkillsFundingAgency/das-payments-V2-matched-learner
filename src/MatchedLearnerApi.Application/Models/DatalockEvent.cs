@@ -24,7 +24,7 @@ namespace MatchedLearnerApi.Application.Models
         public int FrameworkCode { get; set; }
         public int PathwayCode { get; set; }
         public string FundingLineType { get; set; }
-
+        
 
         public List<DatalockEventPriceEpisode> PriceEpisodes { get; set; } = new List<DatalockEventPriceEpisode>();
         
