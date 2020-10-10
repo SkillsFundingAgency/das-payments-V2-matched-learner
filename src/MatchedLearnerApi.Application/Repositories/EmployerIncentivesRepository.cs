@@ -18,7 +18,7 @@ namespace MatchedLearnerApi.Application.Repositories
             _matchedLearnerResultMapper = matchedLearnerResultMapper ?? throw new ArgumentNullException(nameof(matchedLearnerResultMapper));
         }
 
-        public async Task<MatchedLearnerResultDto> MatchedLearner(long ukprn, long uln)
+        public async Task<MatchedLearnerResultDto> GetMatchedLearnerResults(long ukprn, long uln)
         {
             var latestPeriod = await _context.DatalockEvents
                 .Where(y => y.Ukprn == ukprn && y.Uln == uln)

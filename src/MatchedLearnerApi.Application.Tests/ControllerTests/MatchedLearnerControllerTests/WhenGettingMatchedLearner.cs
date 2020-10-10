@@ -74,7 +74,7 @@ namespace MatchedLearnerApi.Application.Tests.ControllerTests.MatchedLearnerCont
             _result = null;
 
             _mockRepository
-                .Setup(x => x.MatchedLearner(_ukprn, _uln))
+                .Setup(x => x.GetMatchedLearnerResults(_ukprn, _uln))
                 .ReturnsAsync(_result);
 
             return this;
@@ -85,7 +85,7 @@ namespace MatchedLearnerApi.Application.Tests.ControllerTests.MatchedLearnerCont
             _result = _fixture.Create<MatchedLearnerResultDto>();
 
             _mockRepository
-                .Setup(x => x.MatchedLearner(_ukprn, _uln))
+                .Setup(x => x.GetMatchedLearnerResults(_ukprn, _uln))
                 .ReturnsAsync(_result);
 
             return this;

@@ -32,7 +32,7 @@ namespace MatchedLearnerApi.Controllers
         [Route("{ukprn}/{uln}")]
         public async Task<ActionResult> Get(long ukprn, long uln)
         {
-            var result = await _employerIncentivesRepository.MatchedLearner(ukprn, uln);
+            var result = await _employerIncentivesRepository.GetMatchedLearnerResults(ukprn, uln);
 
             if (result == null)
                 return NotFound();

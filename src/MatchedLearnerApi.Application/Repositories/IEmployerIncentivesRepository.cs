@@ -5,6 +5,6 @@ namespace MatchedLearnerApi.Application.Repositories
 {
     public interface IEmployerIncentivesRepository
     {
-        Task<MatchedLearnerResultDto> MatchedLearner(long ukprn, long uln);
+        Task<MatchedLearnerResultDto> GetMatchedLearnerResults(long ukprn, long uln);
     }
 }
