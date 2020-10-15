@@ -24,11 +24,6 @@ resources:
     ref: refs/heads/master
     endpoint: 'GitHub (SFA)'
 
-pool:
-  name: 'DAS - Continuous Integration'
-  demands:
-    - Agent.OS -equals Windows_NT
-
 steps:
   - task: DotNetCoreCLI@2
     displayName: Restore
@@ -43,17 +38,10 @@ steps:
       arguments: '--configuration $(buildConfiguration) --no-restore'
       
   - task: DotNetCoreCLI@2
-    displayName: Application Test
+    displayName: Unit Tests
     inputs:
       command: test
       projects: '**/*.Application.Tests.csproj'
-      arguments: '--configuration $(buildConfiguration) --no-build'
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Acceptance Test'
-    inputs:
-      command: test
-      projects: '**/*.AcceptanceTests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build'
 
   - template: azure-pipelines-templates/dependency-check.yml@das-platform-building-blocks
