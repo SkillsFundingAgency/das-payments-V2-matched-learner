@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using MatchedLearnerApi.Extensions;
+using MatchedLearnerApi.Configuration;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NLog.Web;
 using SFA.DAS.Configuration.AzureTableStorage;
+using System;
+using System.IO;
 
 namespace MatchedLearnerApi
 {
@@ -37,7 +33,6 @@ namespace MatchedLearnerApi
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureDasAppConfiguration()
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
@@ -46,6 +41,11 @@ namespace MatchedLearnerApi
                     config.AddJsonFile("appSettings.json", optional: false, reloadOnChange: false);
                     config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
                     config.AddEnvironmentVariables();
+
+                    if (!hostingContext.HostingEnvironment.IsDevelopment())
+                    {
+                        config.AddAzureTableStorage(MatchedLearnerApiConfigurationKeys.MatchedLearnerApi);
+                    }
                 })
                 .UseUrls("https://localhost:5061")
                 .UseNLog();
