@@ -96,6 +96,7 @@
             "apiVersion": "2017-05-10",
             "name": "api-application-insights",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -116,6 +117,7 @@
             "apiVersion": "2017-05-10",
             "name": "api-app-service",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
