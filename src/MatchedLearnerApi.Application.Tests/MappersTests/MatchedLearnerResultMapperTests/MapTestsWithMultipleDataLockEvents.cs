@@ -90,6 +90,18 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                                     },
                                 }
                             },
+                            new DatalockEventNonPayablePeriod
+                            {
+                                Period = 13,
+                                Failures = new List<DatalockEventNonPayablePeriodFailure>
+                                {
+                                    new DatalockEventNonPayablePeriodFailure
+                                    {
+                                        ApprenticeshipId = 5555,
+                                        DataLockFailureId = 1,
+                                    },
+                                }
+                            },
                         },
                         PayablePeriods = new List<DatalockEventPayablePeriod>
                         {
@@ -247,7 +259,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
             var actual = sut.Map(testInput);
 
             var firstEvent = actual.Training.FirstOrDefault(x => x.PathwayCode == 1);
-            firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(4);
+            firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(5);
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 2 });
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 1 });
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 12 });

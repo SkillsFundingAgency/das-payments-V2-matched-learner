@@ -76,10 +76,10 @@ namespace MatchedLearnerApi.Application.Mappers
                 {
                     Period = nonPayablePeriod.Period,
                     IsPayable = false,
-                    AccountId = failure.Apprenticeship.AccountId,
+                    AccountId = failure.Apprenticeship?.AccountId ?? 0,
                     ApprenticeshipId = failure.ApprenticeshipId,
-                    ApprenticeshipEmployerType = failure.Apprenticeship.ApprenticeshipEmployerType,
-                    TransferSenderAccountId = failure.Apprenticeship.TransferSendingEmployerAccountId
+                    ApprenticeshipEmployerType = failure.Apprenticeship?.ApprenticeshipEmployerType ?? 0,
+                    TransferSenderAccountId = failure.Apprenticeship?.TransferSendingEmployerAccountId ?? 0
                 }).Select(group =>
                 {
                     var period = group.Key;

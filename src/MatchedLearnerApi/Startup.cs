@@ -28,7 +28,6 @@ namespace MatchedLearnerApi
 
             services.AddControllers().AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.IgnoreNullValues = true;
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
 

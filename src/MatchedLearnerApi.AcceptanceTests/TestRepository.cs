@@ -44,14 +44,16 @@ INSERT INTO Payments2.DatalockEventNonPayablePeriod (DatalockEventId, DataLockEv
     TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
 VALUES  (@datalockEventId, @datalockEventFailureId1, 'TEST', 1, 3, 400, 1),
         (@datalockEventId, @datalockEventFailureId2, 'TEST', 1, 4, 500, 1),
-        (@datalockEventId, @datalockEventFailureId3, 'TEST', 1, 5, 600, 1)
+        (@datalockEventId, @datalockEventFailureId3, 'TEST', 1, 5, 600, 1),
+        (@datalockEventId, @datalockEventFailureId4, 'TEST', 1, 6, 600, 1)
 
 INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DatalockEventNonPayablePeriodId, DatalockFailureId, ApprenticeshipId)
 VALUES  (@datalockEventFailureId1, 1, -123456), 
         (@datalockEventFailureId1, 2, -123456), 
         (@datalockEventFailureId1, 3, -123456), 
         (@datalockEventFailureId2, 7, -123456), 
-        (@datalockEventFailureId3, 9, -123456)
+        (@datalockEventFailureId3, 9, -123456),
+        (@datalockEventFailureId4, 1, -12345600)
 
 INSERT INTO Payments2.DatalockEventPriceEpisode (DatalockEventId, PriceEpisodeIdentifier, SfaContributionPercentage,
     TotalNegotiatedPrice1, TotalNegotiatedPrice2, TotalNegotiatedPrice3, TotalNegotiatedPrice4, StartDate,
@@ -66,13 +68,14 @@ VALUES (@datalockEventId, 'TEST', 1, 1000, 2000, 0, 0, '2020-10-07', SysDateTime
             var datalockEventFailureId1 = Guid.NewGuid();
             var datalockEventFailureId2 = Guid.NewGuid();
             var datalockEventFailureId3 = Guid.NewGuid();
+            var datalockEventFailureId4 = Guid.NewGuid();
 
             await using var connection = new SqlConnection(_connectionString);
 
             await connection.ExecuteAsync(sql, new
             {
                 ukprn, uln, datalockEventId,
-                datalockEventFailureId1, datalockEventFailureId2, datalockEventFailureId3
+                datalockEventFailureId1, datalockEventFailureId2, datalockEventFailureId3, datalockEventFailureId4
             });
         }
 

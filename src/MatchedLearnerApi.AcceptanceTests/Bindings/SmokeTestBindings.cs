@@ -81,6 +81,7 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
             training.PathwayCode.Should().Be(400);
             training.FundingLineType.Should().Be("funding");
             training.StartDate.Should().Be(new DateTime(2020, 10, 9));
+            //training.Status.Should().NotBeNullOrEmpty();
             training.PriceEpisodes.Should().HaveCount(1);
 
             var priceEpisode = training.PriceEpisodes.First();
@@ -91,7 +92,7 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
             priceEpisode.NumberOfInstalments.Should().Be(12);
             priceEpisode.InstalmentAmount.Should().Be(50);
             priceEpisode.CompletionAmount.Should().Be(550);
-            priceEpisode.Periods.Should().HaveCount(6);
+            priceEpisode.Periods.Should().HaveCount(7);
 
             priceEpisode.Periods.Should().ContainEquivalentOf(new
             {
