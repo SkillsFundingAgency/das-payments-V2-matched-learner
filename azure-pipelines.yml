@@ -24,6 +24,9 @@ resources:
     ref: refs/heads/master
     endpoint: 'GitHub (SFA)'
 
+pool:
+  name: 'DAS - Continuous Integration'
+
 steps:
   - task: DotNetCoreCLI@2
     displayName: Restore
