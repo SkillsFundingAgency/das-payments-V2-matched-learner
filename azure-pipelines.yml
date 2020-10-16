@@ -47,7 +47,7 @@ steps:
       projects: '**/*.Application.Tests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build'
 
-  - template: azure-pipelines-templates/dependency-check.yml
+  - template: azure-pipelines-templates/dependency-check.yml@das-platform-building-blocks
 
   - task: DotNetCoreCLI@2
     displayName: 'Publish API'
