@@ -51,7 +51,7 @@ namespace MatchedLearnerApi.Application.Mappers
                     StandardCode = dataLockEvent.StandardCode,
                     FrameworkCode = dataLockEvent.FrameworkCode,
                     PathwayCode = dataLockEvent.PathwayCode,
-                    FundingLineType = dataLockEvent.FundingLineType,
+                    FundingLineType = null,
                     StartDate = dataLockEvent.LearningStartDate.GetValueOrDefault(),
                     //todo Status we think should be mapped on the price episode not on the Training
                     PriceEpisodes = dataLockEvent.PriceEpisodes.Select(priceEpisode => new PriceEpisodeDto
