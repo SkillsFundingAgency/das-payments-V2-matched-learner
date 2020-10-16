@@ -17,6 +17,9 @@
         "sharedBackEndAppServicePlanName": {
             "type": "string"
         },
+        "sharedBackEndSubnetResourceId": {
+            "type": "string"
+        },
         "appServiceAllowedIPs": {
             "type": "array",
             "defaultValue": []
@@ -34,25 +37,13 @@
             "type": "string"
         },
         "loggingRedisConnectionString": {
-            "type": "string"
+            "type": "securestring"
         },
         "loggingRedisKey": {
             "type": "string"
         },
         "configurationStorageConnectionString": {
             "type": "securestring"
-        },
-        "sharedEnvVirtualNetworkName": {
-            "type": "string"
-        },
-        "subnetObject": {
-            "type": "object"
-        },
-        "subnetServiceEndpointList": {
-            "type": "array"
-        },
-        "subnetDelegations": {
-            "type": "array"
         }
     },
     "variables": {
@@ -61,36 +52,6 @@
         "apiAppServiceName": "[concat(variables('resourceNamePrefix'), 'api-as')]"
     },
     "resources": [
-        {
-            "apiVersion": "2017-05-10",
-            "name": "asp-subnet",
-            "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(variables('deploymentUrlBase'),'subnet.json')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "virtualNetworkName": {
-                        "value": "[parameters('sharedEnvVirtualNetworkName')]"
-                    },
-                    "subnetName": {
-                        "value": "[parameters('subnetObject').name]"
-                    },
-                    "subnetAddressPrefix": {
-                        "value": "[parameters('subnetObject').addressSpace]"
-                    },
-                    "serviceEndpointList": {
-                        "value": "[parameters('subnetServiceEndpointList')]"
-                    },
-                    "delegations": {
-                        "value": "[parameters('subnetDelegations')]"
-                    }
-                }
-            }
-        },
         {
             "apiVersion": "2017-05-10",
             "name": "api-app-service-certificate",
@@ -156,7 +117,7 @@
                         "value": "[parameters('sharedEnvResourceGroup')]"
                     },
                     "subnetResourceId": {
-                        "value": "[reference('asp-subnet').outputs.SubnetResourceId.value]"
+                        "value": "[parameters('sharedBackEndSubnetResourceId')]"
                     },
                     "appServiceAppSettings": {
                         "value": [
