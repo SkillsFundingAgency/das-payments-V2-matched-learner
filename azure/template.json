@@ -161,6 +161,9 @@
                             {
                                 "name": "EnvironmentName",
                                 "value": "[toUpper(parameters('environmentName'))]"
+                            },                            {
+                                "name": "Environment",
+                                "value": "[toUpper(parameters('environmentName'))]"
                             },
                             {
                                 "name": "ConfigNames",
