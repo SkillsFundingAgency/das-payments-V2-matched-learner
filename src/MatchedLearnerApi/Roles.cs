@@ -2,6 +2,6 @@
 {
     public static class RoleNames
     {
-        public const string Default = "matched-learner-api-default";
+        public const string Default = "Default";
     }
 }

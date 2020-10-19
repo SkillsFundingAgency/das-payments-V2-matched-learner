@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Microsoft.Extensions.Options;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
@@ -26,16 +25,8 @@ namespace MatchedLearnerApi
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables();
 
-            Configuration = configuration;
-
-            if (!ConfigurationIsLocalOrDev())
+            if (!ConfigurationIsLocalOrDev(configuration))
             {
-#if DEBUG
-                config
-                    .AddJsonFile("appsettings.json", true)
-                    .AddJsonFile("appsettings.Development.json", true);
-#endif
-
                 config.AddAzureTableStorage(options =>
                     {
                         options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
@@ -51,19 +42,13 @@ namespace MatchedLearnerApi
 
         public IConfiguration Configuration { get; }
 
-        private bool ConfigurationIsLocalOrDev()
-        {
-            return Configuration["Environment"].Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase) ||
-                   Configuration["Environment"].Equals("DEV", StringComparison.CurrentCultureIgnoreCase);
-        }
-        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApiConfigurationSections(Configuration);
             services.AddAppDependencies();
 
-            if (!ConfigurationIsLocalOrDev())
+            if (!ConfigurationIsLocalOrDev(Configuration))
             {
                 var azureAdConfiguration = Configuration
                     .GetSection("AzureAd")
@@ -76,8 +61,7 @@ namespace MatchedLearnerApi
 
                 services.AddAuthentication(azureAdConfiguration, policies);
             }
-
-
+            
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -123,6 +107,13 @@ namespace MatchedLearnerApi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Matched Learner Api V1");
                 c.RoutePrefix = string.Empty;
             });
+        }
+
+        private bool ConfigurationIsLocalOrDev(IConfiguration configuration)
+        {
+            return configuration["Environment"].Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase) ||
+                   configuration["Environment"].Equals("DEV", StringComparison.CurrentCultureIgnoreCase) ||
+                   configuration["Environment"].Equals("DEVELOPMENT", StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }
