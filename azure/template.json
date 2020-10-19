@@ -50,6 +50,9 @@
         },
         "resourceGroupLocation": {
             "type": "string"
+        },
+        "configNames": {
+            "type": "string"
         }
     },
     "variables": {
@@ -161,7 +164,7 @@
                             },
                             {
                                 "name": "ConfigNames",
-                                "value": "SFA.DAS.Payments.MatchedLearner.Api"
+                                "value": "[parameters('configNames')]"
                             }
                         ]
                     },
