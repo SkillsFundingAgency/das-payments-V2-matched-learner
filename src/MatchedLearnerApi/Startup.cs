@@ -6,8 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.Options;
+using SFA.DAS.Api.Common.AppStart;
+using SFA.DAS.Api.Common.Configuration;
+using SFA.DAS.Api.Common.Infrastructure;
+using SFA.DAS.Configuration.AzureTableStorage;
 
 namespace MatchedLearnerApi
 {
@@ -15,16 +21,62 @@ namespace MatchedLearnerApi
     {
         public Startup(IConfiguration configuration)
         {
+            var config = new ConfigurationBuilder()
+                .AddConfiguration(configuration)
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddEnvironmentVariables();
+
             Configuration = configuration;
+
+            if (!ConfigurationIsLocalOrDev())
+            {
+#if DEBUG
+                config
+                    .AddJsonFile("appsettings.json", true)
+                    .AddJsonFile("appsettings.Development.json", true);
+#endif
+
+                config.AddAzureTableStorage(options =>
+                    {
+                        options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
+                        options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
+                        options.EnvironmentName = configuration["Environment"];
+                        options.PreFixConfigurationKeys = false;
+                    }
+                );
+            }
+
+            Configuration = config.Build();
         }
 
         public IConfiguration Configuration { get; }
 
+        private bool ConfigurationIsLocalOrDev()
+        {
+            return Configuration["Environment"].Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase) ||
+                   Configuration["Environment"].Equals("DEV", StringComparison.CurrentCultureIgnoreCase);
+        }
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApiConfigurationSections(Configuration);
             services.AddAppDependencies();
+
+            if (!ConfigurationIsLocalOrDev())
+            {
+                var azureAdConfiguration = Configuration
+                    .GetSection("AzureAd")
+                    .Get<AzureActiveDirectoryConfiguration>();
+
+                var policies = new Dictionary<string, string>
+                {
+                    {PolicyNames.Default, RoleNames.Default},
+                };
+
+                services.AddAuthentication(azureAdConfiguration, policies);
+            }
+
 
             services.AddControllers().AddJsonOptions(options =>
             {
