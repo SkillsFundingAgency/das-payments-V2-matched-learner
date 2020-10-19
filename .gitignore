@@ -288,3 +288,4 @@ local.settings.json
 
 # Internal nlog log
 **/internal-nlog.txt
+src/MatchedLearnerApi/appsettings.Development.json
