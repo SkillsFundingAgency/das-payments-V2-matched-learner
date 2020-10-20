@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
@@ -48,6 +50,9 @@ namespace MatchedLearnerApi
             services.AddApiConfigurationSections(Configuration);
             services.AddAppDependencies();
 
+            services.Configure<AzureActiveDirectoryConfiguration>(Configuration.GetSection("AzureAd"));
+            services.AddSingleton(cfg => cfg.GetService<IOptions<AzureActiveDirectoryConfiguration>>().Value);
+
             if (!ConfigurationIsLocalOrDev(Configuration))
             {
                 var azureAdConfiguration = Configuration
@@ -66,6 +71,16 @@ namespace MatchedLearnerApi
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
+
+            services
+                .AddMvc(o =>
+                {
+                    if (!ConfigurationIsLocalOrDev(Configuration))
+                    {
+                        o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string>{PolicyNames.Default}));
+                    }
+                    o.Conventions.Add(new ApiExplorerGroupPerVersionConvention());
+                }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSwaggerGen(c =>
             {
