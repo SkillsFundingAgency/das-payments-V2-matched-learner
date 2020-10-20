@@ -38,6 +38,7 @@ namespace MatchedLearnerApi
                     config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
                     config.AddEnvironmentVariables();
                 })
+                .UseApplicationInsights()
                 .UseStartup<Startup>()
                 .UseNLog();
     }
