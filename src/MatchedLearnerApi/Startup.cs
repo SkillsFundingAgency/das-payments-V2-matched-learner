@@ -22,7 +22,7 @@ namespace MatchedLearnerApi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public static IConfiguration AddTableStorage(IConfiguration configuration)
         {
             var config = new ConfigurationBuilder()
                 .AddConfiguration(configuration)
@@ -42,9 +42,15 @@ namespace MatchedLearnerApi
             }
 
             Configuration = config.Build();
+            return Configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public Startup(IConfiguration configuration)
+        {
+            AddTableStorage(configuration);
+        }
+
+        public static IConfiguration Configuration { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -76,8 +82,7 @@ namespace MatchedLearnerApi
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
 
-            services
-                .AddMvc(o =>
+            services.AddMvc(o =>
                 {
                     if (!ConfigurationIsLocalOrDev(Configuration))
                     {
@@ -142,7 +147,7 @@ namespace MatchedLearnerApi
             });
         }
 
-        private bool ConfigurationIsLocalOrDev(IConfiguration configuration)
+        private static bool ConfigurationIsLocalOrDev(IConfiguration configuration)
         {
             return configuration["Environment"].Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase) ||
                    configuration["Environment"].Equals("DEV", StringComparison.CurrentCultureIgnoreCase) ||

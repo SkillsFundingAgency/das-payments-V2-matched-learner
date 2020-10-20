@@ -6,6 +6,7 @@ using MatchedLearnerApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace MatchedLearnerApi.Extensions
 {
@@ -13,8 +14,9 @@ namespace MatchedLearnerApi.Extensions
     {
         public static IServiceCollection AddApiConfigurationSections(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton(typeof(IMatchedLearnerApiConfiguration),
-                x => GetInstance<MatchedLearnerApiConfiguration>(configuration, MatchedLearnerApiConfigurationKeys.MatchedLearnerApi));
+            services.Configure<MatchedLearnerApiConfiguration>(configuration.GetSection("MatchedLearner"));
+            services.AddSingleton(typeof(IMatchedLearnerApiConfiguration), cfg => 
+                cfg.GetService<IOptions<MatchedLearnerApiConfiguration>>().Value);
             
             return services;
         }
@@ -23,7 +25,7 @@ namespace MatchedLearnerApi.Extensions
         {
             services.AddTransient<IPaymentsContext, PaymentsContext>(provider =>
             {
-                var configuration = provider.GetService(typeof(IMatchedLearnerApiConfiguration)) as IMatchedLearnerApiConfiguration;
+                var configuration = provider.GetService<IMatchedLearnerApiConfiguration>();
                 var builder = new DbContextOptionsBuilder();
                 builder.UseSqlServer(configuration.DasPaymentsDatabaseConnectionString);
                 return new PaymentsContext(builder.Options);
