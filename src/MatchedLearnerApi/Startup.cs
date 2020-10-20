@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SFA.DAS.Api.Common.AppStart;
@@ -52,6 +54,8 @@ namespace MatchedLearnerApi
 
             services.Configure<AzureActiveDirectoryConfiguration>(Configuration.GetSection("AzureAd"));
             services.AddSingleton(cfg => cfg.GetService<IOptions<AzureActiveDirectoryConfiguration>>().Value);
+
+            services.AddHealthChecks();
 
             if (!ConfigurationIsLocalOrDev(Configuration))
             {
@@ -115,6 +119,19 @@ namespace MatchedLearnerApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                {
+                    ResponseWriter = HealthCheckResponseWriter.WriteJsonResponse,
+                });
+                endpoints.MapHealthChecks("/ping", new HealthCheckOptions
+                {
+                    Predicate = (_) => false,
+                    ResponseWriter = (context, report) =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        return context.Response.WriteAsync("");
+                    }
+                });
             });
 
             app.UseSwagger();
