@@ -109,6 +109,7 @@ namespace MatchedLearnerApi
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
