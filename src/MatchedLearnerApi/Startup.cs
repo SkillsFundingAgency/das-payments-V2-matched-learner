@@ -82,14 +82,14 @@ namespace MatchedLearnerApi
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
 
-            services.AddMvc(o =>
-                {
-                    if (!ConfigurationIsLocalOrDev(Configuration))
-                    {
-                        o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string>{PolicyNames.Default}));
-                    }
-                    o.Conventions.Add(new ApiExplorerGroupPerVersionConvention());
-                }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            //services.AddMvc(o =>
+            //    {
+            //        if (!ConfigurationIsLocalOrDev(Configuration))
+            //        {
+            //            o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string>{PolicyNames.Default}));
+            //        }
+            //        o.Conventions.Add(new ApiExplorerGroupPerVersionConvention());
+            //    }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSwaggerGen(c =>
             {
