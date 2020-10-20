@@ -30,7 +30,6 @@ namespace MatchedLearnerApi
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     var environmentName = hostingContext.HostingEnvironment.EnvironmentName;
@@ -39,7 +38,7 @@ namespace MatchedLearnerApi
                     config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
                     config.AddEnvironmentVariables();
                 })
-                .UseUrls("https://localhost:5061")
+                .UseStartup<Startup>()
                 .UseNLog();
     }
 }
