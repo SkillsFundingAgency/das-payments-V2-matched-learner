@@ -1,4 +1,5 @@
-﻿using MatchedLearnerApi.Application;
+﻿using System;
+using MatchedLearnerApi.Application;
 using MatchedLearnerApi.Application.Mappers;
 using MatchedLearnerApi.Application.Repositories;
 using MatchedLearnerApi.Configuration;
@@ -14,10 +15,15 @@ namespace MatchedLearnerApi.Extensions
     {
         public static IServiceCollection AddApiConfigurationSections(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<MatchedLearnerApiConfiguration>(configuration.GetSection("MatchedLearner"));
-            services.AddSingleton(typeof(IMatchedLearnerApiConfiguration), cfg => 
-                cfg.GetService<IOptions<MatchedLearnerApiConfiguration>>().Value);
-            
+            var matchedLearnerConfig = configuration
+                .GetSection(MatchedLearnerApiConfigurationKeys.MatchedLearnerConfigKey)
+                .Get<MatchedLearnerApiConfiguration>();
+
+            if (matchedLearnerConfig == null)
+                throw new InvalidOperationException("invalid Configuration, unable find 'MatchedLearner' Configuration section");
+
+            services.AddSingleton<IMatchedLearnerApiConfiguration>(matchedLearnerConfig);
+
             return services;
         }
 
@@ -26,6 +32,10 @@ namespace MatchedLearnerApi.Extensions
             services.AddTransient<IPaymentsContext, PaymentsContext>(provider =>
             {
                 var configuration = provider.GetService<IMatchedLearnerApiConfiguration>();
+                if (configuration == null)
+                {
+                    throw new InvalidOperationException($"invalid Configuration, unable create instance of {MatchedLearnerApiConfigurationKeys.MatchedLearnerConfigKey}");
+                }
                 var builder = new DbContextOptionsBuilder();
                 builder.UseSqlServer(configuration.DasPaymentsDatabaseConnectionString);
                 return new PaymentsContext(builder.Options);
@@ -34,13 +44,6 @@ namespace MatchedLearnerApi.Extensions
             services.AddTransient<IMatchedLearnerResultMapper, MatchedLearnerResultMapper>();
 
             return services;
-        }
-
-        private static T GetInstance<T>(IConfiguration configuration, string name)
-        {
-            var configSection = configuration.GetSection(name);
-            
-            return configSection.Get<T>();
         }
     }
 }
