@@ -44,7 +44,7 @@ namespace MatchedLearnerApi.Application.Mappers
                 AcademicYear = firstEvent.AcademicYear,
                 Ukprn = firstEvent.Ukprn,
                 Uln = firstEvent.Uln,
-                Training = orderedDatalockEvents.Select(dataLockEvent => new TrainingDto
+                Training = MergeTrainingForSameApprenticeship(orderedDatalockEvents).Select(dataLockEvent => new TrainingDto
                 {
                     Reference = dataLockEvent.Reference,
                     ProgrammeType = dataLockEvent.ProgrammeType,
@@ -67,6 +67,45 @@ namespace MatchedLearnerApi.Application.Mappers
                     }).ToList()
                 }).ToList()
             };
+        }
+
+        private IEnumerable<DatalockEvent> MergeTrainingForSameApprenticeship(List<DatalockEvent> source)
+        {
+            var groups = source.GroupBy(x => new
+            {
+                x.Reference, 
+                x.StandardCode, 
+                x.ProgrammeType, 
+                x.FrameworkCode, 
+                x.PathwayCode,
+                x.AcademicYear,
+                x.FundingLineType,
+                x.LearningStartDate,
+                x.Uln,
+                x.Ukprn,
+                x.IlrSubmissionWindowPeriod,
+                x.IlrSubmissionDateTime,
+            });
+
+            foreach (var group in groups)
+            {
+                yield return new DatalockEvent
+                {
+                    AcademicYear = group.Key.AcademicYear,
+                    PriceEpisodes = group.SelectMany(x => x.PriceEpisodes).ToList(),
+                    FrameworkCode = group.Key.FrameworkCode,
+                    FundingLineType = group.Key.FundingLineType,
+                    LearningStartDate = group.Key.LearningStartDate,
+                    PathwayCode = group.Key.PathwayCode,
+                    Reference = group.Key.Reference,
+                    ProgrammeType = group.Key.ProgrammeType,
+                    Ukprn = group.Key.Ukprn,
+                    Uln = group.Key.Uln,
+                    StandardCode = group.Key.StandardCode,
+                    IlrSubmissionWindowPeriod = group.Key.IlrSubmissionWindowPeriod,
+                    IlrSubmissionDateTime = group.Key.IlrSubmissionDateTime,
+                };
+            }
         }
 
         private List<PeriodDto> CollatePeriods(DatalockEventPriceEpisode priceEpisode)
