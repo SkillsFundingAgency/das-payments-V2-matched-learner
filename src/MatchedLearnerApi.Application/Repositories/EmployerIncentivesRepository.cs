@@ -32,6 +32,7 @@ namespace MatchedLearnerApi.Application.Repositories
             var datalockEvent = await _context.DatalockEvents
                 .Include(x => x.PriceEpisodes).ThenInclude(x => x.NonPayablePeriods).ThenInclude(x => x.Failures).ThenInclude(x => x.Apprenticeship)
                 .Include(x => x.PriceEpisodes).ThenInclude(x => x.PayablePeriods).ThenInclude(x => x.Apprenticeship)
+                .Where(x => x.Reference == "ZPROG001")
                 .Where(x => x.Ukprn == ukprn && x.Uln == uln)
                 .Where(x => 
                     x.JobId == latestSuccessfulJob.JobId 
