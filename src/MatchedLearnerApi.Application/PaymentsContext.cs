@@ -16,7 +16,7 @@ namespace MatchedLearnerApi.Application
         {
             modelBuilder.HasDefaultSchema("Payments2");
 
-            modelBuilder.ApplyConfiguration(new DatalockEventConfiguration());
+            modelBuilder.ApplyConfiguration(new LatestSuccessfulJobModelConfiguration());
             modelBuilder.ApplyConfiguration(new DatalockEventConfiguration());
             modelBuilder.ApplyConfiguration(new DatalockEventNonPayablePeriodConfiguration());
             modelBuilder.ApplyConfiguration(new DatalockEventNonPayablePeriodFailureConfiguration());

@@ -35,7 +35,7 @@ namespace MatchedLearnerApi.Application.Repositories
                 .Where(x => x.Reference == "ZPROG001")
                 .Where(x => x.Ukprn == ukprn && x.Uln == uln)
                 .Where(x => 
-                    x.JobId == latestSuccessfulJob.JobId 
+                    x.JobId == latestSuccessfulJob.DcJobId 
                  && x.AcademicYear == latestSuccessfulJob.AcademicYear
                  && x.IlrSubmissionWindowPeriod == latestSuccessfulJob.CollectionPeriod)
                 .ToListAsync();
