@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MatchedLearnerApi.Application.ModelConfiguration
 {
-    class DatalockEventNonPayablePeriodFailureConfiguration : IEntityTypeConfiguration<DatalockEventNonPayablePeriodFailure>
+    public class DatalockEventNonPayablePeriodFailureConfiguration : IEntityTypeConfiguration<DatalockEventNonPayablePeriodFailure>
     {
         public void Configure(EntityTypeBuilder<DatalockEventNonPayablePeriodFailure> builder)
         {

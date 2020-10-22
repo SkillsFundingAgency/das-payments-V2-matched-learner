@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MatchedLearnerApi.Application.ModelConfiguration
 {
-    class DatalockEventConfiguration : IEntityTypeConfiguration<DatalockEvent>
+    public class DatalockEventConfiguration : IEntityTypeConfiguration<DatalockEvent>
     {
         public void Configure(EntityTypeBuilder<DatalockEvent> builder)
         {
