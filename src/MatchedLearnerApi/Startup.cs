@@ -7,14 +7,11 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using MatchedLearnerApi.Configuration;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NLog;
-using NLog.Web;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
@@ -46,7 +43,7 @@ namespace MatchedLearnerApi
 
                 if (azureAdConfiguration == null)
                 {
-                    throw new InvalidOperationException($"invalid Configuration, unable Add Authentication, unable find 'AzureAd' Configuration section");
+                    throw new InvalidOperationException("invalid Configuration, unable Add Authentication, unable find 'AzureAd' Configuration section");
                 }
 
                 var policies = new Dictionary<string, string>
