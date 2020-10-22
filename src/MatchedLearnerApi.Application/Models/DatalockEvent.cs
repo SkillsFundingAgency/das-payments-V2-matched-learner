@@ -6,6 +6,7 @@ namespace MatchedLearnerApi.Application.Models
     public class DatalockEvent
     {
         public long Id { get; set; }
+        public long JobId { get; set; }
 
         // "Header" info
         public Guid EventId { get; set; }

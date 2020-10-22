@@ -10,11 +10,13 @@ namespace MatchedLearnerApi.Application
         { }
 
         public DbSet<DatalockEvent> DatalockEvents { get; set; }
+        public virtual DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Payments2");
 
+            modelBuilder.ApplyConfiguration(new DatalockEventConfiguration());
             modelBuilder.ApplyConfiguration(new DatalockEventConfiguration());
             modelBuilder.ApplyConfiguration(new DatalockEventNonPayablePeriodConfiguration());
             modelBuilder.ApplyConfiguration(new DatalockEventNonPayablePeriodFailureConfiguration());

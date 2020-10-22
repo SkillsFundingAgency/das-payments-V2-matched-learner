@@ -6,5 +6,6 @@ namespace MatchedLearnerApi.Application
     public interface IPaymentsContext
     {
         DbSet<DatalockEvent> DatalockEvents { get; set; }
+        DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
     }
 }

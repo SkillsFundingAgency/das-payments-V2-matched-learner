@@ -20,21 +20,23 @@ namespace MatchedLearnerApi.Application.Repositories
 
         public async Task<MatchedLearnerResultDto> GetMatchedLearnerResults(long ukprn, long uln)
         {
-            var latestPeriod = await _context.DatalockEvents
-                .Where(y => y.Ukprn == ukprn && y.Uln == uln)
+            var latestSuccessfulJob = await _context.LatestSuccessfulJobs
+                .Where(y => y.Ukprn == ukprn)
                 .OrderByDescending(y => y.AcademicYear)
-                .ThenByDescending(y => y.IlrSubmissionWindowPeriod)
+                .ThenByDescending(y => y.CollectionPeriod)
                 .FirstOrDefaultAsync();
 
-            if (latestPeriod == null)
+            if (latestSuccessfulJob == null)
                 return null;
 
             var datalockEvent = await _context.DatalockEvents
                 .Include(x => x.PriceEpisodes).ThenInclude(x => x.NonPayablePeriods).ThenInclude(x => x.Failures).ThenInclude(x => x.Apprenticeship)
                 .Include(x => x.PriceEpisodes).ThenInclude(x => x.PayablePeriods).ThenInclude(x => x.Apprenticeship)
                 .Where(x => x.Ukprn == ukprn && x.Uln == uln)
-                .Where(x => x.AcademicYear == latestPeriod.AcademicYear)
-                .Where(x => x.IlrSubmissionWindowPeriod == latestPeriod.IlrSubmissionWindowPeriod)
+                .Where(x => 
+                    x.JobId == latestSuccessfulJob.JobId 
+                 && x.AcademicYear == latestSuccessfulJob.AcademicYear
+                 && x.IlrSubmissionWindowPeriod == latestSuccessfulJob.CollectionPeriod)
                 .ToListAsync();
 
             return _matchedLearnerResultMapper.Map(datalockEvent);
