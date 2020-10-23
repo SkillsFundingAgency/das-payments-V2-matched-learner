@@ -49,6 +49,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventNonPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "1-1-1",
                         DeliveryPeriod = 2,
                         Failures = new List<DatalockEventNonPayablePeriodFailure>
                         {
@@ -71,6 +72,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "2-2-2",
                         Apprenticeship = new Apprenticeship(),
                         DeliveryPeriod = 1,
                     },
@@ -110,6 +112,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventNonPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "3-3-3",
                         DeliveryPeriod = 200,
                         Failures = new List<DatalockEventNonPayablePeriodFailure>
                         {
@@ -132,6 +135,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "4-4-4",
                         Apprenticeship = new Apprenticeship(),
                         DeliveryPeriod = 100,
                     },
@@ -145,7 +149,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
-            actual.Training.Should().HaveCount(1);
+            actual.Training.Should().HaveCount(2);
         }
 
         [Test]
@@ -154,11 +158,12 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
-            actual.Training.First().PriceEpisodes.Should().HaveCount(4);
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "1-1-1"});
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "2-2-2"});
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "3-3-3"});
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "4-4-4"});
+            actual.Training.First().PriceEpisodes.Should().HaveCount(2);
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "1-1-1" });
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "2-2-2" });
+            actual.Training.Last().PriceEpisodes.Should().HaveCount(2);
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "3-3-3" });
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "4-4-4" });
         }
 
         [Test]
@@ -167,8 +172,8 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
-            
-            actual.Training.Should().ContainEquivalentOf(new {PathwayCode = 1});
+
+            actual.Training.Should().ContainEquivalentOf(new { PathwayCode = 1 });
         }
 
         [Test]
@@ -179,46 +184,45 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             var actual = sut.Map(_testInput);
 
             var firstEvent = actual.Training.FirstOrDefault(x => x.PathwayCode == 1);
-            firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(9);
+            firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(2);
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 2 });
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 1 });
-            firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 12 });
-            firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 10 });
         }
 
-        [Test]
-        public void EventsFromSameApprenticeships_Should_BeGrouped()
-        {
-            var testInput = new List<DatalockEvent>
-            {
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                }
-            };
+        //TODO: Move to Repository Tests
+        //[Test]
+        //public void EventsFromSameApprenticeships_Should_BeGrouped()
+        //{
+        //    var testInput = new List<DatalockEvent>
+        //    {
+        //        new DatalockEvent
+        //        {
+        //            AcademicYear = 2021,
+        //            LearningAimPathwayCode = 1,
+        //            LearningAimStandardCode = 2,
+        //            LearningAimFrameworkCode = 3,
+        //            LearningAimProgrammeType = 4,
+        //            LearningAimReference = "123",
+        //            PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+        //        },
+        //        new DatalockEvent
+        //        {
+        //            AcademicYear = 2021,
+        //            LearningAimPathwayCode = 1,
+        //            LearningAimStandardCode = 2,
+        //            LearningAimFrameworkCode = 3,
+        //            LearningAimProgrammeType = 4,
+        //            LearningAimReference = "123",
+        //            PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+        //        }
+        //    };
 
-            var sut = new MatchedLearnerDtoMapper();
+        //    var sut = new MatchedLearnerDtoMapper();
 
-            var actual = sut.Map(testInput);
+        //    var actual = sut.Map(testInput);
 
-            actual.Training.Should().HaveCount(1);
-        }
+        //    actual.Training.Should().HaveCount(1);
+        //}
 
         [Test]
         public void EventsFromDifferentApprenticeships_Reference__Should_NotBeGrouped()

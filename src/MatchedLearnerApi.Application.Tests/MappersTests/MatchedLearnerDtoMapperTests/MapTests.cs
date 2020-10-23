@@ -75,6 +75,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventNonPayablePeriod
                     {
+                        PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         DeliveryPeriod = 2,
                         Failures = new List<DatalockEventNonPayablePeriodFailure>
                         {
@@ -103,6 +104,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventPayablePeriod
                     {
+                        PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         Apprenticeship = new Apprenticeship
                         {
                             ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,

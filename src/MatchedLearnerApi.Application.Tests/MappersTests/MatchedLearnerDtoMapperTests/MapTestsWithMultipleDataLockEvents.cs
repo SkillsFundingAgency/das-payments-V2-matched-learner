@@ -45,6 +45,8 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventNonPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "1-1-1",
+
                         DeliveryPeriod = 2,
                         Failures = new List<DatalockEventNonPayablePeriodFailure>
                         {
@@ -67,6 +69,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "2-2-2",
                         Apprenticeship = new Apprenticeship(),
                         DeliveryPeriod = 1,
                     },
@@ -102,6 +105,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventNonPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "3-3-3",
                         DeliveryPeriod = 200,
                         Failures = new List<DatalockEventNonPayablePeriodFailure>
                         {
@@ -124,6 +128,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
                 {
                     new DatalockEventPayablePeriod
                     {
+                        PriceEpisodeIdentifier = "4-4-4",
                         Apprenticeship = new Apprenticeship(),
                         DeliveryPeriod = 100,
                     },
@@ -159,12 +164,12 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
 
             var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(2);
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "1-1-1"});
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "2-2-2"});
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "1-1-1" });
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "2-2-2" });
 
             actual.Training.Last().PriceEpisodes.Should().HaveCount(2);
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "3-3-3"});
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "4-4-4"});
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "3-3-3" });
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "4-4-4" });
         }
 
         [Test]
@@ -173,9 +178,9 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
-            
-            actual.Training.Should().ContainEquivalentOf(new {PathwayCode = 1});
-            actual.Training.Should().ContainEquivalentOf(new {PathwayCode = 2});
+
+            actual.Training.Should().ContainEquivalentOf(new { PathwayCode = 1 });
+            actual.Training.Should().ContainEquivalentOf(new { PathwayCode = 2 });
         }
 
         [Test]
@@ -186,18 +191,14 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             var actual = sut.Map(_testInput);
 
             var firstEvent = actual.Training.FirstOrDefault(x => x.PathwayCode == 1);
-            firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(5);
+            firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(2);
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 2 });
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 1 });
-            firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 12 });
-            firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 10 });
 
             var secondEvent = actual.Training.FirstOrDefault(x => x.PathwayCode == 2);
-            secondEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(4);
+            secondEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(2);
             secondEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 200 });
             secondEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 100 });
-            secondEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 120 });
-            secondEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 110 });
         }
     }
 }
