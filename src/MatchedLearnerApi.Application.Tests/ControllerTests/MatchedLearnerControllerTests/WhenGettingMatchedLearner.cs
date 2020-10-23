@@ -5,7 +5,6 @@ using MatchedLearnerApi.Types;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 

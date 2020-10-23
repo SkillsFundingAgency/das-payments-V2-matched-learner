@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Threading;
-using MatchedLearnerApi.Configuration;
 using MatchedLearnerApi.Extensions;
 using MatchedLearnerApi.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SFA.DAS.Configuration.AzureTableStorage;
 
 namespace MatchedLearnerApi.AcceptanceTests.Services
 {
