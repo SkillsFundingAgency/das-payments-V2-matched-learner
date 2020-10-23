@@ -11,42 +11,23 @@ namespace MatchedLearnerApi.Application.Mappers
         {
             if (!datalockEvents.Any())
                 return null;
-            var orderedDatalockEvents = datalockEvents.OrderBy(x => x.LearningStartDate).ToList();
-            var firstEvent = orderedDatalockEvents.First();
 
-            foreach (var datalockEvent in datalockEvents)
-            {
-                if (datalockEvent.PriceEpisodes == null)
-                    datalockEvent.PriceEpisodes = new List<DatalockEventPriceEpisode>();
-                
-                foreach (var datalockEventPriceEpisode in datalockEvent.PriceEpisodes)
-                {
-                    if (datalockEventPriceEpisode.NonPayablePeriods == null)
-                        datalockEventPriceEpisode.NonPayablePeriods = new List<DatalockEventNonPayablePeriod>();
-
-                    if (datalockEventPriceEpisode.PayablePeriods == null)
-                        datalockEventPriceEpisode.PayablePeriods = new List<DatalockEventPayablePeriod>();
-
-                    foreach (var datalockEventPayablePeriod in datalockEventPriceEpisode.PayablePeriods)
-                    {
-                        if (datalockEventPayablePeriod.Apprenticeship == null)
-                            datalockEventPayablePeriod.Apprenticeship = new Apprenticeship();
-                    }
-                }
-            }
+            var firstEvent = datalockEvents.First();
+            
+            var groupedDatalockEvents = GroupDatalockEvents(datalockEvents);
 
             return new MatchedLearnerResultDto
             {
                 StartDate = firstEvent.LearningStartDate.GetValueOrDefault(),
                 EventTime = firstEvent.EventTime,
                 IlrSubmissionDate = firstEvent.IlrSubmissionDateTime,
-                IlrSubmissionWindowPeriod = firstEvent.IlrSubmissionWindowPeriod,
+                IlrSubmissionWindowPeriod = firstEvent.CollectionPeriod,
                 AcademicYear = firstEvent.AcademicYear,
                 Ukprn = firstEvent.Ukprn,
                 Uln = firstEvent.Uln,
-                Training = MergeTrainingForSameApprenticeship(orderedDatalockEvents).Select(dataLockEvent => new TrainingDto
+                Training = groupedDatalockEvents.Select(dataLockEvent => new TrainingDto
                 {
-                    Reference = dataLockEvent.Reference,
+                    Reference = dataLockEvent.LearningAimReference,
                     ProgrammeType = dataLockEvent.ProgrammeType,
                     StandardCode = dataLockEvent.StandardCode,
                     FrameworkCode = dataLockEvent.FrameworkCode,
@@ -54,66 +35,109 @@ namespace MatchedLearnerApi.Application.Mappers
                     FundingLineType = null,
                     StartDate = dataLockEvent.LearningStartDate.GetValueOrDefault(),
                     //todo Status we think should be mapped on the price episode not on the Training
-                    PriceEpisodes = dataLockEvent.PriceEpisodes.Select(priceEpisode => new PriceEpisodeDto
-                    {
-                        Identifier = priceEpisode.Identifier,
-                        AgreedPrice = priceEpisode.AgreedPrice,
-                        StartDate = priceEpisode.StartDate,
-                        EndDate = priceEpisode.ActualEndDate,
-                        NumberOfInstalments = priceEpisode.NumberOfInstalments,
-                        InstalmentAmount = priceEpisode.InstalmentAmount,
-                        CompletionAmount = priceEpisode.CompletionAmount,
-                        Periods = CollatePeriods(priceEpisode),
-                    }).ToList()
+                    PriceEpisodes = MapPriceEpisodes(dataLockEvent)
                 }).ToList()
             };
         }
 
-        private IEnumerable<DatalockEvent> MergeTrainingForSameApprenticeship(List<DatalockEvent> source)
+        public List<DatalockEvent> GroupDatalockEvents(IEnumerable<DatalockEvent> datalockEvents)
         {
-            var groups = source.GroupBy(x => new
+            var result = datalockEvents.GroupBy(x => new
             {
-                x.Reference, 
-                x.StandardCode, 
-                x.ProgrammeType, 
-                x.FrameworkCode, 
+                x.LearningAimReference,
+                x.StandardCode,
+                x.ProgrammeType,
+                x.FrameworkCode,
                 x.PathwayCode,
                 x.AcademicYear,
                 x.FundingLineType,
                 x.LearningStartDate,
                 x.Uln,
                 x.Ukprn,
-                x.IlrSubmissionWindowPeriod,
+                x.CollectionPeriod,
                 x.IlrSubmissionDateTime,
-            });
-
-            foreach (var group in groups)
+            }).Select(d => new DatalockEvent
             {
-                yield return new DatalockEvent
-                {
-                    AcademicYear = group.Key.AcademicYear,
-                    PriceEpisodes = group.SelectMany(x => x.PriceEpisodes).ToList(),
-                    FrameworkCode = group.Key.FrameworkCode,
-                    FundingLineType = group.Key.FundingLineType,
-                    LearningStartDate = group.Key.LearningStartDate,
-                    PathwayCode = group.Key.PathwayCode,
-                    Reference = group.Key.Reference,
-                    ProgrammeType = group.Key.ProgrammeType,
-                    Ukprn = group.Key.Ukprn,
-                    Uln = group.Key.Uln,
-                    StandardCode = group.Key.StandardCode,
-                    IlrSubmissionWindowPeriod = group.Key.IlrSubmissionWindowPeriod,
-                    IlrSubmissionDateTime = group.Key.IlrSubmissionDateTime,
-                };
-            }
+                NonPayablePeriods = d.SelectMany(p => p.NonPayablePeriods).ToList(),
+                PayablePeriods = d.SelectMany(p => p.PayablePeriods).ToList(),
+                PriceEpisodes = GroupPriceEpisodes(d.SelectMany(p => p.PriceEpisodes)),
+
+                Ukprn = d.Key.Ukprn,
+                Uln = d.Key.Uln,
+
+                AcademicYear = d.Key.AcademicYear,
+                CollectionPeriod = d.Key.CollectionPeriod,
+
+                LearningAimReference = d.Key.LearningAimReference,
+
+                PathwayCode = d.Key.PathwayCode,
+                StandardCode = d.Key.StandardCode,
+                FrameworkCode = d.Key.FrameworkCode,
+                FundingLineType = d.Key.FundingLineType,
+                ProgrammeType = d.Key.ProgrammeType,
+
+                IlrSubmissionDateTime = d.Key.IlrSubmissionDateTime,
+                LearningStartDate = d.Key.LearningStartDate,
+            }).ToList();
+
+            return result;
         }
 
-        private List<PeriodDto> CollatePeriods(DatalockEventPriceEpisode priceEpisode)
+        private static List<DatalockEventPriceEpisode> GroupPriceEpisodes(IEnumerable<DatalockEventPriceEpisode> priceEpisodes)
         {
-            var collatedFailedPeriods = priceEpisode.NonPayablePeriods
+            var result = priceEpisodes.GroupBy(pe => new
+            {
+                pe.PriceEpisodeIdentifier,
+                pe.ActualEndDate,
+                pe.Completed,
+                pe.CompletionAmount,
+                pe.InstalmentAmount,
+                pe.NumberOfInstalments,
+                pe.StartDate,
+                pe.TotalNegotiatedPrice1,
+                pe.TotalNegotiatedPrice2,
+                pe.TotalNegotiatedPrice3,
+                pe.TotalNegotiatedPrice4,
+            }).Select(pe => new DatalockEventPriceEpisode
+            {
+                PriceEpisodeIdentifier = pe.Key.PriceEpisodeIdentifier,
+                ActualEndDate = pe.Key.ActualEndDate,
+                Completed = pe.Key.Completed,
+                CompletionAmount = pe.Key.CompletionAmount,
+                InstalmentAmount = pe.Key.InstalmentAmount,
+                NumberOfInstalments = pe.Key.NumberOfInstalments,
+                StartDate = pe.Key.StartDate,
+                TotalNegotiatedPrice1 = pe.Key.TotalNegotiatedPrice1,
+                TotalNegotiatedPrice2 = pe.Key.TotalNegotiatedPrice2,
+                TotalNegotiatedPrice3 = pe.Key.TotalNegotiatedPrice3,
+                TotalNegotiatedPrice4 = pe.Key.TotalNegotiatedPrice4,
+            }).Distinct().ToList();
+
+            return result;
+        }
+
+        private List<PriceEpisodeDto> MapPriceEpisodes(DatalockEvent dataLockEvent)
+        {
+            return dataLockEvent.PriceEpisodes.Select(priceEpisode => new PriceEpisodeDto
+            {
+                Identifier = priceEpisode.PriceEpisodeIdentifier,
+                AgreedPrice = priceEpisode.AgreedPrice,
+                StartDate = priceEpisode.StartDate,
+                EndDate = priceEpisode.ActualEndDate,
+                NumberOfInstalments = priceEpisode.NumberOfInstalments,
+                InstalmentAmount = priceEpisode.InstalmentAmount,
+                CompletionAmount = priceEpisode.CompletionAmount,
+                Periods = MapPeriods(priceEpisode.PriceEpisodeIdentifier, dataLockEvent),
+            }).ToList();
+        }
+
+        private List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, DatalockEvent datalockEvent)
+        {
+            var nonPayablePeriods = datalockEvent.NonPayablePeriods
+                .Where(d => d.PriceEpisodeIdentifier == priceEpisodeIdentifier)
                 .SelectMany(nonPayablePeriod => nonPayablePeriod.Failures.GroupBy(failure => new PeriodDto
                 {
-                    Period = nonPayablePeriod.Period,
+                    Period = nonPayablePeriod.DeliveryPeriod,
                     IsPayable = false,
                     AccountId = failure.Apprenticeship?.AccountId ?? 0,
                     ApprenticeshipId = failure.ApprenticeshipId,
@@ -122,21 +146,23 @@ namespace MatchedLearnerApi.Application.Mappers
                 }).Select(group =>
                 {
                     var period = group.Key;
-                    period.DataLockFailures = group.Select(failure => (int) failure.DataLockFailureId).ToList();
+                    period.DataLockFailures = group.Select(failure => (int)failure.DataLockFailureId).ToList();
                     return period;
                 }));
 
-            var payablePeriods = priceEpisode.PayablePeriods.Select(payablePeriod => new PeriodDto
-            {
-                Period = payablePeriod.Period,
-                IsPayable = true,
-                AccountId = payablePeriod.Apprenticeship.AccountId,
-                ApprenticeshipId = payablePeriod.ApprenticeshipId,
-                ApprenticeshipEmployerType = payablePeriod.Apprenticeship.ApprenticeshipEmployerType,
-                TransferSenderAccountId = payablePeriod.Apprenticeship.TransferSendingEmployerAccountId
-            });
+            var payablePeriods = datalockEvent.PayablePeriods
+                .Where(d => d.PriceEpisodeIdentifier == priceEpisodeIdentifier)
+                .Select(payablePeriod => new PeriodDto
+                {
+                    Period = payablePeriod.DeliveryPeriod,
+                    IsPayable = true,
+                    AccountId = payablePeriod.Apprenticeship.AccountId,
+                    ApprenticeshipId = payablePeriod.ApprenticeshipId,
+                    ApprenticeshipEmployerType = payablePeriod.Apprenticeship.ApprenticeshipEmployerType,
+                    TransferSenderAccountId = payablePeriod.Apprenticeship.TransferSendingEmployerAccountId
+                });
 
-            return payablePeriods.Union(collatedFailedPeriods).ToList();
+            return payablePeriods.Union(nonPayablePeriods).ToList();
         }
     }
 }

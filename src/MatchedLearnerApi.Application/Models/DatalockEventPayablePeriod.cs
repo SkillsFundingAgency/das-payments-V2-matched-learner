@@ -7,11 +7,11 @@ namespace MatchedLearnerApi.Application.Models
         public long Id { get; set; }
         public Guid DataLockEventId { get; set; }
         public string PriceEpisodeIdentifier { get; set; }
+        public byte TransactionType { get; set; }
+        public byte DeliveryPeriod { get; set; }
+    
         public long? ApprenticeshipId { get; set; }
-
-        public byte Period { get; set; }
-        public bool IsPayable => true;
-        public byte ApprenticeshipEmployerType { get; set; }
+        
         public virtual Apprenticeship Apprenticeship { get; set; }
     }
 }

@@ -8,8 +8,7 @@ namespace MatchedLearnerApi.Application.ModelConfiguration
     {
         public void Configure(EntityTypeBuilder<DatalockEventNonPayablePeriod> builder)
         {
-            builder.Property(x => x.Period)
-                .HasColumnName("DeliveryPeriod");
+            builder.ToTable("DatalockEventNonPayablePeriod");
 
             builder
                 .HasMany(x => x.Failures)

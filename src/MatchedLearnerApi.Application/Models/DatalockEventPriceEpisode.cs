@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MatchedLearnerApi.Application.Models
 {
@@ -8,7 +7,7 @@ namespace MatchedLearnerApi.Application.Models
         public long Id { get; set; }
         public Guid DataLockEventId { get; set; }
 
-        public string Identifier { get; set; }
+        public string PriceEpisodeIdentifier { get; set; }
 
         public decimal AgreedPrice
         {
@@ -31,10 +30,6 @@ namespace MatchedLearnerApi.Application.Models
         public int NumberOfInstalments { get; set; }
         public decimal InstalmentAmount { get; set; }
         public decimal CompletionAmount { get; set; }
-
-        public virtual List<DatalockEventNonPayablePeriod> NonPayablePeriods { get; set; } = new List<DatalockEventNonPayablePeriod>();
-        public virtual List<DatalockEventPayablePeriod> PayablePeriods { get; set; } = new List<DatalockEventPayablePeriod>();
-
 
         public bool Completed { get; set; }
     }

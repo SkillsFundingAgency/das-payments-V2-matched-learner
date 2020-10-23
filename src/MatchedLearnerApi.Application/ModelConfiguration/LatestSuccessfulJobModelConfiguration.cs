@@ -8,8 +8,9 @@ namespace MatchedLearnerApi.Application.ModelConfiguration
     {
         public void Configure(EntityTypeBuilder<LatestSuccessfulJobModel> builder)
         {
-            builder.HasKey(e => e.JobId);
             builder.ToTable("LatestSuccessfulJobs", "Payments2");
+            
+            builder.HasKey(e => e.JobId);
         }
     }
 }

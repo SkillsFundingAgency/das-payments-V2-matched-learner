@@ -13,23 +13,24 @@ namespace MatchedLearnerApi.Application.Models
         public short AcademicYear { get; set; }
         public DateTimeOffset EventTime { get; set; }
         public DateTime IlrSubmissionDateTime { get; set; }
-        public byte IlrSubmissionWindowPeriod { get; set; }
+        public byte CollectionPeriod { get; set; }
         public long Ukprn { get; set; }
         public long Uln { get; set; }
 
 
         // "Training" info
-        public string Reference { get; set; }
+        public string LearningAimReference { get; set; }
+
         public int ProgrammeType { get; set; }
         public int StandardCode { get; set; }
         public int FrameworkCode { get; set; }
         public int PathwayCode { get; set; }
         public string FundingLineType { get; set; }
         
-
-        public List<DatalockEventPriceEpisode> PriceEpisodes { get; set; } = new List<DatalockEventPriceEpisode>();
-        
-
         public DateTime? LearningStartDate { get; set; }
+
+        public virtual List<DatalockEventPriceEpisode> PriceEpisodes { get; set; } = new List<DatalockEventPriceEpisode>();
+        public virtual List<DatalockEventNonPayablePeriod> NonPayablePeriods { get; set; } = new List<DatalockEventNonPayablePeriod>();
+        public virtual List<DatalockEventPayablePeriod> PayablePeriods { get; set; } = new List<DatalockEventPayablePeriod>();
     }
 }
