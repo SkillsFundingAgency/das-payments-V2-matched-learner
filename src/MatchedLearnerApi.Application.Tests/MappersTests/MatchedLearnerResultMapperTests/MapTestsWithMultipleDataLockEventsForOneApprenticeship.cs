@@ -23,7 +23,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 StandardCode = 2,
                 FrameworkCode = 3,
                 ProgrammeType = 4,
-                Reference = "123",
+                LearningAimReference = "123",
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
                     new DatalockEventPriceEpisode
@@ -33,37 +33,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 2m,
                         NumberOfInstalments = 5,
                         CompletionAmount = 1m,
-                        Identifier = "1-1-1",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 2,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 123,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 2,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 123,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 3,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Apprenticeship = new Apprenticeship(),
-                                Period = 1,
-                            },
-                        },
+                        PriceEpisodeIdentifier = "1-1-1",
                     },
                     new DatalockEventPriceEpisode
                     {
@@ -72,52 +42,39 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 20m,
                         NumberOfInstalments = 50,
                         CompletionAmount = 10m,
-                        Identifier = "2-2-2",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 12,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 321,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 20,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 321,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 30,
-                                    },
-                                }
-                            },
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 13,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 5555,
-                                        DataLockFailureId = 1,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Period = 10,
-                                ApprenticeshipId = 3210,
-                                Apprenticeship = new Apprenticeship(),
-                            },
-                        },
+                        PriceEpisodeIdentifier = "2-2-2",
                     }
-                }
+                },
+                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                {
+                    new DatalockEventNonPayablePeriod
+                    {
+                        DeliveryPeriod = 2,
+                        Failures = new List<DatalockEventNonPayablePeriodFailure>
+                        {
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 123,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 2,
+                            },
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 123,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 3,
+                            },
+                        }
+                    },
+                },
+                PayablePeriods = new List<DatalockEventPayablePeriod>
+                {
+                    new DatalockEventPayablePeriod
+                    {
+                        Apprenticeship = new Apprenticeship(),
+                        DeliveryPeriod = 1,
+                    },
+                },
             });
 
             _testInput.Add(new DatalockEvent
@@ -127,7 +84,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 StandardCode = 2,
                 FrameworkCode = 3,
                 ProgrammeType = 4,
-                Reference = "123",
+                LearningAimReference = "123",
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
                     new DatalockEventPriceEpisode
@@ -137,37 +94,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 200m,
                         NumberOfInstalments = 500,
                         CompletionAmount = 100m,
-                        Identifier = "3-3-3",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 200,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 1230,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 200,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 1230,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 250,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Apprenticeship = new Apprenticeship(),
-                                Period = 100,
-                            },
-                        },
+                        PriceEpisodeIdentifier = "3-3-3",
                     },
                     new DatalockEventPriceEpisode
                     {
@@ -176,39 +103,39 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 200m,
                         NumberOfInstalments = 500,
                         CompletionAmount = 100m,
-                        Identifier = "4-4-4",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 120,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 3210,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 200,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 3210,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 250,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Apprenticeship = new Apprenticeship(),
-                                Period = 110,
-                            },
-                        },
+                        PriceEpisodeIdentifier = "4-4-4",
                     }
-                }
+                },
+                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                {
+                    new DatalockEventNonPayablePeriod
+                    {
+                        DeliveryPeriod = 200,
+                        Failures = new List<DatalockEventNonPayablePeriodFailure>
+                        {
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 1230,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 200,
+                            },
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 1230,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 250,
+                            },
+                        }
+                    },
+                },
+                PayablePeriods = new List<DatalockEventPayablePeriod>
+                {
+                    new DatalockEventPayablePeriod
+                    {
+                        Apprenticeship = new Apprenticeship(),
+                        DeliveryPeriod = 100,
+                    },
+                },
             });
         }
 
@@ -271,7 +198,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
@@ -281,14 +208,14 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
             var sut = new MatchedLearnerResultMapper();
 
-            var actual = sut.Map(_testInput);
+            var actual = sut.Map(testInput);
 
             actual.Training.Should().HaveCount(1);
         }
@@ -305,7 +232,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "1234",
+                    LearningAimReference = "1234",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
@@ -315,7 +242,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
@@ -339,7 +266,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
@@ -349,7 +276,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
@@ -373,7 +300,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 21,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
@@ -383,7 +310,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
@@ -407,7 +334,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 31,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
@@ -417,7 +344,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
@@ -441,7 +368,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 31,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
@@ -451,7 +378,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                     StandardCode = 2,
                     FrameworkCode = 3,
                     ProgrammeType = 4,
-                    Reference = "123",
+                    LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };

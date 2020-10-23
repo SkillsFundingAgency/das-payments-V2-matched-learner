@@ -10,13 +10,13 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
     [TestFixture]
     public class MapTestsWithMultipleDataLockEvents
     {
-        private List<DatalockEvent> testInput = new List<DatalockEvent>();
+        private readonly List<DatalockEvent> _testInput = new List<DatalockEvent>();
 
         [SetUp]
         public void Setup()
         {
-            testInput.Clear();
-            testInput.Add(new DatalockEvent
+            _testInput.Clear();
+            _testInput.Add(new DatalockEvent
             {
                 AcademicYear = 2021,
                 PathwayCode = 1,
@@ -29,37 +29,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 2m,
                         NumberOfInstalments = 5,
                         CompletionAmount = 1m,
-                        Identifier = "1-1-1",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 2,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 123,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 2,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 123,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 3,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Apprenticeship = new Apprenticeship(),
-                                Period = 1,
-                            },
-                        },
+                        PriceEpisodeIdentifier = "1-1-1",
                     },
                     new DatalockEventPriceEpisode
                     {
@@ -68,55 +38,42 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 20m,
                         NumberOfInstalments = 50,
                         CompletionAmount = 10m,
-                        Identifier = "2-2-2",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 12,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 321,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 20,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 321,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 30,
-                                    },
-                                }
-                            },
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 13,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 5555,
-                                        DataLockFailureId = 1,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Period = 10,
-                                ApprenticeshipId = 3210,
-                                Apprenticeship = new Apprenticeship(),
-                            },
-                        },
+                        PriceEpisodeIdentifier = "2-2-2",
                     }
-                }
+                },
+                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                {
+                    new DatalockEventNonPayablePeriod
+                    {
+                        DeliveryPeriod = 2,
+                        Failures = new List<DatalockEventNonPayablePeriodFailure>
+                        {
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 123,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 2,
+                            },
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 123,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 3,
+                            },
+                        }
+                    },
+                },
+                PayablePeriods = new List<DatalockEventPayablePeriod>
+                {
+                    new DatalockEventPayablePeriod
+                    {
+                        Apprenticeship = new Apprenticeship(),
+                        DeliveryPeriod = 1,
+                    },
+                },
             });
 
-            testInput.Add(new DatalockEvent
+            _testInput.Add(new DatalockEvent
             {
                 AcademicYear = 2021,
                 PathwayCode = 2,
@@ -129,37 +86,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 200m,
                         NumberOfInstalments = 500,
                         CompletionAmount = 100m,
-                        Identifier = "3-3-3",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 200,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 1230,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 200,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 1230,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 250,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Apprenticeship = new Apprenticeship(),
-                                Period = 100,
-                            },
-                        },
+                        PriceEpisodeIdentifier = "3-3-3",
                     },
                     new DatalockEventPriceEpisode
                     {
@@ -168,39 +95,39 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = 200m,
                         NumberOfInstalments = 500,
                         CompletionAmount = 100m,
-                        Identifier = "4-4-4",
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                        {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 120,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 3210,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 200,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        ApprenticeshipId = 3210,
-                                        Apprenticeship = new Apprenticeship(),
-                                        DataLockFailureId = 250,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
-                            {
-                                Apprenticeship = new Apprenticeship(),
-                                Period = 110,
-                            },
-                        },
+                        PriceEpisodeIdentifier = "4-4-4",
                     }
-                }
+                },
+                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                {
+                    new DatalockEventNonPayablePeriod
+                    {
+                        DeliveryPeriod = 200,
+                        Failures = new List<DatalockEventNonPayablePeriodFailure>
+                        {
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 1230,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 200,
+                            },
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                ApprenticeshipId = 1230,
+                                Apprenticeship = new Apprenticeship(),
+                                DataLockFailureId = 250,
+                            },
+                        }
+                    },
+                },
+                PayablePeriods = new List<DatalockEventPayablePeriod>
+                {
+                    new DatalockEventPayablePeriod
+                    {
+                        Apprenticeship = new Apprenticeship(),
+                        DeliveryPeriod = 100,
+                    },
+                },
             });
         }
 
@@ -209,7 +136,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         {
             var sut = new MatchedLearnerResultMapper();
 
-            var actual = sut.Map(testInput);
+            var actual = sut.Map(_testInput);
             actual.Training
                 .SelectMany(x => x.PriceEpisodes)
                 .SelectMany(x => x.Periods)
@@ -221,7 +148,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         {
             var sut = new MatchedLearnerResultMapper();
 
-            var actual = sut.Map(testInput);
+            var actual = sut.Map(_testInput);
             actual.Training.Should().HaveCount(2);
         }
 
@@ -230,7 +157,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         {
             var sut = new MatchedLearnerResultMapper();
 
-            var actual = sut.Map(testInput);
+            var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(2);
             actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "1-1-1"});
             actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new {Identifier = "2-2-2"});
@@ -245,7 +172,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         {
             var sut = new MatchedLearnerResultMapper();
 
-            var actual = sut.Map(testInput);
+            var actual = sut.Map(_testInput);
             
             actual.Training.Should().ContainEquivalentOf(new {PathwayCode = 1});
             actual.Training.Should().ContainEquivalentOf(new {PathwayCode = 2});
@@ -256,7 +183,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         {
             var sut = new MatchedLearnerResultMapper();
 
-            var actual = sut.Map(testInput);
+            var actual = sut.Map(_testInput);
 
             var firstEvent = actual.Training.FirstOrDefault(x => x.PathwayCode == 1);
             firstEvent!.PriceEpisodes.SelectMany(x => x.Periods).Should().HaveCount(5);

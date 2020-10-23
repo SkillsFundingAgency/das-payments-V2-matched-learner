@@ -47,11 +47,11 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 LearningStartDate = _expectedLearningStartDate,
                 EventTime = _expectedEventTime,
                 IlrSubmissionDateTime = _expectedIlrSubmissionDate,
-                IlrSubmissionWindowPeriod = _expectedIlrSubmissionWindowPeriod,
+                CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
                 AcademicYear = _expectedAcademicYear,
                 Ukprn = _expectedUkprn,
                 Uln = _expectedUln,
-                Reference = _expectedTrainingReference,
+                LearningAimReference = _expectedTrainingReference,
                 ProgrammeType = _expectedTrainingProgrammeType,
                 StandardCode = _expectedTrainingStandardCode,
                 FrameworkCode = _expectedTrainingFrameworkCode,
@@ -68,47 +68,47 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                         InstalmentAmount = _expectedPriceEpisodeInstalmentAmount,
                         NumberOfInstalments = _expectedPriceEpisodeNumberOfInstalments,
                         CompletionAmount = _expectedPriceEpisodeCompletionAmount,
-                        Identifier = _expectedPriceEpisodeIdentifier,
-                        NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                        PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
+                    }
+                },
+                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                {
+                    new DatalockEventNonPayablePeriod
+                    {
+                        DeliveryPeriod = 2,
+                        Failures = new List<DatalockEventNonPayablePeriodFailure>
                         {
-                            new DatalockEventNonPayablePeriod
-                            {
-                                Period = 2,
-                                Failures = new List<DatalockEventNonPayablePeriodFailure>
-                                {
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        Apprenticeship = new Apprenticeship
-                                        {
-                                            Id = 123,
-                                            ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
-                                        },
-                                        DataLockFailureId = 2,
-                                    },
-                                    new DatalockEventNonPayablePeriodFailure
-                                    {
-                                        Apprenticeship = new Apprenticeship
-                                        {
-                                            Id = 123,
-                                            ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
-                                        },
-                                        DataLockFailureId = 3,
-                                    },
-                                }
-                            },
-                        },
-                        PayablePeriods = new List<DatalockEventPayablePeriod>
-                        {
-                            new DatalockEventPayablePeriod
+                            new DatalockEventNonPayablePeriodFailure
                             {
                                 Apprenticeship = new Apprenticeship
                                 {
+                                    Id = 123,
                                     ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
                                 },
-                                Period = 1,
+                                DataLockFailureId = 2,
                             },
+                            new DatalockEventNonPayablePeriodFailure
+                            {
+                                Apprenticeship = new Apprenticeship
+                                {
+                                    Id = 123,
+                                    ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
+                                },
+                                DataLockFailureId = 3,
+                            },
+                        }
+                    },
+                },
+                PayablePeriods = new List<DatalockEventPayablePeriod>
+                {
+                    new DatalockEventPayablePeriod
+                    {
+                        Apprenticeship = new Apprenticeship
+                        {
+                            ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
                         },
-                    }
+                        DeliveryPeriod = 1,
+                    },
                 }
             });
 
@@ -139,7 +139,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 .SelectMany(x => x.PriceEpisodes)
                 .SelectMany(x => x.Periods)
                 .Should()
-                .AllBeEquivalentTo(new {ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType});
+                .AllBeEquivalentTo(new { ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType });
         }
 
         [Test]
