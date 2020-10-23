@@ -190,40 +190,41 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
         }
 
         //TODO: Move to Repository Tests
-        //[Test]
-        //public void EventsFromSameApprenticeships_Should_BeGrouped()
-        //{
-        //    var testInput = new List<DatalockEvent>
-        //    {
-        //        new DatalockEvent
-        //        {
-        //            AcademicYear = 2021,
-        //            LearningAimPathwayCode = 1,
-        //            LearningAimStandardCode = 2,
-        //            LearningAimFrameworkCode = 3,
-        //            LearningAimProgrammeType = 4,
-        //            LearningAimReference = "123",
-        //            PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-        //        },
-        //        new DatalockEvent
-        //        {
-        //            AcademicYear = 2021,
-        //            LearningAimPathwayCode = 1,
-        //            LearningAimStandardCode = 2,
-        //            LearningAimFrameworkCode = 3,
-        //            LearningAimProgrammeType = 4,
-        //            LearningAimReference = "123",
-        //            PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-        //        }
-        //    };
+        [Test]
+        public void EventsFromSameApprenticeships_Should_BeGrouped()
+        {
+            var testInput = new List<DatalockEvent>
+            {
+                new DatalockEvent
+                {
+                    AcademicYear = 2021,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "123",
+                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                },
+                new DatalockEvent
+                {
+                    AcademicYear = 2021,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "123",
+                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                }
+            };
 
-        //    var sut = new MatchedLearnerDtoMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
-        //    var actual = sut.Map(testInput);
+            var actual = sut.Map(testInput);
 
-        //    actual.Training.Should().HaveCount(1);
-        //}
+            actual.Training.Should().HaveCount(2);
+        }
 
+        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Reference__Should_NotBeGrouped()
         {
@@ -258,6 +259,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             actual.Training.Should().HaveCount(2);
         }
 
+        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Pathway__Should_NotBeGrouped()
         {
@@ -292,6 +294,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             actual.Training.Should().HaveCount(2);
         }
 
+        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Standard__Should_NotBeGrouped()
         {
@@ -326,6 +329,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             actual.Training.Should().HaveCount(2);
         }
 
+        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Framework__Should_NotBeGrouped()
         {
@@ -360,6 +364,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
             actual.Training.Should().HaveCount(2);
         }
 
+        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Programme__Should_NotBeGrouped()
         {
