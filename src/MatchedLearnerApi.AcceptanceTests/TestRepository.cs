@@ -20,8 +20,8 @@ namespace MatchedLearnerApi.AcceptanceTests
         {
             const string sql = @"
 
-INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate,
-    Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status,
+INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, LearnerUln, Ukprn, EstimatedStartDate, EstimatedEndDate,
+    Priority, LearningAimStandardCode, LearningAimProgrammeType, LearningAimFrameworkCode, LearningAimPathwayCode, TransferSendingEmployerAccountId, Status,
     IsLevyPayer, ApprenticeshipEmployerType)
 VALUES (-123456, 1000, SysDateTimeOffset(), @uln, @ukprn, SysDateTimeOffset(), SysDateTimeOffset(), 1, 100, 200, 300, 400, 500, 0, 0, 3)
 
@@ -82,7 +82,7 @@ VALUES (@datalockEventId, 'TEST', 1, 1000, 2000, 0, 0, '2020-10-07', SysDateTime
         public async Task ClearLearner(long ukprn, long uln)
         {
             const string sql = @"
-DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
+DELETE Payments2.Apprenticeship WHERE LearnerUln = @uln AND Ukprn = @ukprn;
 DELETE Payments2.Apprenticeship WHERE Id = -123456;
 
 DELETE Payments2.DatalockEventPayablePeriod

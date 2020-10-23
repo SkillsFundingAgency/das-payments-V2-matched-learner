@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MatchedLearnerApi.Types
 {
-    public class MatchedLearnerResultDto
+    public class MatchedLearnerDto
     {
         public DateTimeOffset StartDate { get; set; }
         public DateTimeOffset EventTime { get; set; }

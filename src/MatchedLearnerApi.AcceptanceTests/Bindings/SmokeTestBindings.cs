@@ -12,7 +12,7 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
     public class SmokeTestContext
     {
         public Func<Task> FailedRequest { get; set; }
-        public MatchedLearnerResultDto MatchedLearnerResultDto { get; set; }
+        public MatchedLearnerDto MatchedLearnerDto { get; set; }
     }
 
     [Binding]
@@ -55,13 +55,13 @@ namespace MatchedLearnerApi.AcceptanceTests.Bindings
         public async Task WhenWeCallTheApiWithTheSampleLearnersDetails()
         {
             var request = new TestClient();
-            _context.MatchedLearnerResultDto = await request.Handle(-1000, -2000);
+            _context.MatchedLearnerDto = await request.Handle(-1000, -2000);
         }
 
         [Then(@"the result matches the sample learner")]
         public void ThenTheResultMatchesTheSampleLearner()
         {
-            var actual = _context.MatchedLearnerResultDto;
+            var actual = _context.MatchedLearnerDto;
 
             actual.Should().NotBeNull();
             

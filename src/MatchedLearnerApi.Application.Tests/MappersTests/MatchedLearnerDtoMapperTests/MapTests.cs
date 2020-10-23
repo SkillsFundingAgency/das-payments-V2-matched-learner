@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using MatchedLearnerApi.Application.Data.Models;
 using MatchedLearnerApi.Application.Mappers;
-using MatchedLearnerApi.Application.Models;
 using MatchedLearnerApi.Types;
 using NUnit.Framework;
 
-namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultMapperTests
+namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapperTests
 {
     [TestFixture]
     public class MapTests
     {
-        private List<DatalockEvent> testInput = new List<DatalockEvent>();
-        private MatchedLearnerResultDto _actual;
+        private readonly List<DatalockEvent> _testInput = new List<DatalockEvent>();
+        private MatchedLearnerDto _actual;
 
         private readonly DateTime _expectedLearningStartDate = new DateTime(2020, 02, 01);
         private readonly DateTime _expectedEventTime = new DateTime(2020, 05, 05);
@@ -41,8 +41,8 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [SetUp]
         public void Setup()
         {
-            testInput.Clear();
-            testInput.Add(new DatalockEvent
+            _testInput.Clear();
+            _testInput.Add(new DatalockEvent
             {
                 LearningStartDate = _expectedLearningStartDate,
                 EventTime = _expectedEventTime,
@@ -50,13 +50,13 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
                 AcademicYear = _expectedAcademicYear,
                 Ukprn = _expectedUkprn,
-                Uln = _expectedUln,
+                LearnerUln = _expectedUln,
                 LearningAimReference = _expectedTrainingReference,
-                ProgrammeType = _expectedTrainingProgrammeType,
-                StandardCode = _expectedTrainingStandardCode,
-                FrameworkCode = _expectedTrainingFrameworkCode,
-                PathwayCode = _expectedTrainingPathwayCode,
-                FundingLineType = _expectedTrainingFundingLineType,
+                LearningAimProgrammeType = _expectedTrainingProgrammeType,
+                LearningAimStandardCode = _expectedTrainingStandardCode,
+                LearningAimFrameworkCode = _expectedTrainingFrameworkCode,
+                LearningAimPathwayCode = _expectedTrainingPathwayCode,
+                LearningAimFundingLineType = _expectedTrainingFundingLineType,
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
                     new DatalockEventPriceEpisode
@@ -112,9 +112,9 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 }
             });
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
-            _actual = sut.Map(testInput);
+            _actual = sut.Map(_testInput);
         }
 
         [Test]
@@ -212,7 +212,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void InputWithPayablePeriod_Should_MapTrainingFundingLineType()
         {
-            //_actual.Training.Single().FundingLineType.Should().Be(_expectedTrainingFundingLineType);
+            //_actual.Training.Single().LearningAimFundingLineType.Should().Be(_expectedTrainingFundingLineType);
             _actual.Training.Single().FundingLineType.Should().BeNullOrEmpty();
         }
 

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using MatchedLearnerApi.Application.Data.Models;
 using MatchedLearnerApi.Application.Mappers;
-using MatchedLearnerApi.Application.Models;
 using NUnit.Framework;
 
-namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultMapperTests
+namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapperTests
 {
     [TestFixture]
     public class MapTestsWithMultipleDataLockEvents
@@ -19,7 +19,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
             _testInput.Add(new DatalockEvent
             {
                 AcademicYear = 2021,
-                PathwayCode = 1,
+                LearningAimPathwayCode = 1,
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
                     new DatalockEventPriceEpisode
@@ -76,7 +76,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
             _testInput.Add(new DatalockEvent
             {
                 AcademicYear = 2021,
-                PathwayCode = 2,
+                LearningAimPathwayCode = 2,
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
                     new DatalockEventPriceEpisode
@@ -134,7 +134,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void InputWithPayablePeriod_Should_ProducePeriodWithIsPayableTrue()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training
@@ -146,7 +146,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void Training_Should_HaveTwoElements()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training.Should().HaveCount(2);
@@ -155,7 +155,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void Training_Should_HaveExpectedPriceEpisodes()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(2);
@@ -170,7 +170,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void Training_Should_BeInOutput()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             
@@ -181,7 +181,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void ThereShouldBe_NoMixingOfPeriodsBetweenPriceEpisodes()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
 

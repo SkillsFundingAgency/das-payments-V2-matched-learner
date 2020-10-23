@@ -1,5 +1,6 @@
 ﻿using System;
 using MatchedLearnerApi.Application;
+using MatchedLearnerApi.Application.Data;
 using MatchedLearnerApi.Application.Mappers;
 using MatchedLearnerApi.Application.Repositories;
 using MatchedLearnerApi.Configuration;
@@ -39,8 +40,9 @@ namespace MatchedLearnerApi.Extensions
                 builder.UseSqlServer(configuration.DasPaymentsDatabaseConnectionString);
                 return new PaymentsContext(builder.Options);
             });
-            services.AddTransient<IEmployerIncentivesRepository, EmployerIncentivesRepository>();
-            services.AddTransient<IMatchedLearnerResultMapper, MatchedLearnerResultMapper>();
+            services.AddTransient<IPaymentsDataLockRepository, PaymentsDataLockRepository>();
+            services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
+            services.AddTransient<IMatchedLearnerService, MatchedLearnerService>();
 
             return services;
         }

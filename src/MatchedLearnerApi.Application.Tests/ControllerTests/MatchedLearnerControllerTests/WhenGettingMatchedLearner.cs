@@ -1,5 +1,4 @@
 ﻿using AutoFixture;
-using MatchedLearnerApi.Application.Repositories;
 using MatchedLearnerApi.Controllers;
 using MatchedLearnerApi.Types;
 using Microsoft.AspNetCore.Mvc;
@@ -49,11 +48,11 @@ namespace MatchedLearnerApi.Application.Tests.ControllerTests.MatchedLearnerCont
     public class WhenGettingMatchedLearnerFixture
     {
         private readonly Fixture _fixture;
-        private readonly Mock<IEmployerIncentivesRepository> _mockRepository;
+        private readonly Mock<IMatchedLearnerService> _mockService;
         private readonly MatchedLearnerController _sut;
         private readonly long _ukprn;
         private readonly long _uln;
-        private MatchedLearnerResultDto _result;
+        private MatchedLearnerDto _result;
 
         public WhenGettingMatchedLearnerFixture()
         {
@@ -62,8 +61,8 @@ namespace MatchedLearnerApi.Application.Tests.ControllerTests.MatchedLearnerCont
 
             _ukprn = _fixture.Create<long>();
             _uln = _fixture.Create<long>();
-            _mockRepository = _fixture.Create<Mock<IEmployerIncentivesRepository>>();
-            _sut = new MatchedLearnerController(_mockRepository.Object);
+            _mockService = _fixture.Create<Mock<IMatchedLearnerService>>();
+            _sut = new MatchedLearnerController(_mockService.Object);
         }
 
         public async Task<IActionResult> Act() => await _sut.Get(_ukprn, _uln);
@@ -72,8 +71,8 @@ namespace MatchedLearnerApi.Application.Tests.ControllerTests.MatchedLearnerCont
         {
             _result = null;
 
-            _mockRepository
-                .Setup(x => x.GetMatchedLearnerResults(_ukprn, _uln))
+            _mockService
+                .Setup(x => x.GetMatchedLearner(_ukprn, _uln))
                 .ReturnsAsync(_result);
 
             return this;
@@ -81,10 +80,10 @@ namespace MatchedLearnerApi.Application.Tests.ControllerTests.MatchedLearnerCont
 
         public WhenGettingMatchedLearnerFixture WithRepositoryReturningResult()
         {
-            _result = _fixture.Create<MatchedLearnerResultDto>();
+            _result = _fixture.Create<MatchedLearnerDto>();
 
-            _mockRepository
-                .Setup(x => x.GetMatchedLearnerResults(_ukprn, _uln))
+            _mockService
+                .Setup(x => x.GetMatchedLearner(_ukprn, _uln))
                 .ReturnsAsync(_result);
 
             return this;

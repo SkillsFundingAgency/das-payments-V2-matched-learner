@@ -1,27 +1,14 @@
-﻿using MatchedLearnerApi.Application.Models;
+﻿using MatchedLearnerApi.Application.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MatchedLearnerApi.Application.ModelConfiguration
+namespace MatchedLearnerApi.Application.Data.ModelConfiguration
 {
     public class DatalockEventConfiguration : IEntityTypeConfiguration<DatalockEvent>
     {
         public void Configure(EntityTypeBuilder<DatalockEvent> builder)
         {
             builder.ToTable("DataLockEvent");
-
-            builder.Property(x => x.ProgrammeType)
-                .HasColumnName("LearningAimProgrammeType");
-            builder.Property(x => x.StandardCode)
-                .HasColumnName("LearningAimStandardCode");
-            builder.Property(x => x.FrameworkCode)
-                .HasColumnName("LearningAimFrameworkCode");
-            builder.Property(x => x.PathwayCode)
-                .HasColumnName("LearningAimPathwayCode");
-            builder.Property(x => x.FundingLineType)
-                .HasColumnName("LearningAimFundingLineType");
-            builder.Property(x => x.Uln)
-                .HasColumnName("LearnerUln");
 
             builder.HasMany(x => x.PriceEpisodes)
                 .WithOne()

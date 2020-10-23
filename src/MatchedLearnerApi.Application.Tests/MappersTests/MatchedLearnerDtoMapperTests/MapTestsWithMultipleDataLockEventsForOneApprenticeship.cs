@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using MatchedLearnerApi.Application.Data.Models;
 using MatchedLearnerApi.Application.Mappers;
-using MatchedLearnerApi.Application.Models;
 using NUnit.Framework;
 
-namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultMapperTests
+namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapperTests
 {
     [TestFixture]
     public class MapTestsWithMultipleDataLockEventsForOneApprenticeship
@@ -19,10 +19,10 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
             _testInput.Add(new DatalockEvent
             {
                 AcademicYear = 2021,
-                PathwayCode = 1,
-                StandardCode = 2,
-                FrameworkCode = 3,
-                ProgrammeType = 4,
+                LearningAimPathwayCode = 1,
+                LearningAimStandardCode = 2,
+                LearningAimFrameworkCode = 3,
+                LearningAimProgrammeType = 4,
                 LearningAimReference = "123",
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
@@ -80,10 +80,10 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
             _testInput.Add(new DatalockEvent
             {
                 AcademicYear = 2021,
-                PathwayCode = 1,
-                StandardCode = 2,
-                FrameworkCode = 3,
-                ProgrammeType = 4,
+                LearningAimPathwayCode = 1,
+                LearningAimStandardCode = 2,
+                LearningAimFrameworkCode = 3,
+                LearningAimProgrammeType = 4,
                 LearningAimReference = "123",
                 PriceEpisodes = new List<DatalockEventPriceEpisode>
                 {
@@ -142,7 +142,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void Training_Should_HaveOneElement()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training.Should().HaveCount(1);
@@ -151,7 +151,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void Training_Should_HaveExpectedPriceEpisodes()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(4);
@@ -164,7 +164,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void Training_Should_BeInOutput()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             
@@ -174,7 +174,7 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
         [Test]
         public void ThereShouldBe_NoMixingOfPeriodsBetweenPriceEpisodes()
         {
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
 
@@ -194,26 +194,26 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(testInput);
 
@@ -228,26 +228,26 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "1234",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(testInput);
 
@@ -262,26 +262,26 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 11,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 11,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(testInput);
 
@@ -296,26 +296,26 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 21,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 21,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(testInput);
 
@@ -330,26 +330,26 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 31,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 31,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(testInput);
 
@@ -364,26 +364,26 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerResultM
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 31,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 31,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 },
                 new DatalockEvent
                 {
                     AcademicYear = 2021,
-                    PathwayCode = 1,
-                    StandardCode = 2,
-                    FrameworkCode = 3,
-                    ProgrammeType = 4,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
                     LearningAimReference = "123",
                     PriceEpisodes = new List<DatalockEventPriceEpisode>(),
                 }
             };
 
-            var sut = new MatchedLearnerResultMapper();
+            var sut = new MatchedLearnerDtoMapper();
 
             var actual = sut.Map(testInput);
 

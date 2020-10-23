@@ -1,9 +1,15 @@
-﻿using MatchedLearnerApi.Application.ModelConfiguration;
-using MatchedLearnerApi.Application.Models;
+﻿using MatchedLearnerApi.Application.Data.ModelConfiguration;
+using MatchedLearnerApi.Application.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MatchedLearnerApi.Application
+namespace MatchedLearnerApi.Application.Data
 {
+    public interface IPaymentsContext
+    {
+        DbSet<DatalockEvent> DatalockEvents { get; set; }
+        DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
+    }
+
     public class PaymentsContext : DbContext, IPaymentsContext
     {
         public PaymentsContext(DbContextOptions options) : base(options)

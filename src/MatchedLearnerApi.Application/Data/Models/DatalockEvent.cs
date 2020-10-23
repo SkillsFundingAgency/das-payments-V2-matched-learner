@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MatchedLearnerApi.Application.Models
+namespace MatchedLearnerApi.Application.Data.Models
 {
     public class DatalockEvent
     {
@@ -15,17 +15,17 @@ namespace MatchedLearnerApi.Application.Models
         public DateTime IlrSubmissionDateTime { get; set; }
         public byte CollectionPeriod { get; set; }
         public long Ukprn { get; set; }
-        public long Uln { get; set; }
+        public long LearnerUln { get; set; }
 
 
         // "Training" info
         public string LearningAimReference { get; set; }
 
-        public int ProgrammeType { get; set; }
-        public int StandardCode { get; set; }
-        public int FrameworkCode { get; set; }
-        public int PathwayCode { get; set; }
-        public string FundingLineType { get; set; }
+        public int LearningAimProgrammeType { get; set; }
+        public int LearningAimStandardCode { get; set; }
+        public int LearningAimFrameworkCode { get; set; }
+        public int LearningAimPathwayCode { get; set; }
+        public string LearningAimFundingLineType { get; set; }
         
         public DateTime? LearningStartDate { get; set; }
 

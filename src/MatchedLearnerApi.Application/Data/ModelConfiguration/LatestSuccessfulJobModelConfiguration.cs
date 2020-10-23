@@ -1,8 +1,8 @@
-﻿using MatchedLearnerApi.Application.Models;
+﻿using MatchedLearnerApi.Application.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MatchedLearnerApi.Application.ModelConfiguration
+namespace MatchedLearnerApi.Application.Data.ModelConfiguration
 {
     public class LatestSuccessfulJobModelConfiguration : IEntityTypeConfiguration<LatestSuccessfulJobModel>
     {

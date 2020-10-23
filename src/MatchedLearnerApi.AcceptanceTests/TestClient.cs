@@ -23,7 +23,7 @@ namespace MatchedLearnerApi.AcceptanceTests
                 _client = new WebApplicationFactory<Startup>().CreateClient();
         }
 
-        public async Task<MatchedLearnerResultDto> Handle(long ukprn, long uln)
+        public async Task<MatchedLearnerDto> Handle(long ukprn, long uln)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, _url + $"/api/v1/{ukprn}/{uln}");
             
@@ -33,7 +33,7 @@ namespace MatchedLearnerApi.AcceptanceTests
                 throw new Exception($"{(int)response.StatusCode}");
 
             var responseAsString = await response.Content.ReadAsStringAsync();
-            var responseAsObjectGraph = JsonConvert.DeserializeObject<MatchedLearnerResultDto>(responseAsString);
+            var responseAsObjectGraph = JsonConvert.DeserializeObject<MatchedLearnerDto>(responseAsString);
 
             return responseAsObjectGraph;
         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MatchedLearnerApi.Application.Models
+namespace MatchedLearnerApi.Application.Data.Models
 {
     public class DatalockEventNonPayablePeriod
     {

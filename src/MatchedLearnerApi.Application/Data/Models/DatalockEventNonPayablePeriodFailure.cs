@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MatchedLearnerApi.Application.Models
+namespace MatchedLearnerApi.Application.Data.Models
 {
     public class DatalockEventNonPayablePeriodFailure
     {
