@@ -68,6 +68,7 @@ namespace MatchedLearnerApi.Application.Repositories
 
                     IlrSubmissionDateTime = d.IlrSubmissionDateTime,
                     LearningStartDate = d.LearningStartDate,
+                    EventTime = d.EventTime,
                 })
                 .ToListAsync();
 
@@ -92,8 +93,8 @@ namespace MatchedLearnerApi.Application.Repositories
                 x.IlrSubmissionDateTime,
             }).Select(d => new DatalockEvent
             {
-                NonPayablePeriods = d.SelectMany(p => p.NonPayablePeriods).ToList(),
-                PayablePeriods = d.SelectMany(p => p.PayablePeriods).ToList(),
+                NonPayablePeriods = d.SelectMany(p => p.NonPayablePeriods).OrderBy(p => p.DeliveryPeriod).ToList(),
+                PayablePeriods = d.SelectMany(p => p.PayablePeriods).OrderBy(p => p.DeliveryPeriod).ToList(),
                 PriceEpisodes = GroupPriceEpisodes(d.SelectMany(p => p.PriceEpisodes)),
 
                 Ukprn = d.Key.Ukprn,
@@ -146,7 +147,9 @@ namespace MatchedLearnerApi.Application.Repositories
                 TotalNegotiatedPrice2 = pe.Key.TotalNegotiatedPrice2,
                 TotalNegotiatedPrice3 = pe.Key.TotalNegotiatedPrice3,
                 TotalNegotiatedPrice4 = pe.Key.TotalNegotiatedPrice4,
-            }).ToList();
+            })
+            .OrderBy(pe => pe.StartDate)
+            .ToList();
 
             return result;
         }
