@@ -31,7 +31,7 @@ namespace MatchedLearnerApi.Application.Repositories
                 .FirstOrDefaultAsync();
 
             if (latestSuccessfulJob == null)
-                return null;
+                return new List<DatalockEvent>();
 
             var transactionTypes = new List<byte> { 1, 2, 3 };
 

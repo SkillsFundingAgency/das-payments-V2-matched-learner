@@ -14,7 +14,7 @@ namespace MatchedLearnerApi.Application.Mappers
     {
         public MatchedLearnerDto Map(List<DatalockEvent> datalockEvents)
         {
-            if (!datalockEvents.Any())
+            if (datalockEvents == null || !datalockEvents.Any())
                 return null;
 
             var firstEvent = datalockEvents.First();
@@ -43,7 +43,7 @@ namespace MatchedLearnerApi.Application.Mappers
             };
         }
 
-        private List<PriceEpisodeDto> MapPriceEpisodes(DatalockEvent dataLockEvent)
+        private static List<PriceEpisodeDto> MapPriceEpisodes(DatalockEvent dataLockEvent)
         {
             return dataLockEvent.PriceEpisodes.Select(priceEpisode => new PriceEpisodeDto
             {
@@ -58,7 +58,7 @@ namespace MatchedLearnerApi.Application.Mappers
             }).ToList();
         }
 
-        private List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, DatalockEvent datalockEvent)
+        private static List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, DatalockEvent datalockEvent)
         {
             var nonPayablePeriods = datalockEvent.NonPayablePeriods
                 .Where(d => d.PriceEpisodeIdentifier == priceEpisodeIdentifier)
