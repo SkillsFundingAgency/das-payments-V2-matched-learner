@@ -1,4 +1,6 @@
-﻿Scenario: No learner
+﻿Feature: SmokeTests
+
+Scenario: No learner
 	When we call the API with a learner that does not exist
 	Then the result should be a 404
 

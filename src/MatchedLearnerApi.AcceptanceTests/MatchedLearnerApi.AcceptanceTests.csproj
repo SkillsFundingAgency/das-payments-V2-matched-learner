@@ -29,8 +29,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.9" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="SpecFlow" Version="3.4.14" />
-    <PackageReference Include="SpecFlow.NUnit" Version="3.4.14" />
+    <PackageReference Include="SpecFlow" Version="3.4.31" />
+    <PackageReference Include="SpecFlow.NUnit" Version="3.4.31" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
   </ItemGroup>
@@ -39,6 +39,21 @@
   <ItemGroup>
     <ProjectReference Include="..\MatchedLearnerApi.Types\MatchedLearnerApi.Types.csproj" />
     <ProjectReference Include="..\MatchedLearnerApi\MatchedLearnerApi.csproj" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <Compile Update="Features\SmokeTests.feature.cs">
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SmokeTests.feature.cs</LastGenOutput>
+    </SpecFlowFeatureFiles>
   </ItemGroup>
 
 </Project>
