@@ -35,13 +35,13 @@ namespace MatchedLearnerApi
             WebHost.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    var environmentName = hostingContext.HostingEnvironment.EnvironmentName;
-                    config.SetBasePath(Directory.GetCurrentDirectory());
-                    config.AddJsonFile("appSettings.json", optional: false, reloadOnChange: false);
-                    config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
-                    config.AddEnvironmentVariables();
+                    //var environmentName = hostingContext.HostingEnvironment.EnvironmentName;
+                    //config.SetBasePath(Directory.GetCurrentDirectory());
+                    //config.AddJsonFile("appSettings.json", optional: false, reloadOnChange: false);
+                    //config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
+                    //config.AddEnvironmentVariables();
 
-                    if (!EnvironmentExtensions.IsDevelopment())
+                    //if (!EnvironmentExtensions.IsDevelopment())
                     {
                         config.AddAzureTableStorage(options =>
                         {
