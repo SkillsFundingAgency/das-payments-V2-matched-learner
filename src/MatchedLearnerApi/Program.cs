@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using NLog.Web;
 using System;
-using System.IO;
 using MatchedLearnerApi.Configuration;
-using MatchedLearnerApi.Extensions;
 using SFA.DAS.Configuration.AzureTableStorage;
 
 namespace MatchedLearnerApi
@@ -35,23 +32,14 @@ namespace MatchedLearnerApi
             WebHost.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    //var environmentName = hostingContext.HostingEnvironment.EnvironmentName;
-                    //config.SetBasePath(Directory.GetCurrentDirectory());
-                    //config.AddJsonFile("appSettings.json", optional: false, reloadOnChange: false);
-                    //config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
-                    //config.AddEnvironmentVariables();
-
-                    //if (!EnvironmentExtensions.IsDevelopment())
+                    config.AddAzureTableStorage(options =>
                     {
-                        config.AddAzureTableStorage(options =>
-                        {
-                            options.PreFixConfigurationKeys = false;
-                            options.ConfigurationKeys = new[] { MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey };
-                        });
-                        
-                        //NOTE: This option uses PreFixConfigurationKeys = true which means all the configurations are prefixed by "MatchedLearner:<key>"
-                        //config.AddAzureTableStorage(MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey);
-                    }
+                        options.PreFixConfigurationKeys = false;
+                        options.ConfigurationKeys = new[] {MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey};
+                    });
+
+                    //NOTE: bellow option uses PreFixConfigurationKeys = true which means all the configurations are prefixed by "MatchedLearner:<key>"
+                    //config.AddAzureTableStorage(MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey);
                 })
                 .UseApplicationInsights()
                 .UseStartup<Startup>()
