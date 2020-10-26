@@ -214,7 +214,6 @@ namespace MatchedLearnerApi.Application.Tests.MappersTests.MatchedLearnerDtoMapp
         [Test]
         public void InputWithPayablePeriod_Should_MapTrainingFundingLineType()
         {
-            //_actual.Training.Single().LearningAimFundingLineType.Should().Be(_expectedTrainingFundingLineType);
             _actual.Training.Single().FundingLineType.Should().BeNullOrEmpty();
         }
 

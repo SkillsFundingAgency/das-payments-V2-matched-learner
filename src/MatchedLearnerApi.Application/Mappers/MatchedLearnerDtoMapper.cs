@@ -37,7 +37,6 @@ namespace MatchedLearnerApi.Application.Mappers
                     PathwayCode = dataLockEvent.LearningAimPathwayCode,
                     FundingLineType = null,
                     StartDate = dataLockEvent.LearningStartDate.GetValueOrDefault(),
-                    //todo Status we think should be mapped on the price episode not on the Training
                     PriceEpisodes = MapPriceEpisodes(dataLockEvent)
                 }).ToList()
             };

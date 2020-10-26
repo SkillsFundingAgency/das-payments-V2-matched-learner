@@ -12,8 +12,6 @@ namespace MatchedLearnerApi.Types
         public int PathwayCode { get; set; }
         public string FundingLineType { get; set; }
         public DateTime StartDate { get; set; }
-        //public string Status { get; set; } = "TBD";
-
 
         public List<PriceEpisodeDto> PriceEpisodes { get; set; } = new List<PriceEpisodeDto>();
     }
