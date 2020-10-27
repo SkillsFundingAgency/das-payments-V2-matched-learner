@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Hosting;
 
-namespace MatchedLearnerApi.Extensions
+namespace SFA.DAS.Payments.MatchedLearner.Api.Extensions
 {
     public class EnvironmentExtensions
     {

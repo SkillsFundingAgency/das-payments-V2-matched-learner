@@ -1,11 +1,11 @@
+using System;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using NLog.Web;
-using System;
-using MatchedLearnerApi.Configuration;
 using SFA.DAS.Configuration.AzureTableStorage;
+using SFA.DAS.Payments.MatchedLearner.Api.Configuration;
 
-namespace MatchedLearnerApi
+namespace SFA.DAS.Payments.MatchedLearner.Api
 {
     public class Program
     {
