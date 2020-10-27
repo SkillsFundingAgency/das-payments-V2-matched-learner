@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Dapper;
-using MatchedLearnerApi.AcceptanceTests.Services;
 using Microsoft.Data.SqlClient;
 
-namespace MatchedLearnerApi.AcceptanceTests
+namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 {
     public class TestRepository
     {
@@ -12,16 +11,18 @@ namespace MatchedLearnerApi.AcceptanceTests
 
         public TestRepository()
         {
-            var apiConfig = MatchedLearnerApiTestConfigurationProvider.Configuration;
-            _connectionString = apiConfig.DasPaymentsDatabaseConnectionString;
+            _connectionString = TestConfiguration.DasPaymentsDatabaseConnectionString;
         }
 
         public async Task AddDatalockEvent(long ukprn, long uln)
         {
             const string sql = @"
 
-INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, LearnerUln, Ukprn, EstimatedStartDate, EstimatedEndDate,
-    Priority, LearningAimStandardCode, LearningAimProgrammeType, LearningAimFrameworkCode, LearningAimPathwayCode, TransferSendingEmployerAccountId, Status,
+INSERT INTO Payments2.Job (IlrSubmissionTime,   JobType, Status, DCJobId, Ukprn, AcademicYear, CollectionPeriod, DCJobSucceeded)
+                   VALUES (SysDateTimeOffset(), 1,       2,       123,      @ukprn, 2021,          1,                 1)
+
+INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate,
+    Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status,
     IsLevyPayer, ApprenticeshipEmployerType)
 VALUES (-123456, 1000, SysDateTimeOffset(), @uln, @ukprn, SysDateTimeOffset(), SysDateTimeOffset(), 1, 100, 200, 300, 400, 500, 0, 0, 3)
 
@@ -30,7 +31,7 @@ INSERT INTO Payments2.DatalockEvent (EventId, EarningEventId, Ukprn, ContractTyp
     LearningAimFrameworkCode, LearningAimPathwayCode, LearningAimFundingLineType, IlrSubmissionDateTime, IsPayable,
     DatalockSourceId, JobId, EventTime, LearningStartDate)
 VALUES (@datalockEventId, NewID(), @ukprn, 1, 1, 2021, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', 
-    '2020-10-10', 0, 0, 0, SysDateTimeOffset(), '2020-10-09 0:00 +00:00')
+    '2020-10-10', 0, 0, 123, SysDateTimeOffset(), '2020-10-09 0:00 +00:00')
 
 
 INSERT INTO Payments2.DatalockEventPayablePeriod (DatalockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod,
@@ -82,7 +83,8 @@ VALUES (@datalockEventId, 'TEST', 1, 1000, 2000, 0, 0, '2020-10-07', SysDateTime
         public async Task ClearLearner(long ukprn, long uln)
         {
             const string sql = @"
-DELETE Payments2.Apprenticeship WHERE LearnerUln = @uln AND Ukprn = @ukprn;
+DELETE FROM Payments2.Job where Ukprn = @ukprn
+DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
 DELETE Payments2.Apprenticeship WHERE Id = -123456;
 
 DELETE Payments2.DatalockEventPayablePeriod
