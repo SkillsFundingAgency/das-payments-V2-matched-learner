@@ -13,6 +13,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             DasPaymentsDatabaseConnectionString = configSection["DasPaymentsDatabaseConnectionString"];
             TargetUrl = configSection["TargetUrl"];
+            Environment = configSection["Environment"];
         }
 
         public static IConfigurationRoot GetConfigurationRoot()
@@ -26,5 +27,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
         public static string DasPaymentsDatabaseConnectionString { get; }
         public static string TargetUrl { get; }
+        public static string Environment { get; }
     }
 }

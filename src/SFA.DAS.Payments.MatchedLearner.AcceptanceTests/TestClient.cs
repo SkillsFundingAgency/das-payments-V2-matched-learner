@@ -15,7 +15,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            Environment.SetEnvironmentVariable("APPSETTING_Environment", "Development");
+            Environment.SetEnvironmentVariable("APPSETTING_Environment", TestConfiguration.Environment);
 
             builder.ConfigureAppConfiguration(config =>
             {
