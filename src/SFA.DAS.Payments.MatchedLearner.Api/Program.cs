@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
             }
             finally
             {
-                NLog.LogManager.Shutdown();
+                global::NLog.LogManager.Shutdown();
             }
         }
 
