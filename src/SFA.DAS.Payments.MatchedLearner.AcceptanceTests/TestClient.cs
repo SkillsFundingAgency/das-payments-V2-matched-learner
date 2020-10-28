@@ -38,7 +38,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             if (!string.IsNullOrEmpty(_url)) return;
 
-            _client = new CustomWebApplicationFactory<Startup>().CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost:44300") });
+            _client = new CustomWebApplicationFactory<Startup>().CreateClient();
             _url = _client.BaseAddress.ToString();
         }
 
