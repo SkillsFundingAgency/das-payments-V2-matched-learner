@@ -1,0 +1,70 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+
+pr: none
+
+workspace:
+  clean: all
+  
+variables:
+- name: BuildPlatform
+  value : 'any cpu'
+- name: BuildConfiguration
+  value: 'release'
+- group: 'Prod Management Resources'
+
+resources:
+  repositories:
+  - repository: das-platform-building-blocks
+    type: github
+    name: SkillsFundingAgency/das-platform-building-blocks
+    ref: refs/tags/0.2.1
+    endpoint: 'GitHub (SFA)'
+
+pool:
+  name: 'DAS - Continuous Integration'
+
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: Restore
+    inputs:
+      command: restore
+      projects: 'src/**/*.csproj'
+
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      projects: 'src/**/*.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-restore'
+      
+  - task: DotNetCoreCLI@2
+    displayName: Unit Tests
+    inputs:
+      command: test
+      projects: '**/*.Application.Tests.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-build'
+
+  - template: azure-pipelines-templates/dependency-check.yml@das-platform-building-blocks
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish API'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/MatchedLearnerApi/MatchedLearnerApi.csproj'
+      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+    inputs:
+      contents: |
+        azure/**
+      targetFolder: '$(build.artifactstagingdirectory)/publish'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      pathtoPublish: '$(build.artifactstagingdirectory)/publish'

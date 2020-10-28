@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NLog.Web;
+using System;
+using MatchedLearnerApi.Configuration;
 using SFA.DAS.Configuration.AzureTableStorage;
 
 namespace MatchedLearnerApi
@@ -36,16 +30,19 @@ namespace MatchedLearnerApi
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    var environmentName = hostingContext.HostingEnvironment.EnvironmentName;
-                    config.SetBasePath(Directory.GetCurrentDirectory());
-                    config.AddJsonFile("appSettings.json", optional: false, reloadOnChange: false);
-                    config.AddJsonFile($"appSettings.{environmentName}.json", optional: true, reloadOnChange: false);
-                    config.AddEnvironmentVariables();
+                    config.AddAzureTableStorage(options =>
+                    {
+                        options.PreFixConfigurationKeys = false;
+                        options.ConfigurationKeys = new[] {MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey};
+                    });
+
+                    //NOTE: bellow option uses PreFixConfigurationKeys = true which means all the configurations are prefixed by "MatchedLearner:<key>"
+                    //config.AddAzureTableStorage(MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey);
                 })
-                .UseUrls("https://localhost:5061")
+                .UseApplicationInsights()
+                .UseStartup<Startup>()
                 .UseNLog();
     }
 }
