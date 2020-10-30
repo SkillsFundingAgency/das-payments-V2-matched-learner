@@ -1,32 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SFA.DAS.Payments.MatchedLearner.Api;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 {
-    public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
-    {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            Environment.SetEnvironmentVariable("APPSETTING_Environment", TestConfiguration.Environment);
-
-            builder.ConfigureAppConfiguration(config =>
-            {
-                config.Sources.Clear();
-                config.SetBasePath(Directory.GetCurrentDirectory());
-                config.AddJsonFile("appSettings.json", optional: false, reloadOnChange: false);
-                config.AddEnvironmentVariables();
-            });
-        }
-    }
-
     public class TestClient
     {
         private static HttpClient _client = new HttpClient();
@@ -34,11 +15,11 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
         public TestClient()
         {
-            _url = TestConfiguration.TargetUrl;
+            _url = TestConfiguration.MatchedLearnerApiConfiguration.TargetUrl;
 
             if (!string.IsNullOrEmpty(_url)) return;
 
-            _client = new CustomWebApplicationFactory<Startup>().CreateClient();
+            _client = new WebApplicationFactory<Startup>().CreateClient();
             _url = _client.BaseAddress.ToString();
         }
 

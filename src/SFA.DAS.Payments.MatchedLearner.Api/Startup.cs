@@ -22,10 +22,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
     public class Startup
     {
         public IConfiguration Configuration { get; set; }
+        public IWebHostEnvironment WebHostEnvironment { get; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+            WebHostEnvironment = webHostEnvironment;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -36,7 +38,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             services.AddHealthChecks();
 
-            if (!EnvironmentExtensions.IsDevelopment())
+            if (!WebHostEnvironment.IsDevelopment())
             {
                 var azureAdConfiguration = Configuration
                     .GetSection(MatchedLearnerApiConfigurationKeys.AzureADConfigKey)
@@ -62,7 +64,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             services.AddMvc(o =>
                 {
-                    if (!EnvironmentExtensions.IsDevelopment())
+                    if (!WebHostEnvironment.IsDevelopment())
                     {
                         o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string> { PolicyNames.Default }));
                     }
@@ -82,9 +84,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (EnvironmentExtensions.IsDevelopment())
+            if (WebHostEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
