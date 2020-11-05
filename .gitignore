@@ -279,4 +279,4 @@ local.settings.json
 # Internal nlog log
 **/internal-nlog.txt
 
-src/MatchedLearnerApi.AcceptanceTests/appsettings.Development.json
+src/SFA.DAS.Payments.MatchedLearner.AcceptanceTests/appsettings.Development.json

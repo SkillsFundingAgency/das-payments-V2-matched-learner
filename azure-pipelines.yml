@@ -44,7 +44,7 @@ steps:
     displayName: Unit Tests
     inputs:
       command: test
-      projects: '**/*.Application.Tests.csproj'
+      projects: '**/*.Application.UnitTests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build'
 
   - template: azure-pipelines-templates/dependency-check.yml@das-platform-building-blocks
@@ -54,7 +54,7 @@ steps:
     inputs:
       command: publish
       publishWebProjects: false
-      projects: 'src/MatchedLearnerApi/MatchedLearnerApi.csproj'
+      projects: 'src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
   - task: CopyFiles@2
