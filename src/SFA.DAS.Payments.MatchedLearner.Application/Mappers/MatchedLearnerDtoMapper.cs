@@ -82,10 +82,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 {
                     Period = payablePeriod.DeliveryPeriod,
                     IsPayable = true,
-                    AccountId = payablePeriod.Apprenticeship.AccountId,
+                    AccountId = payablePeriod.Apprenticeship?.AccountId ?? 0,
                     ApprenticeshipId = payablePeriod.ApprenticeshipId,
-                    ApprenticeshipEmployerType = payablePeriod.Apprenticeship.ApprenticeshipEmployerType,
-                    TransferSenderAccountId = payablePeriod.Apprenticeship.TransferSendingEmployerAccountId
+                    ApprenticeshipEmployerType = payablePeriod.Apprenticeship?.ApprenticeshipEmployerType ?? 0,
+                    TransferSenderAccountId = payablePeriod.Apprenticeship?.TransferSendingEmployerAccountId ?? 0,
                 });
 
             return payablePeriods.Union(nonPayablePeriods).ToList();
