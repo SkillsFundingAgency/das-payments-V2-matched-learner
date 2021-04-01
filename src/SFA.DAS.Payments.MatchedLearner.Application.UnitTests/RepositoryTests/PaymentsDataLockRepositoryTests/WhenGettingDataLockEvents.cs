@@ -110,7 +110,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             AddPriceEpisodeToDataLock();
             AddPayablePeriodToDataLock();
-            AddNonPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
@@ -132,7 +131,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             AddPriceEpisodeToDataLock();
             AddPayablePeriodToDataLock();
-            AddNonPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
