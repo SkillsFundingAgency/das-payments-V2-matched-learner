@@ -48,8 +48,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 .OrderBy(x => x.LearningStartDate)
                 .Select(d => new DatalockEvent
                 {
-                    NonPayablePeriods = d.NonPayablePeriods.Where(npp => transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null).ToList(),
-                    PayablePeriods = d.PayablePeriods.Where(pp => transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null).ToList(),
+                    NonPayablePeriods = d.NonPayablePeriods.Where(npp => transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null && npp.Amount != 0).ToList(),
+                    PayablePeriods = d.PayablePeriods.Where(pp => transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null && pp.Amount != 0).ToList(),
                     PriceEpisodes = d.PriceEpisodes,
 
                     Ukprn = d.Ukprn,

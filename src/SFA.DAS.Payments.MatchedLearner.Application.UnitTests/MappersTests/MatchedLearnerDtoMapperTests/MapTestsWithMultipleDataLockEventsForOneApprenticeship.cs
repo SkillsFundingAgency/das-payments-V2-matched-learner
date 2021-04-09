@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
+using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
 {
@@ -397,6 +400,86 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             var actual = sut.Map(testInput);
 
             actual.Training.Should().HaveCount(2);
+        }
+
+        [Test]
+        public void WhenPayablePeriodApprenticeshipIsNull_ThenExceptionNotThrown()
+        {
+            //Arrange
+            var datalockEvents = new List<DatalockEvent>
+            {
+                new DatalockEvent
+                {
+                    EventId = Guid.NewGuid(),
+                    AcademicYear = 2021,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 31,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "123",
+                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    PayablePeriods = new List<DatalockEventPayablePeriod>
+                    {
+                        new DatalockEventPayablePeriod
+                        {
+                            Id = 1,
+                            Amount = 0,
+                            Apprenticeship = null,
+                            ApprenticeshipId = 123,
+                            DataLockEventId = Guid.NewGuid(),
+                            DeliveryPeriod = 8,
+                            PriceEpisodeIdentifier = "3-490-1-01/08/2020",
+                            TransactionType = 2
+
+                        }
+                    }
+                }
+            };
+
+            //Act
+            var sut = new MatchedLearnerDtoMapper();
+
+            //Assert
+            Assert.DoesNotThrow(() => { sut.Map(datalockEvents); });
+            
+        }
+
+        [Test]
+        public void WhenNonPayablePeriodApprenticeshipIsNull_ThenExceptionNotThrown()
+        {
+            //Arrange
+            var datalockEvents = new List<DatalockEvent>
+            {
+                new DatalockEvent
+                {
+                    EventId = Guid.NewGuid(),
+                    AcademicYear = 2021,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 31,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "123",
+                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                    {
+                        new DatalockEventNonPayablePeriod
+                        {
+                            Id = 1,
+                            Amount = 0,
+                            DataLockEventId = Guid.NewGuid(),
+                            DeliveryPeriod = 8,
+                            PriceEpisodeIdentifier = "3-490-1-01/08/2020",
+                            TransactionType = 2
+                        }
+                    }
+                }
+            };
+
+            //Act
+            var sut = new MatchedLearnerDtoMapper();
+            
+            //Assert
+            Assert.DoesNotThrow(() => { sut.Map(datalockEvents); });
         }
     }
 }
