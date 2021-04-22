@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 
@@ -10,129 +12,157 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
     [TestFixture]
     public class MapTestsWithMultipleDataLockEvents
     {
-        private readonly List<DatalockEvent> _testInput = new List<DatalockEvent>();
+        private readonly MatchedLearnerDataLockDataDto _testInput = new MatchedLearnerDataLockDataDto();
 
         [SetUp]
         public void Setup()
         {
-            _testInput.Clear();
-            _testInput.Add(new DatalockEvent
+            var event1 = Guid.NewGuid();
+
+            var event2 = Guid.NewGuid();
+
+            _testInput.DataLockEvents = new List<DataLockEvent>
             {
-                AcademicYear = 2021,
-                LearningAimPathwayCode = 1,
-                PriceEpisodes = new List<DatalockEventPriceEpisode>
+                new DataLockEvent
                 {
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 100m,
-                        TotalNegotiatedPrice2 = 200m,
-                        InstalmentAmount = 2m,
-                        NumberOfInstalments = 5,
-                        CompletionAmount = 1m,
-                        PriceEpisodeIdentifier = "1-1-1",
-                    },
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 1000m,
-                        TotalNegotiatedPrice2 = 2000m,
-                        InstalmentAmount = 20m,
-                        NumberOfInstalments = 50,
-                        CompletionAmount = 10m,
-                        PriceEpisodeIdentifier = "2-2-2",
-                    }
-                },
-                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                {
-                    new DatalockEventNonPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "1-1-1",
+                    AcademicYear = 2021,
+                    LearningAimPathwayCode = 1,
+                    EventId = event1,
+                }
+            };
 
-                        DeliveryPeriod = 2,
-                        Failures = new List<DatalockEventNonPayablePeriodFailure>
-                        {
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 123,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 2,
-                            },
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 123,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 3,
-                            },
-                        }
-                    },
-                },
-                PayablePeriods = new List<DatalockEventPayablePeriod>
+            _testInput.DataLockEventPriceEpisodes = new List<DataLockEventPriceEpisode>
+            {
+                new DataLockEventPriceEpisode
                 {
-                    new DatalockEventPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "2-2-2",
-                        Apprenticeship = new Apprenticeship(),
-                        DeliveryPeriod = 1,
-                    },
+                    DataLockEventId = event1,
+                    TotalNegotiatedPrice1 = 100m,
+                    TotalNegotiatedPrice2 = 200m,
+                    InstalmentAmount = 2m,
+                    NumberOfInstalments = 5,
+                    CompletionAmount = 1m,
+                    PriceEpisodeIdentifier = "1-1-1",
                 },
-            });
+                new DataLockEventPriceEpisode
+                {
+                    DataLockEventId = event1,
+                    TotalNegotiatedPrice1 = 1000m,
+                    TotalNegotiatedPrice2 = 2000m,
+                    InstalmentAmount = 20m,
+                    NumberOfInstalments = 50,
+                    CompletionAmount = 10m,
+                    PriceEpisodeIdentifier = "2-2-2",
+                }
+            };
+            var nonPayableEventId1 = Guid.NewGuid();
+            _testInput.DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriod>
+            {
+                new DataLockEventNonPayablePeriod
+                {
+                    DataLockEventId = event1,
+                    DataLockEventNonPayablePeriodId = nonPayableEventId1,
+                    PriceEpisodeIdentifier = "1-1-1",
+                    DeliveryPeriod = 2,
+                }
+            };
+            _testInput.DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailure>
+            {
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId1,
+                    ApprenticeshipId = 123,
+                    //Apprenticeship = new Apprenticeship(),
+                    DataLockFailureId = 2,
+                },
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId1,
+                    ApprenticeshipId = 123,
+                    //Apprenticeship = new Apprenticeship(),
+                    DataLockFailureId = 3,
+                },
+            };
+            _testInput.DataLockEventPayablePeriods = new List<DataLockEventPayablePeriod>
+            {
+                new DataLockEventPayablePeriod
+                {
+                    DataLockEventId = event1,
+                    PriceEpisodeIdentifier = "2-2-2",
+                    //Apprenticeship = new Apprenticeship(),
+                    DeliveryPeriod = 1,
+                },
+            };
 
-            _testInput.Add(new DatalockEvent
+            _testInput.DataLockEvents.Add(new DataLockEvent
             {
                 AcademicYear = 2021,
                 LearningAimPathwayCode = 2,
-                PriceEpisodes = new List<DatalockEventPriceEpisode>
+                EventId = event2,
+            });
+
+            _testInput.DataLockEventPriceEpisodes.AddRange(new List<DataLockEventPriceEpisode>
+            {
+                new DataLockEventPriceEpisode
                 {
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 10000m,
-                        TotalNegotiatedPrice2 = 20000m,
-                        InstalmentAmount = 200m,
-                        NumberOfInstalments = 500,
-                        CompletionAmount = 100m,
-                        PriceEpisodeIdentifier = "3-3-3",
-                    },
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 10000m,
-                        TotalNegotiatedPrice2 = 20000m,
-                        InstalmentAmount = 200m,
-                        NumberOfInstalments = 500,
-                        CompletionAmount = 100m,
-                        PriceEpisodeIdentifier = "4-4-4",
-                    }
+                    DataLockEventId = event2,
+                    TotalNegotiatedPrice1 = 10000m,
+                    TotalNegotiatedPrice2 = 20000m,
+                    InstalmentAmount = 200m,
+                    NumberOfInstalments = 500,
+                    CompletionAmount = 100m,
+                    PriceEpisodeIdentifier = "3-3-3",
                 },
-                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                new DataLockEventPriceEpisode
                 {
-                    new DatalockEventNonPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "3-3-3",
-                        DeliveryPeriod = 200,
-                        Failures = new List<DatalockEventNonPayablePeriodFailure>
-                        {
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 1230,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 200,
-                            },
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 1230,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 250,
-                            },
-                        }
-                    },
-                },
-                PayablePeriods = new List<DatalockEventPayablePeriod>
+                    DataLockEventId = event2,
+                    TotalNegotiatedPrice1 = 10000m,
+                    TotalNegotiatedPrice2 = 20000m,
+                    InstalmentAmount = 200m,
+                    NumberOfInstalments = 500,
+                    CompletionAmount = 100m,
+                    PriceEpisodeIdentifier = "4-4-4",
+                }
+            });
+            
+            var nonPayableEventId2 = Guid.NewGuid();
+
+            _testInput.DataLockEventNonPayablePeriods.AddRange(new List<DataLockEventNonPayablePeriod>
+            {
+                new DataLockEventNonPayablePeriod
                 {
-                    new DatalockEventPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "4-4-4",
-                        Apprenticeship = new Apprenticeship(),
-                        DeliveryPeriod = 100,
-                    },
+                    DataLockEventId = event2,
+                    PriceEpisodeIdentifier = "3-3-3",
+                    DeliveryPeriod = 200,
+                    DataLockEventNonPayablePeriodId = nonPayableEventId2
+                }
+            });
+
+            _testInput.DataLockEventNonPayablePeriodFailures.AddRange(new List<DataLockEventNonPayablePeriodFailure>
+            {
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId2,
+                    ApprenticeshipId = 1230,
+                    //Apprenticeship = new Apprenticeship(),
+                    DataLockFailureId = 200,
                 },
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId2,
+                    ApprenticeshipId = 1230,
+                    //Apprenticeship = new Apprenticeship(),
+                    DataLockFailureId = 250,
+                }
+            });
+            _testInput.DataLockEventPayablePeriods.AddRange(new List<DataLockEventPayablePeriod>
+            {
+                new DataLockEventPayablePeriod
+                {
+                    DataLockEventId = event2,
+                    PriceEpisodeIdentifier = "4-4-4",
+                    //Apprenticeship = new Apprenticeship(),
+                    DeliveryPeriod = 100,
+                }
             });
         }
 

@@ -1,13 +1,12 @@
 ﻿using AutoFixture;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Repositories;
-using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.PaymentsDataLockRepositoryTests
 {
@@ -16,10 +15,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
     {
         private IPaymentsDataLockRepository _sut;
         private PaymentsContext _context;
-        private DatalockEvent _datalockEvent;
-        private DatalockEventNonPayablePeriod _datalockEventNonPayablePeriod;
-        private DatalockEventPayablePeriod _datalockEventPayablePeriod;
-        private DatalockEventPriceEpisode _datalockEventPriceEpisode;
+        private DataLockEvent _dataLockEvent;
+        private DataLockEventNonPayablePeriod _dataLockEventNonPayablePeriod;
+        private DataLockEventPayablePeriod _dataLockEventPayablePeriod;
+        private DataLockEventPriceEpisode _dataLockEventPriceEpisode;
         private LatestSuccessfulJobModel _latestSuccessfulJob;
 
         private long _ukprn, _uln, _jobId;
@@ -37,10 +36,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _academicYear = fixture.Create<short>();
             _collectionPeriod = fixture.Create<byte>();
 
-            _datalockEvent = fixture.Create<DatalockEvent>();
-            _datalockEvent.PayablePeriods.Clear();
-            _datalockEvent.NonPayablePeriods.Clear();
-            _datalockEvent.PriceEpisodes.Clear();
+            _dataLockEvent = fixture.Create<DataLockEvent>();
+            //_dataLockEvent.PayablePeriods.Clear();
+            //_dataLockEvent.NonPayablePeriods.Clear();
+            //_dataLockEvent.PriceEpisodes.Clear();
 
             _latestSuccessfulJob = fixture.Create<LatestSuccessfulJobModel>();
             _latestSuccessfulJob.Ukprn = _ukprn;
@@ -48,9 +47,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _latestSuccessfulJob.CollectionPeriod = _collectionPeriod;
             _latestSuccessfulJob.DcJobId = _jobId;
 
-            _datalockEventNonPayablePeriod = fixture.Create<DatalockEventNonPayablePeriod>();
-            _datalockEventPayablePeriod = fixture.Create<DatalockEventPayablePeriod>();
-            _datalockEventPriceEpisode = fixture.Create<DatalockEventPriceEpisode>();
+            _dataLockEventNonPayablePeriod = fixture.Create<DataLockEventNonPayablePeriod>();
+            _dataLockEventPayablePeriod = fixture.Create<DataLockEventPayablePeriod>();
+            _dataLockEventPriceEpisode = fixture.Create<DataLockEventPriceEpisode>();
 
             _context = new PaymentsContext(new DbContextOptionsBuilder<PaymentsContext>()
                     .UseInMemoryDatabase("TestDb", new InMemoryDatabaseRoot())
@@ -63,84 +62,84 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         public async Task ThenDoesNotRetrieveNonPayablePeriodsWithZeroAmount()
         {
             //Arrange
-            _datalockEventNonPayablePeriod.TransactionType = 1;
-            _datalockEventNonPayablePeriod.Amount = 0;
+            _dataLockEventNonPayablePeriod.TransactionType = 1;
+            _dataLockEventNonPayablePeriod.Amount = 0;
 
-            AddPriceEpisodeToDataLock();
-            AddNonPayablePeriodToDataLock();
+            await AddPriceEpisodeToDataLock();
+            await AddNonPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetDatalockEvents(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
-            result.Count.Should().Be(1);
-            result.First().NonPayablePeriods.Count.Should().Be(0);
+            result.DataLockEvents.Count.Should().Be(1);
+            result.DataLockEventNonPayablePeriods.Count.Should().Be(0);
         }
 
         [Test]
         public async Task ThenRetrievesNonPayablePeriodsWithNonZeroAmount()
         {
             //Arrange
-            _datalockEventNonPayablePeriod.TransactionType = 1;
-            _datalockEventNonPayablePeriod.Amount = 100;
+            _dataLockEventNonPayablePeriod.TransactionType = 1;
+            _dataLockEventNonPayablePeriod.Amount = 100;
 
-            AddPriceEpisodeToDataLock();
-            AddNonPayablePeriodToDataLock();
+            await AddPriceEpisodeToDataLock();
+            await AddNonPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetDatalockEvents(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
-            result.Count.Should().Be(1);
-            result.First().NonPayablePeriods.Count.Should().Be(1);
+            result.DataLockEvents.Count.Should().Be(1);
+            result.DataLockEventNonPayablePeriods.Count.Should().Be(1);
         }
 
         [Test]
         public async Task ThenDoesNotRetrievePayablePeriodsWithZeroAmount()
         {
             //Arrange
-            _datalockEventPayablePeriod.TransactionType = 1;
-            _datalockEventPayablePeriod.Amount = 0;
+            _dataLockEventPayablePeriod.TransactionType = 1;
+            _dataLockEventPayablePeriod.Amount = 0;
 
-            AddPriceEpisodeToDataLock();
-            AddPayablePeriodToDataLock();
+            await AddPriceEpisodeToDataLock();
+            await AddPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetDatalockEvents(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
-            result.Count.Should().Be(1);
-            result.First().PayablePeriods.Count.Should().Be(0);
+            result.DataLockEvents.Count.Should().Be(1);
+            result.DataLockEventPayablePeriods.Count.Should().Be(0);
         }
 
         [Test]
         public async Task ThenRetrievesPayablePeriodsWithNonZeroAmount()
         {
             //Arrange
-            _datalockEventPayablePeriod.TransactionType = 1;
-            _datalockEventPayablePeriod.Amount = 100;
+            _dataLockEventPayablePeriod.TransactionType = 1;
+            _dataLockEventPayablePeriod.Amount = 100;
 
-            AddPriceEpisodeToDataLock();
-            AddPayablePeriodToDataLock();
+            await AddPriceEpisodeToDataLock();
+            await AddPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetDatalockEvents(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
-            result.Count.Should().Be(1);
-            result.First().PayablePeriods.Count.Should().Be(1);
+            result.DataLockEvents.Count.Should().Be(1);
+            result.DataLockEventPayablePeriods.Count.Should().Be(1);
         }
 
         private async Task AddLatestSuccessfulJobToDb()
@@ -149,36 +148,44 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await _context.SaveChangesAsync();
         }
 
-        private void AddPriceEpisodeToDataLock()
+        private async Task AddPriceEpisodeToDataLock()
         {
-            _datalockEventPriceEpisode.DataLockEventId = _datalockEvent.EventId;
-            _datalockEvent.PriceEpisodes.Add(_datalockEventPriceEpisode);
+            _dataLockEventPriceEpisode.DataLockEventId = _dataLockEvent.EventId;
+            _context.DataLockEventPriceEpisode.Add(_dataLockEventPriceEpisode);
+
+            await _context.SaveChangesAsync();
         }
 
-        private void AddNonPayablePeriodToDataLock()
+        private async Task AddNonPayablePeriodToDataLock()
         {
-            _datalockEventNonPayablePeriod.PriceEpisodeIdentifier = _datalockEventPriceEpisode.PriceEpisodeIdentifier;
-            _datalockEventNonPayablePeriod.DataLockEventId = _datalockEvent.EventId;
-            _datalockEvent.NonPayablePeriods.Add(_datalockEventNonPayablePeriod);
+            _dataLockEventNonPayablePeriod.PriceEpisodeIdentifier = _dataLockEventPriceEpisode.PriceEpisodeIdentifier;
+            _dataLockEventNonPayablePeriod.DataLockEventId = _dataLockEvent.EventId;
+
+            _context.DataLockEventNonPayablePeriod.Add(_dataLockEventNonPayablePeriod);
+
+            await _context.SaveChangesAsync();
         }
 
-        private void AddPayablePeriodToDataLock()
+        private async Task AddPayablePeriodToDataLock()
         {
-            _datalockEventPayablePeriod.DataLockEventId = _datalockEvent.EventId;
-            _datalockEventPayablePeriod.PriceEpisodeIdentifier = _datalockEventPriceEpisode.PriceEpisodeIdentifier;
-            _datalockEvent.PayablePeriods.Add(_datalockEventPayablePeriod);
+            _dataLockEventPayablePeriod.DataLockEventId = _dataLockEvent.EventId;
+            _dataLockEventPayablePeriod.PriceEpisodeIdentifier = _dataLockEventPriceEpisode.PriceEpisodeIdentifier;
+
+            _context.DataLockEventPayablePeriod.Add(_dataLockEventPayablePeriod);
+
+            await _context.SaveChangesAsync();
         }
 
         private async Task AddDataLockToDb()
         {
-            _datalockEvent.LearnerUln = _uln;
-            _datalockEvent.Ukprn = _ukprn;
-            _datalockEvent.JobId = _latestSuccessfulJob.DcJobId;
-            _datalockEvent.LearningAimReference = "ZPROG001";
-            _datalockEvent.CollectionPeriod = _latestSuccessfulJob.CollectionPeriod;
-            _datalockEvent.AcademicYear = _latestSuccessfulJob.AcademicYear;
+            _dataLockEvent.LearnerUln = _uln;
+            _dataLockEvent.Ukprn = _ukprn;
+            _dataLockEvent.JobId = _latestSuccessfulJob.DcJobId;
+            _dataLockEvent.LearningAimReference = "ZPROG001";
+            _dataLockEvent.CollectionPeriod = _latestSuccessfulJob.CollectionPeriod;
+            _dataLockEvent.AcademicYear = _latestSuccessfulJob.AcademicYear;
 
-            _context.DatalockEvents.Add(_datalockEvent);
+            _context.DataLockEvent.Add(_dataLockEvent);
 
             await _context.SaveChangesAsync();
         }
