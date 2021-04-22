@@ -35,7 +35,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         {
             services.AddApiConfigurationSections(Configuration);
             services.AddAppDependencies();
-
+            services.AddApplicationInsightsTelemetry();
             services.AddHealthChecks();
 
             if (!WebHostEnvironment.IsDevelopment())

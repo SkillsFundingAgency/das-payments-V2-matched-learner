@@ -31,7 +31,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public void WhenWeCallTheApiWithALearnerThatDoesNotExist()
         {
             var request = new TestClient();
-            var act = request.Awaiting(async x => await x.Handle(0, 0));
+            var act = request.Awaiting(client => client.Handle(0, 0));
             _context.FailedRequest = act;
         }
 
