@@ -46,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         {
             var repository = new TestRepository();
             repository.ClearLearner(-1000, -2000).Wait();
-            repository.AddDatalockEvent(-1000, -2000).Wait();
+            repository.AddDataLockEvent(-1000, -2000).Wait();
         }
 
         [When(@"we call the API with the sample learners details")]

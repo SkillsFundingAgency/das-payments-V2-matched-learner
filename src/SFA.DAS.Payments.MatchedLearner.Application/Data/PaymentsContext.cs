@@ -23,11 +23,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
             modelBuilder.HasDefaultSchema("Payments2");
 
             modelBuilder.ApplyConfiguration(new LatestSuccessfulJobModelConfiguration());
-            modelBuilder.ApplyConfiguration(new DatalockEventConfiguration());
-            modelBuilder.ApplyConfiguration(new DatalockEventNonPayablePeriodConfiguration());
-            modelBuilder.ApplyConfiguration(new DatalockEventNonPayablePeriodFailureConfiguration());
-            modelBuilder.ApplyConfiguration(new DatalockEventPayablePeriodConfiguration());
-            modelBuilder.ApplyConfiguration(new DatalockEventPriceEpisodeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

@@ -22,7 +22,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
         }
         public async Task<MatchedLearnerDto> GetMatchedLearner(long ukprn, long uln)
         {
-            var dataLockEvents = await _paymentsDataLockRepository.GetDatalockEvents(ukprn, uln);
+            var dataLockEvents = await _paymentsDataLockRepository.GetDataLockEvents(ukprn, uln);
 
             var matchedLearnerResult = _matchedLearnerDtoMapper.Map(dataLockEvents);
 
