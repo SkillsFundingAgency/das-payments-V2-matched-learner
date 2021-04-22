@@ -4,13 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Payments.MatchedLearner.Application.Data;
-using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 {
     public interface IPaymentsDataLockRepository
     {
-        Task<List<DatalockEvent>> GetDatalockEvents(long ukprn, long uln);
+        Task<MatchedLearnerDataLockDataDto> GetDataLockEvents(long ukprn, long uln);
     }
 
     public class PaymentsDataLockRepository : IPaymentsDataLockRepository
@@ -22,7 +21,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<List<DatalockEvent>> GetDatalockEvents(long ukprn, long uln)
+        public async Task<MatchedLearnerDataLockDataDto> GetDataLockEvents(long ukprn, long uln)
         {
             var latestSuccessfulJob = await _context.LatestSuccessfulJobs
                 .Where(y => y.Ukprn == ukprn)
@@ -31,127 +30,61 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 .FirstOrDefaultAsync();
 
             if (latestSuccessfulJob == null)
-                return new List<DatalockEvent>();
+                return new MatchedLearnerDataLockDataDto();
 
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var datalockEvents = await _context.DatalockEvents
-                .Include(d => d.PriceEpisodes)
-                .Include(d => d.PayablePeriods).ThenInclude(pp => pp.Apprenticeship)
-                .Include(d => d.NonPayablePeriods).ThenInclude(npp => npp.Failures).ThenInclude(f => f.Apprenticeship)
-                .Where(x => x.LearningAimReference == "ZPROG001")
-                .Where(x => x.Ukprn == ukprn && x.LearnerUln == uln)
-                .Where(x => x.LearnerUln == uln)
-                .Where(x => x.JobId == latestSuccessfulJob.DcJobId)
-                .Where(x => x.AcademicYear == latestSuccessfulJob.AcademicYear)
-                .Where(x => x.CollectionPeriod == latestSuccessfulJob.CollectionPeriod)
+            var dataLockEvents = await _context.DataLockEvent
+                .Where(x =>
+                    x.LearningAimReference == "ZPROG001" && 
+                    x.Ukprn == ukprn && 
+                    x.LearnerUln == uln && 
+                    x.JobId == latestSuccessfulJob.DcJobId && 
+                    x.AcademicYear == latestSuccessfulJob.AcademicYear && 
+                    x.CollectionPeriod == latestSuccessfulJob.CollectionPeriod)
                 .OrderBy(x => x.LearningStartDate)
-                .Select(d => new DatalockEvent
-                {
-                    NonPayablePeriods = d.NonPayablePeriods.Where(npp => transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null && npp.Amount != 0).ToList(),
-                    PayablePeriods = d.PayablePeriods.Where(pp => transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null && pp.Amount != 0).ToList(),
-                    PriceEpisodes = d.PriceEpisodes,
-
-                    Ukprn = d.Ukprn,
-                    LearnerUln = d.LearnerUln,
-
-                    AcademicYear = d.AcademicYear,
-                    CollectionPeriod = d.CollectionPeriod,
-
-                    LearningAimReference = d.LearningAimReference,
-
-                    LearningAimPathwayCode = d.LearningAimPathwayCode,
-                    LearningAimStandardCode = d.LearningAimStandardCode,
-                    LearningAimFrameworkCode = d.LearningAimFrameworkCode,
-                    LearningAimFundingLineType = d.LearningAimFundingLineType,
-                    LearningAimProgrammeType = d.LearningAimProgrammeType,
-
-                    IlrSubmissionDateTime = d.IlrSubmissionDateTime,
-                    LearningStartDate = d.LearningStartDate,
-                    EventTime = d.EventTime,
-                })
                 .ToListAsync();
 
-            return GroupDatalockEvents(datalockEvents);
-        }
+            var eventId = dataLockEvents.Select(d => d.EventId).ToList();
 
-        private static List<DatalockEvent> GroupDatalockEvents(IEnumerable<DatalockEvent> datalockEvents)
-        {
-            var result = datalockEvents.GroupBy(x => new
+            var dataLockEventPriceEpisodes = await _context.DataLockEventPriceEpisode
+                .Where(d => eventId.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
+                .OrderBy(p => p.StartDate)
+                .ToListAsync();
+
+
+            var dataLockEventPayablePeriods = await _context.DataLockEventPayablePeriod
+                .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .OrderBy(p => p.DeliveryPeriod)
+                .ToListAsync();
+
+            var dataLockEventNonPayablePeriods = await _context.DataLockEventNonPayablePeriod
+                .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .OrderBy(p => p.DeliveryPeriod)
+                .ToListAsync();
+
+            var dataLockEventNonPayablePeriodIds = dataLockEventNonPayablePeriods.Select(d => d.DataLockEventNonPayablePeriodId).ToList();
+
+            var dataLockEventNonPayablePeriodFailures = await _context.DataLockEventNonPayablePeriodFailures
+                .Where(d => dataLockEventNonPayablePeriodIds.Contains(d.DataLockEventNonPayablePeriodId))
+                .ToListAsync();
+
+            var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
+                 .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
+                 .Distinct()
+                 .ToList();
+
+            var apprenticeshipDetails = await _context.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
+
+            return new MatchedLearnerDataLockDataDto
             {
-                x.LearningAimReference,
-                x.LearningAimStandardCode,
-                x.LearningAimProgrammeType,
-                x.LearningAimFrameworkCode,
-                x.LearningAimPathwayCode,
-                x.AcademicYear,
-                x.LearningAimFundingLineType,
-                x.LearningStartDate,
-                x.LearnerUln,
-                x.Ukprn,
-                x.CollectionPeriod,
-                x.IlrSubmissionDateTime,
-            }).Select(d => new DatalockEvent
-            {
-                NonPayablePeriods = d.SelectMany(p => p.NonPayablePeriods).OrderBy(p => p.DeliveryPeriod).ToList(),
-                PayablePeriods = d.SelectMany(p => p.PayablePeriods).OrderBy(p => p.DeliveryPeriod).ToList(),
-                PriceEpisodes = GroupPriceEpisodes(d.SelectMany(p => p.PriceEpisodes)),
-
-                Ukprn = d.Key.Ukprn,
-                LearnerUln = d.Key.LearnerUln,
-
-                AcademicYear = d.Key.AcademicYear,
-                CollectionPeriod = d.Key.CollectionPeriod,
-
-                LearningAimReference = d.Key.LearningAimReference,
-
-                LearningAimPathwayCode = d.Key.LearningAimPathwayCode,
-                LearningAimStandardCode = d.Key.LearningAimStandardCode,
-                LearningAimFrameworkCode = d.Key.LearningAimFrameworkCode,
-                LearningAimFundingLineType = d.Key.LearningAimFundingLineType,
-                LearningAimProgrammeType = d.Key.LearningAimProgrammeType,
-
-                IlrSubmissionDateTime = d.Key.IlrSubmissionDateTime,
-                LearningStartDate = d.Key.LearningStartDate,
-            }).ToList();
-
-
-            return result;
-        }
-
-        private static List<DatalockEventPriceEpisode> GroupPriceEpisodes(IEnumerable<DatalockEventPriceEpisode> priceEpisodes)
-        {
-            var result = priceEpisodes.GroupBy(pe => new
-            {
-                pe.PriceEpisodeIdentifier,
-                pe.ActualEndDate,
-                pe.Completed,
-                pe.CompletionAmount,
-                pe.InstalmentAmount,
-                pe.NumberOfInstalments,
-                pe.StartDate,
-                pe.TotalNegotiatedPrice1,
-                pe.TotalNegotiatedPrice2,
-                pe.TotalNegotiatedPrice3,
-                pe.TotalNegotiatedPrice4,
-            }).Select(pe => new DatalockEventPriceEpisode
-            {
-                PriceEpisodeIdentifier = pe.Key.PriceEpisodeIdentifier,
-                ActualEndDate = pe.Key.ActualEndDate,
-                Completed = pe.Key.Completed,
-                CompletionAmount = pe.Key.CompletionAmount,
-                InstalmentAmount = pe.Key.InstalmentAmount,
-                NumberOfInstalments = pe.Key.NumberOfInstalments,
-                StartDate = pe.Key.StartDate,
-                TotalNegotiatedPrice1 = pe.Key.TotalNegotiatedPrice1,
-                TotalNegotiatedPrice2 = pe.Key.TotalNegotiatedPrice2,
-                TotalNegotiatedPrice3 = pe.Key.TotalNegotiatedPrice3,
-                TotalNegotiatedPrice4 = pe.Key.TotalNegotiatedPrice4,
-            })
-            .OrderBy(pe => pe.StartDate)
-            .ToList();
-
-            return result;
+                DataLockEvents = dataLockEvents,
+                DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
+                DataLockEventPayablePeriods = dataLockEventPayablePeriods,
+                DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods,
+                DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
+                Apprenticeships = apprenticeshipDetails
+            };
         }
     }
 }

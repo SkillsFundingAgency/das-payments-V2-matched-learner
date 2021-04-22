@@ -6,7 +6,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
 {
     public interface IPaymentsContext
     {
-        DbSet<DatalockEvent> DatalockEvents { get; set; }
+        DbSet<DataLockEvent> DataLockEvent { get; set; }
+        DbSet<DataLockEventNonPayablePeriod> DataLockEventNonPayablePeriod { get; set; }
+        DbSet<DataLockEventNonPayablePeriodFailure> DataLockEventNonPayablePeriodFailures { get; set; }
+        DbSet<DataLockEventPayablePeriod> DataLockEventPayablePeriod { get; set; }
+        DbSet<DataLockEventPriceEpisode> DataLockEventPriceEpisode { get; set; }
+        DbSet<Apprenticeship> Apprenticeship { get; set; }
         DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
     }
 
@@ -15,8 +20,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
         public PaymentsContext(DbContextOptions options) : base(options)
         { }
 
-        public DbSet<DatalockEvent> DatalockEvents { get; set; }
-        public virtual DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
+        public DbSet<DataLockEvent> DataLockEvent { get; set; }
+        public DbSet<DataLockEventNonPayablePeriod> DataLockEventNonPayablePeriod { get; set; }
+        public DbSet<DataLockEventNonPayablePeriodFailure> DataLockEventNonPayablePeriodFailures { get; set; }
+        public DbSet<DataLockEventPayablePeriod> DataLockEventPayablePeriod { get; set; }
+        public DbSet<DataLockEventPriceEpisode> DataLockEventPriceEpisode { get; set; }
+        public DbSet<Apprenticeship> Apprenticeship { get; set; }
+        public DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
