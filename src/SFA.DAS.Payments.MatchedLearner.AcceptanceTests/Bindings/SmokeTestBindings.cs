@@ -12,6 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
     public class SmokeTestContext
     {
         public Func<Task> FailedRequest { get; set; }
+        public List<Func<Task>> FailedRequests { get; set; } = new List<Func<Task>>();
         public MatchedLearnerDto MatchedLearnerDto { get; set; }
     }
 
@@ -42,19 +43,52 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         }
 
         [Given(@"we have created a sample learner")]
-        public void GivenWeHaveCreatedASampleLearner()
+        public async Task GivenWeHaveCreatedASampleLearner()
         {
             var repository = new TestRepository();
-            repository.ClearLearner(-1000, -2000).Wait();
-            repository.AddDataLockEvent(-1000, -2000).Wait();
+            await repository.ClearLearner(-1000, -2000);
+            await repository.AddDataLockEvent(-1000, -2000);
+        }
+
+        [Given(@"we have created (.*) sample learners")]
+        public async Task GivenWeHaveCreatedASampleLearner(int learnerCount)
+        {
+            var repository = new TestRepository();
+            for (var index = 1; index < learnerCount + 1; index++)
+            {
+                await repository.ClearLearner(index, index);
+                await repository.AddDataLockEvent(index, index);
+            }
         }
 
         [When(@"we call the API with the sample learners details")]
         public async Task WhenWeCallTheApiWithTheSampleLearnersDetails()
         {
             var request = new TestClient();
+            
             _context.MatchedLearnerDto = await request.Handle(-1000, -2000);
         }
+
+        [When(@"we call the API (.*) times with the sample learners details")]
+        public void WhenWeCallTheApiTimesWithTheSampleLearnersDetails(int learnerCount)
+        {
+            var request = new TestClient();
+            for (var index = 1; index < learnerCount + 1; index++)
+            {
+                var currentIndex = index;
+                _context.FailedRequests.Add(request.Awaiting(client => client.Handle(currentIndex, currentIndex)));
+            }
+        }
+
+        [Then(@"the result should not be any exceptions")]
+        public void ThenTheResultShouldBeA()
+        {
+            foreach (var failedRequest in _context.FailedRequests)
+            {
+                failedRequest.Should().NotThrow<Exception>();
+            }
+        }
+
 
         [Then(@"the result matches the sample learner")]
         public void ThenTheResultMatchesTheSampleLearner()
