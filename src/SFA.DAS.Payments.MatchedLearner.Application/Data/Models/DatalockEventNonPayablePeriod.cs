@@ -14,6 +14,5 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
 
         public Guid DataLockEventNonPayablePeriodId { get; set; }
 
-        public virtual List<DatalockEventNonPayablePeriodFailure> Failures { get; set; } = new List<DatalockEventNonPayablePeriodFailure>();
     }
 }

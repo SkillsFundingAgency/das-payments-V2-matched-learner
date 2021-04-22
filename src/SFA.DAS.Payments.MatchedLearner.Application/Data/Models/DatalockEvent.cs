@@ -29,8 +29,5 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
         
         public DateTime? LearningStartDate { get; set; }
 
-        public virtual List<DatalockEventPriceEpisode> PriceEpisodes { get; set; } = new List<DatalockEventPriceEpisode>();
-        public virtual List<DatalockEventNonPayablePeriod> NonPayablePeriods { get; set; } = new List<DatalockEventNonPayablePeriod>();
-        public virtual List<DatalockEventPayablePeriod> PayablePeriods { get; set; } = new List<DatalockEventPayablePeriod>();
     }
 }
