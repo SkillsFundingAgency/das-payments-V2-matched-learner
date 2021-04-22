@@ -1,23 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
+using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 {
     public interface IMatchedLearnerDtoMapper
     {
-        MatchedLearnerDto Map(List<DatalockEvent> datalockEvents);
+        MatchedLearnerDto Map(MatchedLearnerDataLockDataDto matchedLearnerDataLockData);
     }
 
     public class MatchedLearnerDtoMapper : IMatchedLearnerDtoMapper
     {
-        public MatchedLearnerDto Map(List<DatalockEvent> datalockEvents)
+        public MatchedLearnerDto Map(MatchedLearnerDataLockDataDto matchedLearnerDataLockData)
         {
-            if (datalockEvents == null || !datalockEvents.Any())
+            if (matchedLearnerDataLockData == null || !matchedLearnerDataLockData.DataLockEvents.Any())
                 return null;
 
-            var firstEvent = datalockEvents.First();
+            var firstEvent = matchedLearnerDataLockData.DataLockEvents.First();
             
             return new MatchedLearnerDto
             {
@@ -28,7 +29,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 AcademicYear = firstEvent.AcademicYear,
                 Ukprn = firstEvent.Ukprn,
                 Uln = firstEvent.LearnerUln,
-                Training = datalockEvents.Select(dataLockEvent => new TrainingDto
+                Training = matchedLearnerDataLockData.DataLockEvents.Select(dataLockEvent => new TrainingDto
                 {
                     Reference = dataLockEvent.LearningAimReference,
                     ProgrammeType = dataLockEvent.LearningAimProgrammeType,
@@ -37,55 +38,69 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                     PathwayCode = dataLockEvent.LearningAimPathwayCode,
                     FundingLineType = null,
                     StartDate = dataLockEvent.LearningStartDate.GetValueOrDefault(),
-                    PriceEpisodes = MapPriceEpisodes(dataLockEvent)
+                    PriceEpisodes = MapPriceEpisodes(dataLockEvent.EventId, matchedLearnerDataLockData)
                 }).ToList()
             };
         }
 
-        private static List<PriceEpisodeDto> MapPriceEpisodes(DatalockEvent dataLockEvent)
+        private static List<PriceEpisodeDto> MapPriceEpisodes(Guid learnerDataLockData, MatchedLearnerDataLockDataDto matchedLearnerDataLockData)
         {
-            return dataLockEvent.PriceEpisodes.Select(priceEpisode => new PriceEpisodeDto
-            {
-                Identifier = priceEpisode.PriceEpisodeIdentifier,
-                AgreedPrice = priceEpisode.AgreedPrice,
-                StartDate = priceEpisode.StartDate,
-                EndDate = priceEpisode.ActualEndDate,
-                NumberOfInstalments = priceEpisode.NumberOfInstalments,
-                InstalmentAmount = priceEpisode.InstalmentAmount,
-                CompletionAmount = priceEpisode.CompletionAmount,
-                Periods = MapPeriods(priceEpisode.PriceEpisodeIdentifier, dataLockEvent),
-            }).ToList();
+            return matchedLearnerDataLockData
+                .DataLockEventPriceEpisodes
+                .Where(d => d.DataLockEventId == learnerDataLockData)
+                .Select(priceEpisode => new PriceEpisodeDto
+                {
+                    Identifier = priceEpisode.PriceEpisodeIdentifier,
+                    AgreedPrice = priceEpisode.AgreedPrice,
+                    StartDate = priceEpisode.StartDate,
+                    EndDate = priceEpisode.ActualEndDate,
+                    NumberOfInstalments = priceEpisode.NumberOfInstalments,
+                    InstalmentAmount = priceEpisode.InstalmentAmount,
+                    CompletionAmount = priceEpisode.CompletionAmount,
+                    Periods = MapPeriods(priceEpisode.PriceEpisodeIdentifier, matchedLearnerDataLockData),
+                }).ToList();
         }
 
-        private static List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, DatalockEvent datalockEvent)
+        private static List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, MatchedLearnerDataLockDataDto matchedLearnerDataLockData)
         {
-            var nonPayablePeriods = datalockEvent.NonPayablePeriods
+            var nonPayablePeriods = matchedLearnerDataLockData.DataLockEventNonPayablePeriods
                 .Where(d => d.PriceEpisodeIdentifier == priceEpisodeIdentifier)
-                .SelectMany(nonPayablePeriod => nonPayablePeriod.Failures.GroupBy(failure => new PeriodDto
+                .Select(nonPayablePeriod =>
                 {
-                    Period = nonPayablePeriod.DeliveryPeriod,
-                    IsPayable = false,
-                    AccountId = failure.Apprenticeship?.AccountId ?? 0,
-                    ApprenticeshipId = failure.ApprenticeshipId,
-                    ApprenticeshipEmployerType = failure.Apprenticeship?.ApprenticeshipEmployerType ?? 0,
-                    TransferSenderAccountId = failure.Apprenticeship?.TransferSendingEmployerAccountId ?? 0
-                }).Select(group =>
-                {
-                    var period = group.Key;
-                    period.DataLockFailures = group.Select(failure => (int)failure.DataLockFailureId).ToList();
-                    return period;
-                }));
+                    var failures = matchedLearnerDataLockData.DataLockEventNonPayablePeriodFailures
+                        .Where(f => f.DataLockEventNonPayablePeriodId ==
+                                    nonPayablePeriod.DataLockEventNonPayablePeriodId).ToList();
 
-            var payablePeriods = datalockEvent.PayablePeriods
+                    var apprenticeship = 
+                        matchedLearnerDataLockData.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
+
+                    return new PeriodDto
+                    {
+                        Period = nonPayablePeriod.DeliveryPeriod,
+                        IsPayable = false,
+                        DataLockFailures = failures.Select(f => (int)f.DataLockFailureId).ToList(),
+                        AccountId = apprenticeship?.AccountId ?? 0,
+                        ApprenticeshipId = apprenticeship?.Id,
+                        ApprenticeshipEmployerType = apprenticeship?.ApprenticeshipEmployerType ?? 0,
+                        TransferSenderAccountId = apprenticeship?.TransferSendingEmployerAccountId ?? 0
+                    };
+                });
+
+            var payablePeriods = matchedLearnerDataLockData.DataLockEventPayablePeriods
                 .Where(d => d.PriceEpisodeIdentifier == priceEpisodeIdentifier)
-                .Select(payablePeriod => new PeriodDto
+                .Select(payablePeriod =>
                 {
-                    Period = payablePeriod.DeliveryPeriod,
-                    IsPayable = true,
-                    AccountId = payablePeriod.Apprenticeship?.AccountId ?? 0,
-                    ApprenticeshipId = payablePeriod.ApprenticeshipId,
-                    ApprenticeshipEmployerType = payablePeriod.Apprenticeship?.ApprenticeshipEmployerType ?? 0,
-                    TransferSenderAccountId = payablePeriod.Apprenticeship?.TransferSendingEmployerAccountId ?? 0,
+                    var apprenticeship = matchedLearnerDataLockData.Apprenticeships.FirstOrDefault(a => a.Id == payablePeriod.ApprenticeshipId);
+
+                    return new PeriodDto
+                    {
+                        Period = payablePeriod.DeliveryPeriod,
+                        IsPayable = true,
+                        AccountId = apprenticeship?.AccountId ?? 0,
+                        ApprenticeshipId = apprenticeship?.Id,
+                        ApprenticeshipEmployerType = apprenticeship?.ApprenticeshipEmployerType ?? 0,
+                        TransferSenderAccountId = apprenticeship?.TransferSendingEmployerAccountId ?? 0,
+                    };
                 });
 
             return payablePeriods.Union(nonPayablePeriods).ToList();
