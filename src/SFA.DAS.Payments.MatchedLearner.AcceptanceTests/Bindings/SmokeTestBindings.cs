@@ -12,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
     public class SmokeTestContext
     {
         public Func<Task> FailedRequest { get; set; }
-        public List<Func<Task>> FailedRequests { get; set; } = new List<Func<Task>>();
+        public List<Func<Task>> Requests { get; set; } = new List<Func<Task>>();
         public MatchedLearnerDto MatchedLearnerDto { get; set; }
     }
 
@@ -25,8 +25,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         {
             _context = context;
         }
-
-        private const string ApiCallResultKey = "ApiCallResult";
 
         [When(@"we call the API with a learner that does not exist")]
         public void WhenWeCallTheApiWithALearnerThatDoesNotExist()
@@ -76,16 +74,16 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             for (var index = 1; index < learnerCount + 1; index++)
             {
                 var currentIndex = index;
-                _context.FailedRequests.Add(request.Awaiting(client => client.Handle(currentIndex, currentIndex)));
+                _context.Requests.Add(request.Awaiting(client => client.Handle(currentIndex, currentIndex)));
             }
         }
 
         [Then(@"the result should not be any exceptions")]
-        public void ThenTheResultShouldBeA()
+        public void ThenTheResultShouldBeAnyExceptions()
         {
-            foreach (var failedRequest in _context.FailedRequests)
+            foreach (var request in _context.Requests)
             {
-                failedRequest.Should().NotThrow<Exception>();
+                request.Should().NotThrow<Exception>();
             }
         }
 

@@ -3,7 +3,7 @@ using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Data
 {
-    public class MatchedLearnerDataLockDataDto
+    public class MatchedLearnerDataLockInfo
     {
         public List<DataLockEvent> DataLockEvents { get; set; } = new List<DataLockEvent>();
         public List<DataLockEventPriceEpisode> DataLockEventPriceEpisodes { get; set; } = new List<DataLockEventPriceEpisode>();

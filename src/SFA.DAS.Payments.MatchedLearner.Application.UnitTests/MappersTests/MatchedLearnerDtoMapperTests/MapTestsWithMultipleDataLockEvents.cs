@@ -12,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
     [TestFixture]
     public class MapTestsWithMultipleDataLockEvents
     {
-        private readonly MatchedLearnerDataLockDataDto _testInput = new MatchedLearnerDataLockDataDto();
+        private readonly MatchedLearnerDataLockInfo _testInput = new MatchedLearnerDataLockInfo();
 
         [SetUp]
         public void Setup()
@@ -71,14 +71,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId1,
                     ApprenticeshipId = 123,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 2,
                 },
                 new DataLockEventNonPayablePeriodFailure
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId1,
                     ApprenticeshipId = 123,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 3,
                 },
             };
@@ -88,7 +86,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventId = event1,
                     PriceEpisodeIdentifier = "2-2-2",
-                    //Apprenticeship = new Apprenticeship(),
                     DeliveryPeriod = 1,
                 },
             };
@@ -143,14 +140,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId2,
                     ApprenticeshipId = 1230,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 200,
                 },
                 new DataLockEventNonPayablePeriodFailure
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId2,
                     ApprenticeshipId = 1230,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 250,
                 }
             });
@@ -160,7 +155,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventId = event2,
                     PriceEpisodeIdentifier = "4-4-4",
-                    //Apprenticeship = new Apprenticeship(),
                     DeliveryPeriod = 100,
                 }
             });

@@ -1,28 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Application.Data;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 {
     public interface IPaymentsDataLockRepository
     {
-        Task<MatchedLearnerDataLockDataDto> GetDataLockEvents(long ukprn, long uln);
+        Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
     }
 
     public class PaymentsDataLockRepository : IPaymentsDataLockRepository
     {
         private readonly IPaymentsContext _context;
+        private readonly ILogger<PaymentsDataLockRepository> _logger;
 
-        public PaymentsDataLockRepository(IPaymentsContext context)
+        public PaymentsDataLockRepository(IPaymentsContext context, ILogger<PaymentsDataLockRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<MatchedLearnerDataLockDataDto> GetDataLockEvents(long ukprn, long uln)
+        public async Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln)
         {
+            var stopwatch = Stopwatch.StartNew();
+
             var latestSuccessfulJob = await _context.LatestSuccessfulJobs
                 .Where(y => y.Ukprn == ukprn)
                 .OrderByDescending(y => y.AcademicYear)
@@ -30,17 +36,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 .FirstOrDefaultAsync();
 
             if (latestSuccessfulJob == null)
-                return new MatchedLearnerDataLockDataDto();
+                return new MatchedLearnerDataLockInfo();
+
+            _logger.LogDebug($"Getting DataLock Event Data Uln: {uln}, Academic year: {latestSuccessfulJob.AcademicYear}, Collection period: {latestSuccessfulJob.CollectionPeriod}");
 
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
             var dataLockEvents = await _context.DataLockEvent
                 .Where(x =>
-                    x.LearningAimReference == "ZPROG001" && 
-                    x.Ukprn == ukprn && 
-                    x.LearnerUln == uln && 
-                    x.JobId == latestSuccessfulJob.DcJobId && 
-                    x.AcademicYear == latestSuccessfulJob.AcademicYear && 
+                    x.LearningAimReference == "ZPROG001" &&
+                    x.Ukprn == ukprn &&
+                    x.LearnerUln == uln &&
+                    x.JobId == latestSuccessfulJob.DcJobId &&
+                    x.AcademicYear == latestSuccessfulJob.AcademicYear &&
                     x.CollectionPeriod == latestSuccessfulJob.CollectionPeriod)
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
@@ -76,7 +84,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 
             var apprenticeshipDetails = await _context.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
 
-            return new MatchedLearnerDataLockDataDto
+            stopwatch.Stop();
+
+            _logger.LogInformation($"Finished getting DataLock Event Data Duration: {stopwatch.ElapsedMilliseconds} Uln: {uln}, Academic year: {latestSuccessfulJob.AcademicYear}, Collection period: {latestSuccessfulJob.CollectionPeriod}");
+
+            return new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = dataLockEvents,
                 DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,

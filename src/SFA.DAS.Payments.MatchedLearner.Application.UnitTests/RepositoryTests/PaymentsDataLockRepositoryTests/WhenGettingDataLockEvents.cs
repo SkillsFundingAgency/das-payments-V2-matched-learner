@@ -7,6 +7,8 @@ using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Repositories;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.PaymentsDataLockRepositoryTests
 {
@@ -37,11 +39,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _collectionPeriod = fixture.Create<byte>();
 
             _dataLockEvent = fixture.Create<DataLockEvent>();
-            //_dataLockEvent.PayablePeriods.Clear();
-            //_dataLockEvent.NonPayablePeriods.Clear();
-            //_dataLockEvent.PriceEpisodes.Clear();
-
             _latestSuccessfulJob = fixture.Create<LatestSuccessfulJobModel>();
+
             _latestSuccessfulJob.Ukprn = _ukprn;
             _latestSuccessfulJob.AcademicYear = _academicYear;
             _latestSuccessfulJob.CollectionPeriod = _collectionPeriod;
@@ -55,7 +54,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
                     .UseInMemoryDatabase("TestDb", new InMemoryDatabaseRoot())
                     .Options);
 
-            _sut = new PaymentsDataLockRepository(_context);
+            _sut = new PaymentsDataLockRepository(_context, fixture.Create<Mock<ILogger<PaymentsDataLockRepository>>>().Object);
         }
 
         [Test]

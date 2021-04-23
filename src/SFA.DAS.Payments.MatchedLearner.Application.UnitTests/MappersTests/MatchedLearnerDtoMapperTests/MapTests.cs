@@ -41,7 +41,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [SetUp]
         public void Setup()
         {
-            var matchedLearnerDataLockDataDto = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
 
                 DataLockEvents = new List<DataLockEvent>
@@ -129,7 +129,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var sut = new MatchedLearnerDtoMapper();
 
-            _actual = sut.Map(matchedLearnerDataLockDataDto);
+            _actual = sut.Map(testInput);
         }
 
         [Test]

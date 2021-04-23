@@ -12,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
     [TestFixture]
     public class MapTestsWithMultipleDataLockEventsForOneApprenticeship
     {
-        private readonly MatchedLearnerDataLockDataDto _testInput = new MatchedLearnerDataLockDataDto();
+        private readonly MatchedLearnerDataLockInfo _testInput = new MatchedLearnerDataLockInfo();
 
         [SetUp]
         public void Setup()
@@ -78,14 +78,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId,
                     ApprenticeshipId = 123,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 2,
                 },
                 new DataLockEventNonPayablePeriodFailure
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId,
                     ApprenticeshipId = 123,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 3,
                 },
             };
@@ -95,7 +93,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventId = event1,
                     PriceEpisodeIdentifier = "2-2-2",
-                    //Apprenticeship = new Apprenticeship(),
                     DeliveryPeriod = 1,
                 },
             };
@@ -154,14 +151,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId2,
                     ApprenticeshipId = 1230,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 200,
                 },
                 new DataLockEventNonPayablePeriodFailure
                 {
                     DataLockEventNonPayablePeriodId = nonPayableEventId2,
                     ApprenticeshipId = 1230,
-                    //Apprenticeship = new Apprenticeship(),
                     DataLockFailureId = 250,
                 },
             });
@@ -172,7 +167,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventId = event2,
                     PriceEpisodeIdentifier = "4-4-4",
-                    //Apprenticeship = new Apprenticeship(),
                     DeliveryPeriod = 100,
                 },
             });
@@ -224,11 +218,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 1 });
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromSameApprenticeships_Should_BeGrouped()
         {
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -260,11 +253,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Reference__Should_NotBeGrouped()
         {
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -296,11 +288,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Pathway__Should_NotBeGrouped()
         {
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -332,11 +323,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Standard__Should_NotBeGrouped()
         {
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -368,11 +358,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Framework__Should_NotBeGrouped()
         {
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -404,11 +393,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Programme__Should_NotBeGrouped()
         {
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -444,7 +432,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         public void WhenPayablePeriodApprenticeshipIsNull_ThenExceptionNotThrown()
         {
             //Arrange
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
@@ -489,7 +477,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             
             var eventId = Guid.NewGuid();
 
-            var testInput = new MatchedLearnerDataLockDataDto
+            var testInput = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = new List<DataLockEvent>
                 {
