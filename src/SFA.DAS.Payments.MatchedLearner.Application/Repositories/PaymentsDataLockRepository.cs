@@ -36,7 +36,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 .FirstOrDefaultAsync();
 
             if (latestSuccessfulJob == null)
+            {
+                stopwatch.Stop();
+                _logger.LogInformation($"No Data in current academic year CollectionPeriod for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
                 return new MatchedLearnerDataLockInfo();
+            }
 
             _logger.LogDebug($"Getting DataLock Event Data Uln: {uln}, Academic year: {latestSuccessfulJob.AcademicYear}, Collection period: {latestSuccessfulJob.CollectionPeriod}");
 
