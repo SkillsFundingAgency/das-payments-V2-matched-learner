@@ -101,10 +101,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             {
                 EventId = event2,
                 AcademicYear = 2021,
-                LearningAimPathwayCode = 1,
-                LearningAimStandardCode = 2,
-                LearningAimFrameworkCode = 3,
-                LearningAimProgrammeType = 4,
+                LearningAimPathwayCode = 5,
+                LearningAimStandardCode = 6,
+                LearningAimFrameworkCode = 7,
+                LearningAimProgrammeType = 8,
                 LearningAimReference = "123",
             });
 
@@ -173,7 +173,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         }
 
         [Test]
-        public void Training_Should_HaveOneElement()
+        public void Training_Should_HaveTwoElement()
         {
             var sut = new MatchedLearnerDtoMapper();
 
@@ -250,7 +250,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var actual = sut.Map(testInput);
 
-            actual.Training.Should().HaveCount(2);
+            actual.Training.Should().HaveCount(1);
         }
 
         [Test]
