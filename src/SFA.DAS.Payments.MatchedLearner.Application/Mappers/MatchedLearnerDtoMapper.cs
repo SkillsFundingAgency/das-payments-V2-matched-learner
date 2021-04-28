@@ -19,7 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 return null;
 
             var firstEvent = matchedLearnerDataLockInfo.DataLockEvents.First();
-            
+
             return new MatchedLearnerDto
             {
                 StartDate = firstEvent.LearningStartDate.GetValueOrDefault(),
@@ -29,25 +29,44 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 AcademicYear = firstEvent.AcademicYear,
                 Ukprn = firstEvent.Ukprn,
                 Uln = firstEvent.LearnerUln,
-                Training = matchedLearnerDataLockInfo.DataLockEvents.Select(dataLockEvent => new TrainingDto
-                {
-                    Reference = dataLockEvent.LearningAimReference,
-                    ProgrammeType = dataLockEvent.LearningAimProgrammeType,
-                    StandardCode = dataLockEvent.LearningAimStandardCode,
-                    FrameworkCode = dataLockEvent.LearningAimFrameworkCode,
-                    PathwayCode = dataLockEvent.LearningAimPathwayCode,
-                    FundingLineType = null,
-                    StartDate = dataLockEvent.LearningStartDate.GetValueOrDefault(),
-                    PriceEpisodes = MapPriceEpisodes(dataLockEvent.EventId, matchedLearnerDataLockInfo)
-                }).ToList()
+                Training = MapTraining(matchedLearnerDataLockInfo)
             };
         }
 
-        private static List<PriceEpisodeDto> MapPriceEpisodes(Guid learnerDataLockData, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
+        private static List<TrainingDto> MapTraining(MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
+        {
+            return matchedLearnerDataLockInfo.DataLockEvents.GroupBy(x => new
+            {
+                x.LearningAimReference,
+                x.LearningAimStandardCode,
+                x.LearningAimProgrammeType,
+                x.LearningAimFrameworkCode,
+                x.LearningAimPathwayCode,
+                x.AcademicYear,
+                x.LearningAimFundingLineType,
+                x.LearningStartDate,
+                x.LearnerUln,
+                x.Ukprn,
+                x.CollectionPeriod,
+                x.IlrSubmissionDateTime,
+            }).Select(dataLockEvent => new TrainingDto
+            {
+                Reference = dataLockEvent.Key.LearningAimReference,
+                ProgrammeType = dataLockEvent.Key.LearningAimProgrammeType,
+                StandardCode = dataLockEvent.Key.LearningAimStandardCode,
+                FrameworkCode = dataLockEvent.Key.LearningAimFrameworkCode,
+                PathwayCode = dataLockEvent.Key.LearningAimPathwayCode,
+                FundingLineType = null,
+                StartDate = dataLockEvent.Key.LearningStartDate.GetValueOrDefault(),
+                PriceEpisodes = MapPriceEpisodes(dataLockEvent.First().EventId, matchedLearnerDataLockInfo)
+            }).ToList();
+        }
+
+        private static List<PriceEpisodeDto> MapPriceEpisodes(Guid dataLockEventId, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
         {
             return matchedLearnerDataLockInfo
                 .DataLockEventPriceEpisodes
-                .Where(d => d.DataLockEventId == learnerDataLockData)
+                .Where(d => d.DataLockEventId == dataLockEventId)
                 .Select(priceEpisode => new PriceEpisodeDto
                 {
                     Identifier = priceEpisode.PriceEpisodeIdentifier,
@@ -71,8 +90,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         .Where(f => f.DataLockEventNonPayablePeriodId ==
                                     nonPayablePeriod.DataLockEventNonPayablePeriodId).ToList();
 
-                    var apprenticeship = 
-                        matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
+                    var apprenticeship = matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
 
                     return new PeriodDto
                     {
