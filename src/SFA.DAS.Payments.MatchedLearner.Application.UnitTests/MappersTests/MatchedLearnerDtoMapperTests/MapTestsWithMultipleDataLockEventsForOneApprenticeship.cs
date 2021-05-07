@@ -3,151 +3,177 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
+using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
-using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
 {
     [TestFixture]
     public class MapTestsWithMultipleDataLockEventsForOneApprenticeship
     {
-        private readonly List<DatalockEvent> _testInput = new List<DatalockEvent>();
+        private readonly MatchedLearnerDataLockInfo _testInput = new MatchedLearnerDataLockInfo();
 
         [SetUp]
         public void Setup()
         {
-            _testInput.Clear();
-            _testInput.Add(new DatalockEvent
+            var event1 = Guid.NewGuid();
+
+            var event2 = Guid.NewGuid();
+
+            _testInput.DataLockEvents = new List<DataLockEvent>
             {
+                new DataLockEvent
+                {
+                    EventId = event1,
+                    AcademicYear = 2021,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "123",
+                }
+            };
+
+            _testInput.DataLockEventPriceEpisodes = new List<DataLockEventPriceEpisode>
+            {
+                new DataLockEventPriceEpisode
+                {
+                    DataLockEventId = event1,
+                    TotalNegotiatedPrice1 = 100m,
+                    TotalNegotiatedPrice2 = 200m,
+                    InstalmentAmount = 2m,
+                    NumberOfInstalments = 5,
+                    CompletionAmount = 1m,
+                    PriceEpisodeIdentifier = "1-1-1",
+                },
+                new DataLockEventPriceEpisode
+                {
+                    DataLockEventId = event1,
+                    TotalNegotiatedPrice1 = 1000m,
+                    TotalNegotiatedPrice2 = 2000m,
+                    InstalmentAmount = 20m,
+                    NumberOfInstalments = 50,
+                    CompletionAmount = 10m,
+                    PriceEpisodeIdentifier = "2-2-2",
+                }
+            };
+            
+            var nonPayableEventId = Guid.NewGuid();
+            
+            _testInput.DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriod>
+            {
+                new DataLockEventNonPayablePeriod
+                {
+                    DataLockEventId = event1,
+                    PriceEpisodeIdentifier = "1-1-1",
+                    DeliveryPeriod = 2,
+                    DataLockEventNonPayablePeriodId = nonPayableEventId
+                }
+            };
+
+            _testInput.DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailure>
+            {
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId,
+                    ApprenticeshipId = 123,
+                    DataLockFailureId = 2,
+                },
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId,
+                    ApprenticeshipId = 123,
+                    DataLockFailureId = 3,
+                },
+            };
+            _testInput.DataLockEventPayablePeriods = new List<DataLockEventPayablePeriod>
+            {
+                new DataLockEventPayablePeriod
+                {
+                    DataLockEventId = event1,
+                    PriceEpisodeIdentifier = "2-2-2",
+                    DeliveryPeriod = 1,
+                },
+            };
+
+            _testInput.DataLockEvents.Add(new DataLockEvent
+            {
+                EventId = event2,
                 AcademicYear = 2021,
-                LearningAimPathwayCode = 1,
-                LearningAimStandardCode = 2,
-                LearningAimFrameworkCode = 3,
-                LearningAimProgrammeType = 4,
+                LearningAimPathwayCode = 5,
+                LearningAimStandardCode = 6,
+                LearningAimFrameworkCode = 7,
+                LearningAimProgrammeType = 8,
                 LearningAimReference = "123",
-                PriceEpisodes = new List<DatalockEventPriceEpisode>
+            });
+
+            _testInput.DataLockEventPriceEpisodes.AddRange(new List<DataLockEventPriceEpisode>
+            {
+                new DataLockEventPriceEpisode
                 {
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 100m,
-                        TotalNegotiatedPrice2 = 200m,
-                        InstalmentAmount = 2m,
-                        NumberOfInstalments = 5,
-                        CompletionAmount = 1m,
-                        PriceEpisodeIdentifier = "1-1-1",
-                    },
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 1000m,
-                        TotalNegotiatedPrice2 = 2000m,
-                        InstalmentAmount = 20m,
-                        NumberOfInstalments = 50,
-                        CompletionAmount = 10m,
-                        PriceEpisodeIdentifier = "2-2-2",
-                    }
+                    DataLockEventId = event2,
+                    TotalNegotiatedPrice1 = 10000m,
+                    TotalNegotiatedPrice2 = 20000m,
+                    InstalmentAmount = 200m,
+                    NumberOfInstalments = 500,
+                    CompletionAmount = 100m,
+                    PriceEpisodeIdentifier = "3-3-3",
                 },
-                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                new DataLockEventPriceEpisode
                 {
-                    new DatalockEventNonPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "1-1-1",
-                        DeliveryPeriod = 2,
-                        Failures = new List<DatalockEventNonPayablePeriodFailure>
-                        {
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 123,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 2,
-                            },
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 123,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 3,
-                            },
-                        }
-                    },
+                    DataLockEventId = event2,
+                    TotalNegotiatedPrice1 = 10000m,
+                    TotalNegotiatedPrice2 = 20000m,
+                    InstalmentAmount = 200m,
+                    NumberOfInstalments = 500,
+                    CompletionAmount = 100m,
+                    PriceEpisodeIdentifier = "4-4-4",
+                }
+            });
+            
+            var nonPayableEventId2 = Guid.NewGuid();
+
+            _testInput.DataLockEventNonPayablePeriods.AddRange(new List<DataLockEventNonPayablePeriod>
+            {
+                new DataLockEventNonPayablePeriod
+                {
+                    DataLockEventId = event2,
+                    PriceEpisodeIdentifier = "3-3-3",
+                    DeliveryPeriod = 200,
+                    DataLockEventNonPayablePeriodId = nonPayableEventId2
+                }
+            });
+
+            _testInput.DataLockEventNonPayablePeriodFailures.AddRange(new List<DataLockEventNonPayablePeriodFailure>
+            {
+                new DataLockEventNonPayablePeriodFailure
+                {
+                    DataLockEventNonPayablePeriodId = nonPayableEventId2,
+                    ApprenticeshipId = 1230,
+                    DataLockFailureId = 200,
                 },
-                PayablePeriods = new List<DatalockEventPayablePeriod>
+                new DataLockEventNonPayablePeriodFailure
                 {
-                    new DatalockEventPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "2-2-2",
-                        Apprenticeship = new Apprenticeship(),
-                        DeliveryPeriod = 1,
-                    },
+                    DataLockEventNonPayablePeriodId = nonPayableEventId2,
+                    ApprenticeshipId = 1230,
+                    DataLockFailureId = 250,
                 },
             });
 
-            _testInput.Add(new DatalockEvent
+            _testInput.DataLockEventPayablePeriods.AddRange(new List<DataLockEventPayablePeriod>
             {
-                AcademicYear = 2021,
-                LearningAimPathwayCode = 1,
-                LearningAimStandardCode = 2,
-                LearningAimFrameworkCode = 3,
-                LearningAimProgrammeType = 4,
-                LearningAimReference = "123",
-                PriceEpisodes = new List<DatalockEventPriceEpisode>
+                new DataLockEventPayablePeriod
                 {
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 10000m,
-                        TotalNegotiatedPrice2 = 20000m,
-                        InstalmentAmount = 200m,
-                        NumberOfInstalments = 500,
-                        CompletionAmount = 100m,
-                        PriceEpisodeIdentifier = "3-3-3",
-                    },
-                    new DatalockEventPriceEpisode
-                    {
-                        TotalNegotiatedPrice1 = 10000m,
-                        TotalNegotiatedPrice2 = 20000m,
-                        InstalmentAmount = 200m,
-                        NumberOfInstalments = 500,
-                        CompletionAmount = 100m,
-                        PriceEpisodeIdentifier = "4-4-4",
-                    }
-                },
-                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
-                {
-                    new DatalockEventNonPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "3-3-3",
-                        DeliveryPeriod = 200,
-                        Failures = new List<DatalockEventNonPayablePeriodFailure>
-                        {
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 1230,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 200,
-                            },
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                ApprenticeshipId = 1230,
-                                Apprenticeship = new Apprenticeship(),
-                                DataLockFailureId = 250,
-                            },
-                        }
-                    },
-                },
-                PayablePeriods = new List<DatalockEventPayablePeriod>
-                {
-                    new DatalockEventPayablePeriod
-                    {
-                        PriceEpisodeIdentifier = "4-4-4",
-                        Apprenticeship = new Apprenticeship(),
-                        DeliveryPeriod = 100,
-                    },
+                    DataLockEventId = event2,
+                    PriceEpisodeIdentifier = "4-4-4",
+                    DeliveryPeriod = 100,
                 },
             });
         }
 
         [Test]
-        public void Training_Should_HaveOneElement()
+        public void Training_Should_HaveTwoElement()
         {
             var sut = new MatchedLearnerDtoMapper();
 
@@ -192,31 +218,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             firstEvent.PriceEpisodes.SelectMany(x => x.Periods).Should().ContainEquivalentOf(new { Period = 1 });
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromSameApprenticeships_Should_BeGrouped()
         {
-            var testInput = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    },
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
                 }
             };
 
@@ -224,34 +250,34 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var actual = sut.Map(testInput);
 
-            actual.Training.Should().HaveCount(2);
+            actual.Training.Should().HaveCount(1);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Reference__Should_NotBeGrouped()
         {
-            var testInput = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "1234",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "1234",
+                    },
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
                 }
             };
 
@@ -262,31 +288,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Pathway__Should_NotBeGrouped()
         {
-            var testInput = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 11,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 11,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    },
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
                 }
             };
 
@@ -297,31 +323,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Standard__Should_NotBeGrouped()
         {
-            var testInput = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 21,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 21,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    },
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
                 }
             };
 
@@ -332,31 +358,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Framework__Should_NotBeGrouped()
         {
-            var testInput = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 31,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 31,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    },
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
                 }
             };
 
@@ -367,31 +393,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             actual.Training.Should().HaveCount(2);
         }
 
-        //TODO: Move to Repository Tests
         [Test]
         public void EventsFromDifferentApprenticeships_Programme__Should_NotBeGrouped()
         {
-            var testInput = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 31,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                },
-                new DatalockEvent
-                {
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 3,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 31,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    },
+                    new DataLockEvent
+                    {
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 3,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
                 }
             };
 
@@ -406,32 +432,32 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         public void WhenPayablePeriodApprenticeshipIsNull_ThenExceptionNotThrown()
         {
             //Arrange
-            var datalockEvents = new List<DatalockEvent>
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    EventId = Guid.NewGuid(),
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 31,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                    PayablePeriods = new List<DatalockEventPayablePeriod>
+                    new DataLockEvent
                     {
-                        new DatalockEventPayablePeriod
-                        {
-                            Id = 1,
-                            Amount = 0,
-                            Apprenticeship = null,
-                            ApprenticeshipId = 123,
-                            DataLockEventId = Guid.NewGuid(),
-                            DeliveryPeriod = 8,
-                            PriceEpisodeIdentifier = "3-490-1-01/08/2020",
-                            TransactionType = 2
-
-                        }
+                        EventId = Guid.NewGuid(),
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 31,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
+                },
+                DataLockEventPayablePeriods = new List<DataLockEventPayablePeriod>
+                {
+                    new DataLockEventPayablePeriod
+                    {
+                        Id = 1,
+                        Amount = 0,
+                        ApprenticeshipId = 123,
+                        DataLockEventId = Guid.NewGuid(),
+                        DeliveryPeriod = 8,
+                        PriceEpisodeIdentifier = "3-490-1-01/08/2020",
+                        TransactionType = 2
                     }
                 }
             };
@@ -440,7 +466,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             var sut = new MatchedLearnerDtoMapper();
 
             //Assert
-            Assert.DoesNotThrow(() => { sut.Map(datalockEvents); });
+            Assert.DoesNotThrow(() => { sut.Map(testInput); });
             
         }
 
@@ -448,29 +474,34 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         public void WhenNonPayablePeriodApprenticeshipIsNull_ThenExceptionNotThrown()
         {
             //Arrange
-            var datalockEvents = new List<DatalockEvent>
+            
+            var eventId = Guid.NewGuid();
+
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                new DatalockEvent
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    EventId = Guid.NewGuid(),
-                    AcademicYear = 2021,
-                    LearningAimPathwayCode = 1,
-                    LearningAimStandardCode = 2,
-                    LearningAimFrameworkCode = 31,
-                    LearningAimProgrammeType = 4,
-                    LearningAimReference = "123",
-                    PriceEpisodes = new List<DatalockEventPriceEpisode>(),
-                    NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+                    new DataLockEvent
                     {
-                        new DatalockEventNonPayablePeriod
-                        {
-                            Id = 1,
-                            Amount = 0,
-                            DataLockEventId = Guid.NewGuid(),
-                            DeliveryPeriod = 8,
-                            PriceEpisodeIdentifier = "3-490-1-01/08/2020",
-                            TransactionType = 2
-                        }
+                        EventId = eventId,
+                        AcademicYear = 2021,
+                        LearningAimPathwayCode = 1,
+                        LearningAimStandardCode = 2,
+                        LearningAimFrameworkCode = 31,
+                        LearningAimProgrammeType = 4,
+                        LearningAimReference = "123",
+                    }
+                },
+                DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriod>
+                {
+                    new DataLockEventNonPayablePeriod
+                    {
+                        Id = 1,
+                        Amount = 0,
+                        DataLockEventId = eventId,
+                        DeliveryPeriod = 8,
+                        PriceEpisodeIdentifier = "3-490-1-01/08/2020",
+                        TransactionType = 2
                     }
                 }
             };
@@ -479,7 +510,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             var sut = new MatchedLearnerDtoMapper();
             
             //Assert
-            Assert.DoesNotThrow(() => { sut.Map(datalockEvents); });
+            Assert.DoesNotThrow(() => { sut.Map(testInput); });
         }
     }
 }

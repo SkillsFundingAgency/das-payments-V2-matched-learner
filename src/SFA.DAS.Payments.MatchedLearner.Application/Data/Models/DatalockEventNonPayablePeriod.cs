@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
 {
-    public class DatalockEventNonPayablePeriod
+    public class DataLockEventNonPayablePeriod
     {
         public long Id { get; set; }
         public Guid DataLockEventId { get; set; }
@@ -13,7 +12,5 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
         public decimal Amount { get; set; }
 
         public Guid DataLockEventNonPayablePeriodId { get; set; }
-
-        public virtual List<DatalockEventNonPayablePeriodFailure> Failures { get; set; } = new List<DatalockEventNonPayablePeriodFailure>();
     }
 }

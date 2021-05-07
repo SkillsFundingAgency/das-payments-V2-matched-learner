@@ -33,10 +33,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApiConfigurationSections(Configuration);
-            services.AddAppDependencies();
-
-            services.AddHealthChecks();
+            services.AddApiConfigurationSections(Configuration)
+                .AddAppDependencies()
+                .AddApplicationInsightsTelemetry()
+                .AddHealthChecks();
 
             if (!WebHostEnvironment.IsDevelopment())
             {
@@ -120,7 +120,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
                     }
                 });
             });
-
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

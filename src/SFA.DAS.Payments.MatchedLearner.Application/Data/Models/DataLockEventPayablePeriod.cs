@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
 {
-    public class DatalockEventPayablePeriod
+    public class DataLockEventPayablePeriod
     {
         public long Id { get; set; }
         public Guid DataLockEventId { get; set; }
@@ -12,7 +12,5 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
         public decimal Amount { get; set; }
     
         public long? ApprenticeshipId { get; set; }
-        
-        public virtual Apprenticeship Apprenticeship { get; set; }
     }
 }

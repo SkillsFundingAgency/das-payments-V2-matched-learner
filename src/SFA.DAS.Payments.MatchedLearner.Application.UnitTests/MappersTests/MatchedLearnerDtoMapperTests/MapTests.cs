@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Types;
@@ -12,7 +13,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
     [TestFixture]
     public class MapTests
     {
-        private readonly List<DatalockEvent> _testInput = new List<DatalockEvent>();
         private MatchedLearnerDto _actual;
 
         private readonly DateTime _expectedLearningStartDate = new DateTime(2020, 02, 01);
@@ -41,25 +41,32 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [SetUp]
         public void Setup()
         {
-            _testInput.Clear();
-            _testInput.Add(new DatalockEvent
+            var testInput = new MatchedLearnerDataLockInfo
             {
-                LearningStartDate = _expectedLearningStartDate,
-                EventTime = _expectedEventTime,
-                IlrSubmissionDateTime = _expectedIlrSubmissionDate,
-                CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
-                AcademicYear = _expectedAcademicYear,
-                Ukprn = _expectedUkprn,
-                LearnerUln = _expectedUln,
-                LearningAimReference = _expectedTrainingReference,
-                LearningAimProgrammeType = _expectedTrainingProgrammeType,
-                LearningAimStandardCode = _expectedTrainingStandardCode,
-                LearningAimFrameworkCode = _expectedTrainingFrameworkCode,
-                LearningAimPathwayCode = _expectedTrainingPathwayCode,
-                LearningAimFundingLineType = _expectedTrainingFundingLineType,
-                PriceEpisodes = new List<DatalockEventPriceEpisode>
+
+                DataLockEvents = new List<DataLockEvent>
                 {
-                    new DatalockEventPriceEpisode
+                    new DataLockEvent
+                    {
+                        LearningStartDate = _expectedLearningStartDate,
+                        EventTime = _expectedEventTime,
+                        IlrSubmissionDateTime = _expectedIlrSubmissionDate,
+                        CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
+                        AcademicYear = _expectedAcademicYear,
+                        Ukprn = _expectedUkprn,
+                        LearnerUln = _expectedUln,
+                        LearningAimReference = _expectedTrainingReference,
+                        LearningAimProgrammeType = _expectedTrainingProgrammeType,
+                        LearningAimStandardCode = _expectedTrainingStandardCode,
+                        LearningAimFrameworkCode = _expectedTrainingFrameworkCode,
+                        LearningAimPathwayCode = _expectedTrainingPathwayCode,
+                        LearningAimFundingLineType = _expectedTrainingFundingLineType,
+                    }
+                },
+
+                DataLockEventPriceEpisodes = new List<DataLockEventPriceEpisode>
+                {
+                    new DataLockEventPriceEpisode
                     {
                         StartDate = _expectedPriceEpisodeStartDate,
                         ActualEndDate = _expectedPriceEpisodeEndDate,
@@ -71,52 +78,58 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                     }
                 },
-                NonPayablePeriods = new List<DatalockEventNonPayablePeriod>
+
+                DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriod>
                 {
-                    new DatalockEventNonPayablePeriod
+                    new DataLockEventNonPayablePeriod
                     {
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         DeliveryPeriod = 2,
-                        Failures = new List<DatalockEventNonPayablePeriodFailure>
-                        {
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                Apprenticeship = new Apprenticeship
-                                {
-                                    Id = 123,
-                                    ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
-                                },
-                                DataLockFailureId = 2,
-                            },
-                            new DatalockEventNonPayablePeriodFailure
-                            {
-                                Apprenticeship = new Apprenticeship
-                                {
-                                    Id = 123,
-                                    ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
-                                },
-                                DataLockFailureId = 3,
-                            },
-                        }
+                    }
+                },
+
+                DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailure>
+                {
+                    new DataLockEventNonPayablePeriodFailure
+                    {
+                        ApprenticeshipId = 123,
+                        DataLockFailureId = 2,
+                    },
+                    new DataLockEventNonPayablePeriodFailure
+                    {
+                        ApprenticeshipId = 123,
+                        DataLockFailureId = 3,
                     },
                 },
-                PayablePeriods = new List<DatalockEventPayablePeriod>
+
+                Apprenticeships = new List<Apprenticeship>
                 {
-                    new DatalockEventPayablePeriod
+                    new Apprenticeship
+                    {
+                        Id = 123,
+                        ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType
+                    },
+                    new Apprenticeship
+                    {
+                        Id = 456,
+                        ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType
+                    }
+                },
+
+                DataLockEventPayablePeriods = new List<DataLockEventPayablePeriod>
+                {
+                    new DataLockEventPayablePeriod
                     {
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
-                        Apprenticeship = new Apprenticeship
-                        {
-                            ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType,
-                        },
+                        ApprenticeshipId = 456,
                         DeliveryPeriod = 1,
                     },
                 }
-            });
+            };
 
             var sut = new MatchedLearnerDtoMapper();
 
-            _actual = sut.Map(_testInput);
+            _actual = sut.Map(testInput);
         }
 
         [Test]

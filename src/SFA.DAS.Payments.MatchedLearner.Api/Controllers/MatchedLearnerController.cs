@@ -19,9 +19,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Api.Controllers
         }
 
         /// <summary>
-        /// Gets the learner that matches the given ukprn and uln and returns data lock information about that learner
+        /// Gets the learner that matches the given ukprn and uln and returns data Lock information about that learner
         /// </summary>
-        /// <returns>Data lock information about the matching learner</returns>
+        /// <returns>Data Lock information about the matching learner</returns>
         /// <response code="200">Matching learner found</response>
         /// <response code="404">Matching learner not found</response>
         /// <response code="401">The client is not authorized to access this endpoint</response>

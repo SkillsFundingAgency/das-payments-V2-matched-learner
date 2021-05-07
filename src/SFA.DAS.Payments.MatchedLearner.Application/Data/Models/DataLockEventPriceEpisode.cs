@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
 {
-    public class DatalockEventPriceEpisode
+    public class DataLockEventPriceEpisode
     {
         public long Id { get; set; }
         public Guid DataLockEventId { get; set; }

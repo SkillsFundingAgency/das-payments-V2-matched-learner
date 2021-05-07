@@ -41,7 +41,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
                     //NOTE: bellow option uses PreFixConfigurationKeys = true which means all the configurations are prefixed by "MatchedLearner:<key>"
                     //config.AddAzureTableStorage(MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey);
                 })
-                .UseApplicationInsights()
                 .UseStartup<Startup>()
                 .UseNLog();
     }
