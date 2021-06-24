@@ -6,6 +6,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Types
     public class PriceEpisodeDto
     {
         public string Identifier { get; set; }
+        public short AcademicYear { get; set; }
+        public byte CollectionPeriod { get; set; }
         public decimal AgreedPrice { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
