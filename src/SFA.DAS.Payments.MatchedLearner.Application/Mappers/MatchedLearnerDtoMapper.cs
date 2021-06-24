@@ -58,11 +58,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 PathwayCode = dataLockEvent.Key.LearningAimPathwayCode,
                 FundingLineType = null,
                 StartDate = dataLockEvent.Key.LearningStartDate.GetValueOrDefault(),
-                PriceEpisodes = MapPriceEpisodes(dataLockEvent.First().EventId, matchedLearnerDataLockInfo)
+                PriceEpisodes = MapPriceEpisodes(dataLockEvent.First().EventId, dataLockEvent.Key.AcademicYear, dataLockEvent.Key.CollectionPeriod, matchedLearnerDataLockInfo)
             }).ToList();
         }
 
-        private static List<PriceEpisodeDto> MapPriceEpisodes(Guid dataLockEventId, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
+        private static List<PriceEpisodeDto> MapPriceEpisodes(Guid dataLockEventId, short academicYear, byte collectionPeriod,  MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
         {
             return matchedLearnerDataLockInfo
                 .DataLockEventPriceEpisodes
@@ -70,6 +70,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 .Select(priceEpisode => new PriceEpisodeDto
                 {
                     Identifier = priceEpisode.PriceEpisodeIdentifier,
+                    AcademicYear = academicYear,
+                    CollectionPeriod = collectionPeriod,
                     AgreedPrice = priceEpisode.AgreedPrice,
                     StartDate = priceEpisode.StartDate,
                     EndDate = priceEpisode.ActualEndDate,
@@ -77,7 +79,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                     InstalmentAmount = priceEpisode.InstalmentAmount,
                     CompletionAmount = priceEpisode.CompletionAmount,
                     Periods = MapPeriods(priceEpisode.PriceEpisodeIdentifier, matchedLearnerDataLockInfo),
-                    //todo update this to include academic year and collection period
                 }).ToList();
         }
 
