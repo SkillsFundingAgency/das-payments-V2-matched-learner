@@ -111,7 +111,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             training.PathwayCode.Should().Be(400);
             training.FundingLineType.Should().BeNullOrEmpty();
             training.StartDate.Should().Be(new DateTime(2020, 10, 9));
-            training.PriceEpisodes.Should().HaveCount(1);
+            training.PriceEpisodes.Should().HaveCount(1); //todo update this to test multiple price episodes
 
             var priceEpisode = training.PriceEpisodes.First();
             priceEpisode.Identifier.Should().Be("TEST");

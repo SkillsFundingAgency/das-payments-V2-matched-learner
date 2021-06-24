@@ -13,5 +13,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Types
         public decimal InstalmentAmount { get; set; }
         public decimal CompletionAmount { get; set; }
         public virtual List<PeriodDto> Periods { get; set; } = new List<PeriodDto>();
+
+        //todo update this to include academic year and period as now that may be varied
     }
 }

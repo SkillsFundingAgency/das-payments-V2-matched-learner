@@ -57,21 +57,35 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
 
-            var eventId = dataLockEvents.Select(d => d.EventId).ToList();
+            //todo order by academic year
 
+            //todo this should potentially be dataLockEvents for the latestSuccessfulJob from the previous academic year? //answer - all academic years, latest for each
+            //if so, how to work out this job? //remove academicYear filter
+            var dataLockEventsForAllPeriods = await _context.DataLockEvent
+                .Where(x =>
+                    x.LearningAimReference == "ZPROG001" &&
+                    x.Ukprn == ukprn &&
+                    x.LearnerUln == uln)
+                .OrderBy(x => x.LearningStartDate)
+                .ToListAsync();
+
+            var eventIds = dataLockEvents.Select(d => d.EventId).ToList();
+            var eventIdsForAllPeriods = dataLockEventsForAllPeriods.Select(d => d.EventId).ToList();
+
+            //todo update this to pull all price episodes for the learning aim
             var dataLockEventPriceEpisodes = await _context.DataLockEventPriceEpisode
-                .Where(d => eventId.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
+                .Where(d => eventIdsForAllPeriods.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
                 .OrderBy(p => p.StartDate)
                 .ToListAsync();
 
-
+            //todo do these need updating to or do we only care about price episodes? //they all need updating
             var dataLockEventPayablePeriods = await _context.DataLockEventPayablePeriod
-                .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
                 .OrderBy(p => p.DeliveryPeriod)
                 .ToListAsync();
 
             var dataLockEventNonPayablePeriods = await _context.DataLockEventNonPayablePeriod
-                .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
                 .OrderBy(p => p.DeliveryPeriod)
                 .ToListAsync();
 

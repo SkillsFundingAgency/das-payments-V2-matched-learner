@@ -77,6 +77,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                     InstalmentAmount = priceEpisode.InstalmentAmount,
                     CompletionAmount = priceEpisode.CompletionAmount,
                     Periods = MapPeriods(priceEpisode.PriceEpisodeIdentifier, matchedLearnerDataLockInfo),
+                    //todo update this to include academic year and collection period
                 }).ToList();
         }
 
