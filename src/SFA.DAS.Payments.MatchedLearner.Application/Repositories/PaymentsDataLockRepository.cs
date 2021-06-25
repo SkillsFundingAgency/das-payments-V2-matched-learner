@@ -39,7 +39,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 Apprenticeships = new List<Apprenticeship>()
             };
 
-            var academicYears = _context.LatestSuccessfulJobs.Where(x => x.Ukprn == ukprn).Select(x => x.AcademicYear).OrderByDescending(x => x).Distinct();
+            var academicYears = _context.LatestSuccessfulJobs
+                .Where(x => x.Ukprn == ukprn)
+                .Select(x => x.AcademicYear)
+                .OrderByDescending(x => x)
+                .Distinct()
+                .ToList();
 
             foreach (var academicYear in academicYears)
             {
