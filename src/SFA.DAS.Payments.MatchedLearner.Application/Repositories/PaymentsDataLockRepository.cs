@@ -32,11 +32,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 
             var latestSuccessfulJobs = _context.LatestSuccessfulJobs
                 .Where(x => x.Ukprn == ukprn)
-                .OrderByDescending(x => x)
                 .Select(l => l.DcJobId)
                 .Distinct()
                 .ToList();
+            
+            if (!latestSuccessfulJobs.Any())
+            {
+                stopwatch.Stop();
+                _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
+                return new MatchedLearnerDataLockInfo();
+            }
 
+            _logger.LogDebug($"Getting DataLock Event Data for Uln: {uln}");
+          
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
             var dataLockEvents = await _context.DataLockEvent
@@ -99,7 +107,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 
             stopwatch.Stop();
 
-            _logger.LogInformation($"Finished getting DataLock Event Data Duration: {stopwatch.ElapsedMilliseconds} Uln: {uln}");
+            _logger.LogInformation($"Finished getting DataLock Event Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
 
             return result;
         }
