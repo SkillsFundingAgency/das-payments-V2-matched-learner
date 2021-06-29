@@ -30,11 +30,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
         {
             var stopwatch = Stopwatch.StartNew();
 
-            var latestSuccessfulJobs = _context.LatestSuccessfulJobs
+            var latestSuccessfulJobs = await _context.LatestSuccessfulJobs
                 .Where(x => x.Ukprn == ukprn)
                 .Select(l => l.DcJobId)
                 .Distinct()
-                .ToList();
+                .ToListAsync();
             
             if (!latestSuccessfulJobs.Any())
             {
