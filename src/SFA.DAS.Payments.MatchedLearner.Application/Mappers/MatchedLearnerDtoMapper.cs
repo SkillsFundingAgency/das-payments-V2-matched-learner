@@ -18,7 +18,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
             if (matchedLearnerDataLockInfo == null || !matchedLearnerDataLockInfo.DataLockEvents.Any())
                 return null;
 
-            var firstEvent = matchedLearnerDataLockInfo.DataLockEvents.First();
+            var firstEvent = matchedLearnerDataLockInfo.DataLockEvents
+                .OrderByDescending(x => x.AcademicYear)
+                .ThenBy(x => x.LearningStartDate)
+                .First();
 
             return new MatchedLearnerDto
             {
