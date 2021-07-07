@@ -24,6 +24,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data.Models
         public decimal TotalNegotiatedPrice3 { get; set; }
         public decimal TotalNegotiatedPrice4 { get; set; }
 
+        public DateTime? EffectiveTotalNegotiatedPriceStartDate { get; set; }
+
         public DateTime StartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
 

@@ -37,6 +37,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         private readonly int _expectedPriceEpisodeNumberOfInstalments = 5;
         private readonly decimal _expectedPriceEpisodeInstalmentAmount = 2m;
         private readonly decimal _expectedPriceEpisodeCompletionAmount = 1m;
+        private readonly DateTime _expectedTotalNegotiatedPriceStartDate = new DateTime(2020, 02, 01);
 
         [SetUp]
         public void Setup()
@@ -76,6 +77,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                         NumberOfInstalments = _expectedPriceEpisodeNumberOfInstalments,
                         CompletionAmount = _expectedPriceEpisodeCompletionAmount,
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
+                        EffectiveTotalNegotiatedPriceStartDate = _expectedTotalNegotiatedPriceStartDate
                     }
                 },
 
@@ -264,6 +266,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         public void InputWithPayablePeriod_Should_MapPriceEpisodeCompletionAmount()
         {
             _actual.Training.Single().PriceEpisodes.Single().CompletionAmount.Should().Be(_expectedPriceEpisodeCompletionAmount);
+        }
+
+        [Test]
+        public void InputWithPayablePeriod_Should_MapTotalNegotiatedPriceStartDate()
+        {
+            _actual.Training.Single().PriceEpisodes.Single().TotalNegotiatedPriceStartDate.Should().Be(_expectedTotalNegotiatedPriceStartDate);
         }
     }
 }
