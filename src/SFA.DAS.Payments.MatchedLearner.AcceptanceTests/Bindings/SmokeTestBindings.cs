@@ -123,6 +123,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             priceEpisode.NumberOfInstalments.Should().Be(12);
             priceEpisode.InstalmentAmount.Should().Be(50);
             priceEpisode.CompletionAmount.Should().Be(550);
+            priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
             priceEpisode.Periods.Should().HaveCount(3);
 
             priceEpisode.Periods.Should().ContainEquivalentOf(new
@@ -164,6 +165,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             priceEpisode2.NumberOfInstalments.Should().Be(12);
             priceEpisode2.InstalmentAmount.Should().Be(50);
             priceEpisode2.CompletionAmount.Should().Be(550);
+            priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
             priceEpisode2.Periods.Should().HaveCount(7);
 
             priceEpisode2.Periods.Should().ContainEquivalentOf(new

@@ -48,8 +48,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 x.LearningAimFundingLineType,
                 x.LearningStartDate,
                 x.LearnerUln,
-                x.Ukprn,
-                x.IlrSubmissionDateTime,
+                x.Ukprn
             }).Select(dataLockEvent => new TrainingDto
             {
                 Reference = dataLockEvent.Key.LearningAimReference,
@@ -75,7 +74,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                     x.ActualEndDate,
                     x.NumberOfInstalments,
                     x.InstalmentAmount,
-                    x.CompletionAmount
+                    x.CompletionAmount,
+                    x.EffectiveTotalNegotiatedPriceStartDate
                 })
                 .Select(priceEpisode =>
                 {
@@ -94,6 +94,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         InstalmentAmount = priceEpisode.Key.InstalmentAmount,
                         CompletionAmount = priceEpisode.Key.CompletionAmount,
                         Periods = MapPeriods(priceEpisode.Key.PriceEpisodeIdentifier, matchedLearnerDataLockInfo),
+                        TotalNegotiatedPriceStartDate = priceEpisode.Key.EffectiveTotalNegotiatedPriceStartDate
                     };
                 }).ToList();
         }
