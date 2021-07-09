@@ -15,8 +15,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
     [TestFixture]
     public class WhenGettingDataLockEvents
     {
-        private IPaymentsDataLockRepository _sut;
-        private PaymentsContext _context;
+        private IMatchedLearnerRepository _sut;
+        private MatchedLearnerContext _context;
         private DataLockEvent _dataLockEvent;
         private DataLockEventNonPayablePeriod _dataLockEventNonPayablePeriod;
         private DataLockEventPayablePeriod _dataLockEventPayablePeriod;
@@ -50,11 +50,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventPayablePeriod = fixture.Create<DataLockEventPayablePeriod>();
             _dataLockEventPriceEpisode = fixture.Create<DataLockEventPriceEpisode>();
 
-            _context = new PaymentsContext(new DbContextOptionsBuilder<PaymentsContext>()
+            _context = new MatchedLearnerContext(new DbContextOptionsBuilder<MatchedLearnerContext>()
                     .UseInMemoryDatabase("TestDb", new InMemoryDatabaseRoot())
                     .Options);
 
-            _sut = new PaymentsDataLockRepository(_context, fixture.Create<Mock<ILogger<PaymentsDataLockRepository>>>().Object);
+            _sut = new MatchedLearnerRepository(_context, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
         }
 
         [Test]

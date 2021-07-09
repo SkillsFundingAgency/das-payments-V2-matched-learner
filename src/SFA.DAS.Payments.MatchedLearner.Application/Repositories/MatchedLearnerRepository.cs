@@ -9,17 +9,17 @@ using SFA.DAS.Payments.MatchedLearner.Application.Data;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 {
-    public interface IPaymentsDataLockRepository
+    public interface IMatchedLearnerRepository
     {
         Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
     }
 
-    public class PaymentsDataLockRepository : IPaymentsDataLockRepository
+    public class MatchedLearnerRepository : IMatchedLearnerRepository
     {
-        private readonly IPaymentsContext _context;
-        private readonly ILogger<PaymentsDataLockRepository> _logger;
+        private readonly IMatchedLearnerContext _context;
+        private readonly ILogger<MatchedLearnerRepository> _logger;
 
-        public PaymentsDataLockRepository(IPaymentsContext context, ILogger<PaymentsDataLockRepository> logger)
+        public MatchedLearnerRepository(IMatchedLearnerContext context, ILogger<MatchedLearnerRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

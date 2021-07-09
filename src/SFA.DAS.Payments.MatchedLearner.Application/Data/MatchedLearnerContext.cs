@@ -4,7 +4,7 @@ using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Data
 {
-    public interface IPaymentsContext
+    public interface IMatchedLearnerContext
     {
         DbSet<DataLockEvent> DataLockEvent { get; set; }
         DbSet<DataLockEventNonPayablePeriod> DataLockEventNonPayablePeriod { get; set; }
@@ -15,9 +15,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
         DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
     }
 
-    public class PaymentsContext : DbContext, IPaymentsContext
+    public class MatchedLearnerContext : DbContext, IMatchedLearnerContext
     {
-        public PaymentsContext(DbContextOptions options) : base(options)
+        public MatchedLearnerContext(DbContextOptions options) : base(options)
         { }
 
         public DbSet<DataLockEvent> DataLockEvent { get; set; }
