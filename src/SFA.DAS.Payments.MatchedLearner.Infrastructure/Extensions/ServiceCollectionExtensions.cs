@@ -68,23 +68,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             return services;
         }
 
-        public static IServiceCollection AddAppDependencies(this IServiceCollection services)
-        {
-            services.AddTransient<IPaymentsContext, PaymentsContext>(provider =>
-            {
-                var applicationSettings = GetApplicationSettings(null, provider);
-
-                var builder = new DbContextOptionsBuilder();
-                builder.UseSqlServer(applicationSettings.PaymentsConnectionString);
-                return new PaymentsContext(builder.Options);
-            });
-            services.AddTransient<IPaymentsDataLockRepository, PaymentsDataLockRepository>();
-            services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
-            services.AddTransient<IMatchedLearnerService, MatchedLearnerService>();
-
-            return services;
-        }
-
         public static IConfiguration InitialiseConfigure(this IConfiguration configuration)
         {
             var config = new ConfigurationBuilder()
