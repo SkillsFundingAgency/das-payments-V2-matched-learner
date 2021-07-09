@@ -29,7 +29,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             return applicationSettings;
         }
 
-        public static IServiceCollection AddNLog(this IServiceCollection serviceCollection, bool isDevelopmentEnvironment)
+        public static IServiceCollection AddNLog(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
             var nLogConfiguration = new NLogConfiguration();
 
@@ -45,6 +45,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                     CaptureMessageProperties = true
                 });
                 options.AddConsole();
+                
+                var isDevelopmentEnvironment = IsDevelopmentEnvironment(configuration);
 
                 nLogConfiguration.ConfigureNLog(applicationSettings.ServiceName, isDevelopmentEnvironment);
             });
@@ -83,12 +85,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             return services;
         }
 
-        public static IConfiguration InitialiseConfigure(this IConfiguration configuration, bool isDevelopmentEnvironment)
+        public static IConfiguration InitialiseConfigure(this IConfiguration configuration)
         {
             var config = new ConfigurationBuilder()
                 .AddConfiguration(configuration)
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables();
+            
+            var isDevelopmentEnvironment = IsDevelopmentEnvironment(configuration);
 
             if (!isDevelopmentEnvironment)
             {
@@ -107,6 +111,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             }
 #endif
             return config.Build();
+        }
+
+        public static bool IsDevelopmentEnvironment(IConfiguration configuration)
+        {
+            var environmentName = configuration["EnvironmentName"];
+            if (string.IsNullOrEmpty(environmentName))
+            {
+                configuration.InitialiseConfigure();
+            }
+
+            return configuration.Equals("Development", StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Microsoft.ApplicationInsights.NLogTarget;
 using NLog;
 using NLog.Common;

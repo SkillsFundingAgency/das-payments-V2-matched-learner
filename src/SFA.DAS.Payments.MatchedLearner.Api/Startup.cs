@@ -34,14 +34,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Configuration = Configuration.InitialiseConfigure(WebHostEnvironment.IsDevelopment());
+            Configuration = Configuration.InitialiseConfigure();
 
             services.AddApiConfigurationSections(Configuration)
                 .AddAppDependencies()
                 .AddApplicationInsightsTelemetry()
                 .AddHealthChecks();
 
-            services.AddNLog(WebHostEnvironment.IsDevelopment());
+            services.AddNLog(Configuration);
 
             if (!WebHostEnvironment.IsDevelopment())
             {

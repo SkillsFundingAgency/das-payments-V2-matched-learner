@@ -60,7 +60,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
         private static bool IsDevelopmentEnvironment(IConfiguration configuration)
         {
-            return configuration["EnvironmentName"].Equals("Development", StringComparison.CurrentCultureIgnoreCase);
+            return Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID").Equals("Development", StringComparison.CurrentCultureIgnoreCase);
         }
 
         public static Guid CreateCustomIdentifier(string data)
