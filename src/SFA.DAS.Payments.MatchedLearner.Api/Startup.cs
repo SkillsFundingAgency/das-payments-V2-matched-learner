@@ -14,8 +14,8 @@ using Microsoft.OpenApi.Models;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
-using SFA.DAS.Payments.MatchedLearner.Api.Configuration;
-using SFA.DAS.Payments.MatchedLearner.Api.Extensions;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 
 namespace SFA.DAS.Payments.MatchedLearner.Api
 {
@@ -27,21 +27,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+
             WebHostEnvironment = webHostEnvironment;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Configuration = Configuration.InitialiseConfigure(WebHostEnvironment.IsDevelopment());
+
             services.AddApiConfigurationSections(Configuration)
                 .AddAppDependencies()
                 .AddApplicationInsightsTelemetry()
                 .AddHealthChecks();
 
+            services.AddNLog(WebHostEnvironment.IsDevelopment());
+
             if (!WebHostEnvironment.IsDevelopment())
             {
                 var azureAdConfiguration = Configuration
-                    .GetSection(MatchedLearnerApiConfigurationKeys.AzureADConfigKey)
+                    .GetSection(ApplicationSettingsKeys.AzureADConfigKey)
                     .Get<AzureActiveDirectoryConfiguration>();
 
                 if (azureAdConfiguration == null)
@@ -51,25 +56,25 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
                 var policies = new Dictionary<string, string>
                 {
-                    {PolicyNames.Default, RoleNames.Default},
+                    { PolicyNames.Default, RoleNames.Default },
                 };
 
                 services.AddAuthentication(azureAdConfiguration, policies);
             }
-            
+
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
 
             services.AddMvc(o =>
+            {
+                if (!WebHostEnvironment.IsDevelopment())
                 {
-                    if (!WebHostEnvironment.IsDevelopment())
-                    {
-                        o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string> { PolicyNames.Default }));
-                    }
-                    o.Conventions.Add(new ApiExplorerGroupPerVersionConvention());
-                }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                    o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string> { PolicyNames.Default }));
+                }
+                o.Conventions.Add(new ApiExplorerGroupPerVersionConvention());
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSwaggerGen(c =>
             {
@@ -120,7 +125,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
                     }
                 });
             });
-            
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

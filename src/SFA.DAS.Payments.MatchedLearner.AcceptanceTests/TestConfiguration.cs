@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Microsoft.Extensions.Configuration;
 using SFA.DAS.Configuration.AzureTableStorage;
-using SFA.DAS.Payments.MatchedLearner.Api.Configuration;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 {
@@ -11,9 +11,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         {
             var config = GetConfigurationRoot();
 
-            MatchedLearnerApiConfiguration = config
+            ApplicationSettings = config
                 .GetSection("MatchedLearner")
-                .Get<MatchedLearnerApiConfiguration>();
+                .Get<ApplicationSettings>();
         }
 
         public static IConfigurationRoot GetConfigurationRoot()
@@ -23,11 +23,11 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                  .AddAzureTableStorage(options =>
                  {
                      options.PreFixConfigurationKeys = false;
-                     options.ConfigurationKeys = new[] { MatchedLearnerApiConfigurationKeys.MatchedLearnerApiKey };
+                     options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
                  })
                  .Build();
         }
         
-        public static IMatchedLearnerApiConfiguration MatchedLearnerApiConfiguration { get; }
+        public static IApplicationSettings ApplicationSettings { get; }
     }
 }

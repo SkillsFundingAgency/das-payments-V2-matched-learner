@@ -1,6 +1,6 @@
-﻿namespace SFA.DAS.Payments.MatchedLearner.Api.Configuration
+﻿namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 {
-    public class MatchedLearnerApiConfigurationKeys
+    public class ApplicationSettingsKeys
     {
         public const string MatchedLearnerApiKey = "SFA.DAS.MatchedLearnerApi";
 

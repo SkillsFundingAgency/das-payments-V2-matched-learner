@@ -11,7 +11,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
         public TestRepository()
         {
-            _connectionString = TestConfiguration.MatchedLearnerApiConfiguration.DasPaymentsDatabaseConnectionString;
+            _connectionString = TestConfiguration.ApplicationSettings.PaymentsConnectionString;
         }
 
         public async Task AddDataLockEvent(long ukprn, long uln)

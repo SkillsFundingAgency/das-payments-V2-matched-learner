@@ -15,7 +15,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
         public TestClient()
         {
-            _url = TestConfiguration.MatchedLearnerApiConfiguration.TargetUrl;
+            _url = TestConfiguration.ApplicationSettings.TargetUrl;
 
             if (!string.IsNullOrEmpty(_url)) return;
 
