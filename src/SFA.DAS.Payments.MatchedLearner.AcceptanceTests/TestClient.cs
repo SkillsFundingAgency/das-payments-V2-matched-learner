@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SFA.DAS.Payments.MatchedLearner.Api;
 using SFA.DAS.Payments.MatchedLearner.Types;
@@ -19,7 +21,19 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             if (!string.IsNullOrEmpty(_url)) return;
 
-            _client = new WebApplicationFactory<Startup>().CreateClient();
+            var factory = new WebApplicationFactory<Startup>().WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureAppConfiguration((context, configurationBuilder) =>
+                {
+                    configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        {"EnvironmentName", "Development"},
+                    });
+                });
+            });
+
+            _client = factory.CreateClient();
+
             _url = _client.BaseAddress.ToString();
         }
 
