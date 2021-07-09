@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
+using SFA.DAS.Payments.MatchedLearner.Api.Ioc;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 
