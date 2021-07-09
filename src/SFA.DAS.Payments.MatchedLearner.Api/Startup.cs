@@ -4,12 +4,10 @@ using System.IO;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
@@ -22,13 +20,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
     public class Startup
     {
         public IConfiguration Configuration { get; set; }
-        public IWebHostEnvironment WebHostEnvironment { get; }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-            WebHostEnvironment = webHostEnvironment;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -43,7 +38,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             services.AddNLog(Configuration);
 
-            if (!WebHostEnvironment.IsDevelopment())
+            if (!Configuration.IsDevelopment())
             {
                 var azureAdConfiguration = Configuration
                     .GetSection(ApplicationSettingsKeys.AzureADConfigKey)
@@ -69,7 +64,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             services.AddMvc(o =>
             {
-                if (!WebHostEnvironment.IsDevelopment())
+                if (!Configuration.IsDevelopment())
                 {
                     o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string> { PolicyNames.Default }));
                 }
@@ -91,7 +86,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            if (WebHostEnvironment.IsDevelopment())
+            if (Configuration.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }

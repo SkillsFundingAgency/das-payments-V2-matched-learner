@@ -46,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 });
                 options.AddConsole();
                 
-                var isDevelopmentEnvironment = IsDevelopmentEnvironment(configuration);
+                var isDevelopmentEnvironment = configuration.IsDevelopment();
 
                 nLogConfiguration.ConfigureNLog(applicationSettings.ServiceName, isDevelopmentEnvironment);
             });
@@ -92,7 +92,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables();
             
-            var isDevelopmentEnvironment = IsDevelopmentEnvironment(configuration);
+            var isDevelopmentEnvironment = configuration.IsDevelopment();
 
             if (!isDevelopmentEnvironment)
             {
@@ -113,15 +113,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             return config.Build();
         }
 
-        public static bool IsDevelopmentEnvironment(IConfiguration configuration)
+        public static bool IsDevelopment(this IConfiguration configuration)
         {
             var environmentName = configuration["EnvironmentName"];
-            if (string.IsNullOrEmpty(environmentName))
-            {
-                configuration.InitialiseConfigure();
-            }
 
-            return configuration.Equals("Development", StringComparison.CurrentCultureIgnoreCase);
+            if (!string.IsNullOrEmpty(environmentName))
+                return environmentName.Equals("Development", StringComparison.CurrentCultureIgnoreCase);
+
+            throw new ApplicationException("Configuration is not initialized correctly");
         }
     }
 }

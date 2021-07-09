@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SFA.DAS.Payments.MatchedLearner.Functions": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "EnvironmentName": "Development",
+      }
+    }
+  }
+}

@@ -15,9 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLea
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0BB168E1-4E04-455A-9CC0-391E35BBE800}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.Payments.MatchedLearner.Functions", "SFA.DAS.Payments.MatchedLearner.Functions\SFA.DAS.Payments.MatchedLearner.Functions.csproj", "{0487D4D8-9E5F-4FE4-A039-A6B9718D8936}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLearner.Functions", "SFA.DAS.Payments.MatchedLearner.Functions\SFA.DAS.Payments.MatchedLearner.Functions.csproj", "{0487D4D8-9E5F-4FE4-A039-A6B9718D8936}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.Payments.MatchedLearner.Infrastructure", "SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj", "{B44D4BA1-FDC9-4659-AE29-B23D6D33B815}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLearner.Infrastructure", "SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj", "{B44D4BA1-FDC9-4659-AE29-B23D6D33B815}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
