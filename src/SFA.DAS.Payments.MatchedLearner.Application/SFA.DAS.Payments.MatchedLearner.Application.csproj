@@ -13,4 +13,8 @@
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Types\SFA.DAS.Payments.MatchedLearner.Types.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\ModelConfiguration\" />
+  </ItemGroup>
+
 </Project>

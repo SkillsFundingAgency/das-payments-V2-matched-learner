@@ -29,33 +29,24 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
         {
             var stopwatch = Stopwatch.StartNew();
 
-            var latestSuccessfulJob = await _context.LatestSuccessfulJobs
-                .Where(y => y.Ukprn == ukprn)
-                .OrderByDescending(y => y.AcademicYear)
-                .ThenByDescending(y => y.CollectionPeriod)
-                .FirstOrDefaultAsync();
-
-            if (latestSuccessfulJob == null)
-            {
-                stopwatch.Stop();
-                _logger.LogInformation($"No Data in current academic year CollectionPeriod for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
-                return new MatchedLearnerDataLockInfo();
-            }
-
-            _logger.LogDebug($"Getting DataLock Event Data Uln: {uln}, Academic year: {latestSuccessfulJob.AcademicYear}, Collection period: {latestSuccessfulJob.CollectionPeriod}");
-
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
             var dataLockEvents = await _context.DataLockEvent
                 .Where(x =>
                     x.LearningAimReference == "ZPROG001" &&
                     x.Ukprn == ukprn &&
-                    x.LearnerUln == uln &&
-                    x.JobId == latestSuccessfulJob.DcJobId &&
-                    x.AcademicYear == latestSuccessfulJob.AcademicYear &&
-                    x.CollectionPeriod == latestSuccessfulJob.CollectionPeriod)
+                    x.LearnerUln == uln)
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
+            
+            if (dataLockEvents == null)
+            {
+                stopwatch.Stop();
+                _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
+                return new MatchedLearnerDataLockInfo();
+            }
+
+            _logger.LogDebug($"Getting DataLock Event Data Uln: {uln}");
 
             var eventId = dataLockEvents.Select(d => d.EventId).ToList();
 
@@ -90,7 +81,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 
             stopwatch.Stop();
 
-            _logger.LogInformation($"Finished getting DataLock Event Data Duration: {stopwatch.ElapsedMilliseconds} Uln: {uln}, Academic year: {latestSuccessfulJob.AcademicYear}, Collection period: {latestSuccessfulJob.CollectionPeriod}");
+            _logger.LogInformation($"Finished getting DataLock Event Data Duration: {stopwatch.ElapsedMilliseconds} Uln: {uln}");
 
             return new MatchedLearnerDataLockInfo
             {

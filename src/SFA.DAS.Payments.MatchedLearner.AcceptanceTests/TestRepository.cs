@@ -18,9 +18,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         {
             const string sql = @"
 
-INSERT INTO Payments2.Job (IlrSubmissionTime,   JobType, Status, DCJobId, Ukprn, AcademicYear, CollectionPeriod, DCJobSucceeded)
-                   VALUES (SysDateTimeOffset(), 1,       2,       123,      @ukprn, 2021,          1,                 1)
-
 INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate,
     Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status,
     IsLevyPayer, ApprenticeshipEmployerType)
@@ -83,7 +80,6 @@ VALUES (@dataLockEventId, 'TEST', 1, 1000, 2000, 0, 0, '2020-10-07', SysDateTime
         public async Task ClearLearner(long ukprn, long uln)
         {
             const string sql = @"
-DELETE FROM Payments2.Job where Ukprn = @ukprn
 DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
 DELETE Payments2.Apprenticeship WHERE Id = -123456;
 

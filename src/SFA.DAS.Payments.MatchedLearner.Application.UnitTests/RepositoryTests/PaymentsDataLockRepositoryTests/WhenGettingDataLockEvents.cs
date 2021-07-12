@@ -21,11 +21,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         private DataLockEventNonPayablePeriod _dataLockEventNonPayablePeriod;
         private DataLockEventPayablePeriod _dataLockEventPayablePeriod;
         private DataLockEventPriceEpisode _dataLockEventPriceEpisode;
-        private LatestSuccessfulJobModel _latestSuccessfulJob;
 
-        private long _ukprn, _uln, _jobId;
-        private short _academicYear;
-        private byte _collectionPeriod;
+        private long _ukprn, _uln;
 
         [SetUp]
         public void SetUp()
@@ -34,17 +31,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             _ukprn = fixture.Create<long>();
             _uln = fixture.Create<long>();
-            _jobId = fixture.Create<long>();
-            _academicYear = fixture.Create<short>();
-            _collectionPeriod = fixture.Create<byte>();
 
             _dataLockEvent = fixture.Create<DataLockEvent>();
-            _latestSuccessfulJob = fixture.Create<LatestSuccessfulJobModel>();
-
-            _latestSuccessfulJob.Ukprn = _ukprn;
-            _latestSuccessfulJob.AcademicYear = _academicYear;
-            _latestSuccessfulJob.CollectionPeriod = _collectionPeriod;
-            _latestSuccessfulJob.DcJobId = _jobId;
 
             _dataLockEventNonPayablePeriod = fixture.Create<DataLockEventNonPayablePeriod>();
             _dataLockEventPayablePeriod = fixture.Create<DataLockEventPayablePeriod>();
@@ -143,7 +131,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
         private async Task AddLatestSuccessfulJobToDb()
         {
-            _context.LatestSuccessfulJobs.Add(_latestSuccessfulJob);
             await _context.SaveChangesAsync();
         }
 
@@ -179,10 +166,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         {
             _dataLockEvent.LearnerUln = _uln;
             _dataLockEvent.Ukprn = _ukprn;
-            _dataLockEvent.JobId = _latestSuccessfulJob.DcJobId;
             _dataLockEvent.LearningAimReference = "ZPROG001";
-            _dataLockEvent.CollectionPeriod = _latestSuccessfulJob.CollectionPeriod;
-            _dataLockEvent.AcademicYear = _latestSuccessfulJob.AcademicYear;
+            _dataLockEvent.CollectionPeriod = 11;
+            _dataLockEvent.AcademicYear = 2021;
 
             _context.DataLockEvent.Add(_dataLockEvent);
 

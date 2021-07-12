@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SFA.DAS.Payments.MatchedLearner.Application.Data.ModelConfiguration;
 using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Data
@@ -12,7 +11,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
         DbSet<DataLockEventPayablePeriod> DataLockEventPayablePeriod { get; set; }
         DbSet<DataLockEventPriceEpisode> DataLockEventPriceEpisode { get; set; }
         DbSet<Apprenticeship> Apprenticeship { get; set; }
-        DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
     }
 
     public class MatchedLearnerContext : DbContext, IMatchedLearnerContext
@@ -26,13 +24,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
         public DbSet<DataLockEventPayablePeriod> DataLockEventPayablePeriod { get; set; }
         public DbSet<DataLockEventPriceEpisode> DataLockEventPriceEpisode { get; set; }
         public DbSet<Apprenticeship> Apprenticeship { get; set; }
-        public DbSet<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Payments2");
-
-            modelBuilder.ApplyConfiguration(new LatestSuccessfulJobModelConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
