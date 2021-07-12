@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SFA.DAS.Payments.MatchedLearner.Application.Data;
 
-namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
+namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
     public interface IMatchedLearnerRepository
     {
@@ -38,7 +39,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                     x.LearnerUln == uln)
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
-            
+
             if (dataLockEvents == null)
             {
                 stopwatch.Stop();
@@ -54,7 +55,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
                 .Where(d => eventId.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
                 .OrderBy(p => p.StartDate)
                 .ToListAsync();
-
 
             var dataLockEventPayablePeriods = await _context.DataLockEventPayablePeriod
                 .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)

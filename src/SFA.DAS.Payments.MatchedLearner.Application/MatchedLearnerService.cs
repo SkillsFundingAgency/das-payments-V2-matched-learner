@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
-using SFA.DAS.Payments.MatchedLearner.Application.Repositories;
+using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.MatchedLearner.Types;
+using System;
+using System.Threading.Tasks;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application
 {
@@ -24,6 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             _matchedLearnerDtoMapper = matchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(matchedLearnerDtoMapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
         public async Task<MatchedLearnerDto> GetMatchedLearner(long ukprn, long uln)
         {
             try

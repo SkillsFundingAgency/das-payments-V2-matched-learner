@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.Payments.MatchedLearner.Application;
-using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
-using SFA.DAS.Payments.MatchedLearner.Application.Repositories;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc

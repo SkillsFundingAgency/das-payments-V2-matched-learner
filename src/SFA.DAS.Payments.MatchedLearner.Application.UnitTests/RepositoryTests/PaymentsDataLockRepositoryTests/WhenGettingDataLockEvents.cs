@@ -1,14 +1,16 @@
-﻿using AutoFixture;
+﻿using System;
+using System.Linq;
+using AutoFixture;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using NUnit.Framework;
-using SFA.DAS.Payments.MatchedLearner.Application.Data;
-using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
-using SFA.DAS.Payments.MatchedLearner.Application.Repositories;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NUnit.Framework;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using System.Threading.Tasks;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.PaymentsDataLockRepositoryTests
 {
@@ -17,10 +19,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
     {
         private IMatchedLearnerRepository _sut;
         private MatchedLearnerContext _context;
-        private DataLockEvent _dataLockEvent;
-        private DataLockEventNonPayablePeriod _dataLockEventNonPayablePeriod;
-        private DataLockEventPayablePeriod _dataLockEventPayablePeriod;
-        private DataLockEventPriceEpisode _dataLockEventPriceEpisode;
+        private DataLockEventModel _dataLockEvent;
+        private DataLockEventNonPayablePeriodModel _dataLockEventNonPayablePeriod;
+        private DataLockEventPayablePeriodModel _dataLockEventPayablePeriod;
+        private DataLockEventPriceEpisodeModel _dataLockEventPriceEpisode;
 
         private long _ukprn, _uln;
 
@@ -29,15 +31,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         {
             var fixture = new Fixture();
 
+            fixture.Behaviors
+                .OfType<ThrowingRecursionBehavior>()
+                .ToList()
+                .ForEach(b => fixture.Behaviors.Remove(b));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             _ukprn = fixture.Create<long>();
             _uln = fixture.Create<long>();
 
-            _dataLockEvent = fixture.Create<DataLockEvent>();
+            _dataLockEvent = fixture.Create<DataLockEventModel>();
 
-            _dataLockEventNonPayablePeriod = fixture.Create<DataLockEventNonPayablePeriod>();
-            _dataLockEventPayablePeriod = fixture.Create<DataLockEventPayablePeriod>();
-            _dataLockEventPriceEpisode = fixture.Create<DataLockEventPriceEpisode>();
-
+            _dataLockEventNonPayablePeriod = fixture.Freeze<DataLockEventNonPayablePeriodModel>();
+            _dataLockEventPayablePeriod = fixture.Freeze<DataLockEventPayablePeriodModel>();
+            _dataLockEventPriceEpisode = fixture.Freeze<DataLockEventPriceEpisodeModel>();
+            _dataLockEventPriceEpisode.PriceEpisodeIdentifier = Guid.NewGuid().ToString();
+            
             _context = new MatchedLearnerContext(new DbContextOptionsBuilder<MatchedLearnerContext>()
                     .UseInMemoryDatabase("TestDb", new InMemoryDatabaseRoot())
                     .Options);
@@ -52,8 +61,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventNonPayablePeriod.TransactionType = 1;
             _dataLockEventNonPayablePeriod.Amount = 0;
 
-            await AddPriceEpisodeToDataLock();
-            await AddNonPayablePeriodToDataLock();
+            await AttachPriceEpisodeToDataLock();
+            await AttachNonPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
@@ -73,8 +82,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventNonPayablePeriod.TransactionType = 1;
             _dataLockEventNonPayablePeriod.Amount = 100;
 
-            await AddPriceEpisodeToDataLock();
-            await AddNonPayablePeriodToDataLock();
+            await AttachPriceEpisodeToDataLock();
+            await AttachNonPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
@@ -94,8 +103,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventPayablePeriod.TransactionType = 1;
             _dataLockEventPayablePeriod.Amount = 0;
 
-            await AddPriceEpisodeToDataLock();
-            await AddPayablePeriodToDataLock();
+            await AttachPriceEpisodeToDataLock();
+            await AttachPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
@@ -115,8 +124,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventPayablePeriod.TransactionType = 1;
             _dataLockEventPayablePeriod.Amount = 100;
 
-            await AddPriceEpisodeToDataLock();
-            await AddPayablePeriodToDataLock();
+            await AttachPriceEpisodeToDataLock();
+            await AttachPayablePeriodToDataLock();
 
             await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
@@ -134,32 +143,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await _context.SaveChangesAsync();
         }
 
-        private async Task AddPriceEpisodeToDataLock()
+        private async Task AttachPriceEpisodeToDataLock()
         {
             _dataLockEventPriceEpisode.DataLockEventId = _dataLockEvent.EventId;
-            _context.DataLockEventPriceEpisode.Add(_dataLockEventPriceEpisode);
-
-            await _context.SaveChangesAsync();
+            _dataLockEvent.PriceEpisodes.Add(_dataLockEventPriceEpisode);
         }
 
-        private async Task AddNonPayablePeriodToDataLock()
+        private async Task AttachNonPayablePeriodToDataLock()
         {
             _dataLockEventNonPayablePeriod.PriceEpisodeIdentifier = _dataLockEventPriceEpisode.PriceEpisodeIdentifier;
             _dataLockEventNonPayablePeriod.DataLockEventId = _dataLockEvent.EventId;
 
-            _context.DataLockEventNonPayablePeriod.Add(_dataLockEventNonPayablePeriod);
-
-            await _context.SaveChangesAsync();
+            _dataLockEvent.NonPayablePeriods.Add(_dataLockEventNonPayablePeriod);
         }
 
-        private async Task AddPayablePeriodToDataLock()
+        private async Task AttachPayablePeriodToDataLock()
         {
             _dataLockEventPayablePeriod.DataLockEventId = _dataLockEvent.EventId;
             _dataLockEventPayablePeriod.PriceEpisodeIdentifier = _dataLockEventPriceEpisode.PriceEpisodeIdentifier;
 
-            _context.DataLockEventPayablePeriod.Add(_dataLockEventPayablePeriod);
-
-            await _context.SaveChangesAsync();
+            _dataLockEvent.PayablePeriods.Add(_dataLockEventPayablePeriod);
         }
 
         private async Task AddDataLockToDb()

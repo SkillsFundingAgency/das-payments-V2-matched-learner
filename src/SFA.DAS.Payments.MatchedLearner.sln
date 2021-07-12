@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLearner.Infrastructure", "SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj", "{B44D4BA1-FDC9-4659-AE29-B23D6D33B815}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLearner.Data", "SFA.DAS.Payments.MatchedLearner.Data\SFA.DAS.Payments.MatchedLearner.Data.csproj", "{0F606CC3-57C9-451B-BDB5-B8D92C4617D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{B44D4BA1-FDC9-4659-AE29-B23D6D33B815}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B44D4BA1-FDC9-4659-AE29-B23D6D33B815}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B44D4BA1-FDC9-4659-AE29-B23D6D33B815}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F606CC3-57C9-451B-BDB5-B8D92C4617D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F606CC3-57C9-451B-BDB5-B8D92C4617D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F606CC3-57C9-451B-BDB5-B8D92C4617D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F606CC3-57C9-451B-BDB5-B8D92C4617D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

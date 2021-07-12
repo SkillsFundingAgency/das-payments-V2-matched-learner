@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SFA.DAS.Payments.MatchedLearner.Data.Entities;
+using SFA.DAS.Payments.MatchedLearner.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SFA.DAS.Payments.MatchedLearner.Application.Data;
-using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 {

@@ -1,16 +1,11 @@
-﻿using System;
-using System.IO;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using SFA.DAS.Configuration.AzureTableStorage;
-using SFA.DAS.Payments.MatchedLearner.Application;
-using SFA.DAS.Payments.MatchedLearner.Application.Data;
-using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
-using SFA.DAS.Payments.MatchedLearner.Application.Repositories;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
+using System;
+using System.IO;
 
 namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 {
@@ -45,7 +40,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                     CaptureMessageProperties = true
                 });
                 options.AddConsole();
-                
+
                 var isDevelopmentEnvironment = configuration.IsDevelopment();
 
                 nLogConfiguration.ConfigureNLog(applicationSettings.ServiceName, isDevelopmentEnvironment);
@@ -74,7 +69,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 .AddConfiguration(configuration)
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddEnvironmentVariables();
-            
+
             var isDevelopmentEnvironment = configuration.IsDevelopment();
 
             if (!isDevelopmentEnvironment)
