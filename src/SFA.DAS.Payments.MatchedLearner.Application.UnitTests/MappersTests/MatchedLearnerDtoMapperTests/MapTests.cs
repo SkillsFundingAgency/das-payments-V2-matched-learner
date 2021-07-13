@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -31,8 +32,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         private readonly int _expectedTrainingPathwayCode = 19;
         private readonly string _expectedTrainingFundingLineType = "LineTypeTwo";
 
-        private readonly string _expectedPriceEpisodeIdentifier = "1-1-1";
-        private readonly DateTime _expectedPriceEpisodeStartDate = new DateTime(2020, 01, 01);
+        private readonly string _expectedPriceEpisodeIdentifier = "1-1-01/08/2020";
+        private readonly DateTime _expectedPriceEpisodeIdentifierDatePart = new DateTime(2020,08,01);
+        private readonly DateTime _expectedPriceEpisodeStartDate = new DateTime(2020, 02, 01);
         private readonly DateTime _expectedPriceEpisodeEndDate = new DateTime(2021, 08, 08);
         private readonly int _expectedPriceEpisodeNumberOfInstalments = 5;
         private readonly decimal _expectedPriceEpisodeInstalmentAmount = 2m;
@@ -247,7 +249,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void InputWithPayablePeriod_Should_MapPriceEpisodeStartDate()
         {
-            _actual.Training.Single().PriceEpisodes.Single().StartDate.Should().Be(_expectedPriceEpisodeStartDate);
+            _actual.Training.Single().PriceEpisodes.Single().StartDate.Should().Be(_expectedPriceEpisodeIdentifierDatePart);
         }
 
         [Test]
