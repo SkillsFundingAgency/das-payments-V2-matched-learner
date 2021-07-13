@@ -18,7 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
         DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
         Task<int> SaveChanges(CancellationToken cancellationToken = default(CancellationToken));
-        Task DeleteLearnerData(long ukprn, short academicYear, IList<byte> collectionPeriod);
+        Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
     }
 
     public class MatchedLearnerContext : DbContext, IMatchedLearnerContext
@@ -32,9 +32,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<DataLockEventNonPayablePeriodFailureModel> DataLockEventNonPayablePeriodFailures { get; set; }
         public DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
         public DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
-        public async Task DeleteLearnerData(long ukprn, short academicYear, IList<byte> collectionPeriod)
+
+        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
             await Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = {ukprn} AND AcademicYear = {academicYear} AND CollectionPeriod IN {string.Join(",", collectionPeriod)}");
+
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

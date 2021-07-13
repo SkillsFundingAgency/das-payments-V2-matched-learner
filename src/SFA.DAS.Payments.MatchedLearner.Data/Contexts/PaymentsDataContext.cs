@@ -7,7 +7,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 {
-    public interface IDataLockEventDataContext
+    public interface IPaymentsDataContext
     {
         DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
         DatabaseFacade Database { get; }
@@ -19,9 +19,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         Task<int> SaveChanges(CancellationToken cancellationToken = default(CancellationToken));
     }
 
-    public class DataLockEventDataContext : DbContext, IDataLockEventDataContext
+    public class PaymentsDataContext : DbContext, IPaymentsDataContext
     {
-        public DataLockEventDataContext (DbContextOptions options) : base(options)
+        public PaymentsDataContext (DbContextOptions options) : base(options)
         { }
 
         public DbSet<ApprenticeshipModel> Apprenticeship { get; set; }

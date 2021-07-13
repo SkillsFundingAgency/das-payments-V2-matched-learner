@@ -31,18 +31,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
                 return new MatchedLearnerDataContextFactory(builder);
             });
 
-            services.AddTransient<IDataLockEventDataContext, DataLockEventDataContext>(provider =>
+            services.AddTransient<IPaymentsDataContext, PaymentsDataContext>(provider =>
             {
                 var applicationSettings = ServiceCollectionExtensions.GetApplicationSettings(null, provider);
 
                 var builder = new DbContextOptionsBuilder();
                 builder.UseSqlServer(applicationSettings.PaymentsConnectionString);
 
-                return new DataLockEventDataContext(builder.Options);
+                return new PaymentsDataContext(builder.Options);
             });
 
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
-            services.AddTransient<IDataLockEventRepository, DataLockEventRepository>();
+            services.AddTransient<IPaymentsRepository, PaymentsRepository>();
             services.AddTransient<IMatchedLearnerDataImportService, MatchedLearnerDataImportService>();
 
             return services;
