@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -8,7 +7,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 {
-    public interface IMatchedLearnerContext
+    public interface IDataLockEventDataContext
     {
         DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
         DatabaseFacade Database { get; }
@@ -18,12 +17,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
         DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
         Task<int> SaveChanges(CancellationToken cancellationToken = default(CancellationToken));
-        Task DeleteLearnerData(long ukprn, short academicYear, IList<byte> collectionPeriod);
     }
 
-    public class MatchedLearnerContext : DbContext, IMatchedLearnerContext
+    public class DataLockEventDataContext : DbContext, IDataLockEventDataContext
     {
-        public MatchedLearnerContext(DbContextOptions options) : base(options)
+        public DataLockEventDataContext (DbContextOptions options) : base(options)
         { }
 
         public DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
@@ -32,10 +30,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<DataLockEventNonPayablePeriodFailureModel> DataLockEventNonPayablePeriodFailures { get; set; }
         public DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
         public DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
-        public async Task DeleteLearnerData(long ukprn, short academicYear, IList<byte> collectionPeriod)
-        {
-            await Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = {ukprn} AND AcademicYear = {academicYear} AND CollectionPeriod IN {string.Join(",", collectionPeriod)}");
-        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Payments2");

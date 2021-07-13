@@ -13,12 +13,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
     public class MatchedLearnerDataImportService : IMatchedLearnerDataImportService
     {
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
-        private readonly string _paymentsRepository;
+        private readonly IDataLockEventRepository _dataLockEventRepository;
 
-        public MatchedLearnerDataImportService(IMatchedLearnerRepository matchedLearnerRepository, string paymentsRepository)
+        public MatchedLearnerDataImportService(IMatchedLearnerRepository matchedLearnerRepository, IDataLockEventRepository dataLockEventRepository)
         {
             _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
-            _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
+            _dataLockEventRepository = dataLockEventRepository ?? throw new ArgumentNullException(nameof(dataLockEventRepository));
         }
 
         public async Task Import(long ukprn, byte collectionPeriod, short academicYear)
@@ -32,9 +32,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             await _matchedLearnerRepository.RemovePreviousSubmissionData(ukprn, academicYear, collectionPeriods);
 
-            //var datalockData = await _paymentsRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriods);
+            var datalockData = await _dataLockEventRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriods);
 
-            //await _matchedLearnerRepository.SaveDataLockEvents(datalockData);
+            await _matchedLearnerRepository.StoreDataLocks(datalockData);
         }
     }
 }
