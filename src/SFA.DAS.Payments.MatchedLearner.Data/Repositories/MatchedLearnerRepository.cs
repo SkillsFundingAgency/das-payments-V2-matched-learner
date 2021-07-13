@@ -13,6 +13,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
     public interface IMatchedLearnerRepository
     {
         Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
+        Task RemovePreviousSubmissionData(long ukprn, short academicYear, IList<byte> collectionPeriod);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -92,6 +93,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
                 Apprenticeships = apprenticeshipDetails
             };
+        }
+
+        public async Task RemovePreviousSubmissionData(long ukprn, short academicYear, IList<byte> collectionPeriod)
+        {
+            await _context.DeleteLearnerData(ukprn, academicYear, collectionPeriod);
         }
     }
 }

@@ -1,22 +1,26 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using SFA.DAS.Payments.MatchedLearner.Application;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions
 {
-    public class SubmissionJobSucceededHandlerFunction
+    public class SubmissionSucceededHandlerFunction
     {
-        private readonly ILogger<SubmissionJobSucceededHandlerFunction> _logger;
+        private readonly IMatchedLearnerDataImportService _matchedLearnerDataImportService;
+        private readonly ILogger<SubmissionSucceededHandlerFunction> _logger;
 
-        public SubmissionJobSucceededHandlerFunction(ILogger<SubmissionJobSucceededHandlerFunction> logger)
+        public SubmissionSucceededHandlerFunction(IMatchedLearnerDataImportService matchedLearnerDataImportService,  ILogger<SubmissionSucceededHandlerFunction> logger)
         {
+            _matchedLearnerDataImportService = matchedLearnerDataImportService ?? throw new ArgumentNullException(nameof(matchedLearnerDataImportService));
             this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [FunctionName("SubmissionJobSucceededHandler")]
-        public void Run([ServiceBusTrigger("%MatchedLearnerQueue%", Connection = "ServiceBusConnectionString")] string myQueueItem)
+        [FunctionName("SubmissionSucceededHandler")]
+        public async Task Run([ServiceBusTrigger("%MatchedLearnerQueue%", Connection = "ServiceBusConnectionString")] string myQueueItem)
         {
-            _logger.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
+            await _matchedLearnerDataImportService.Import(1, 1, 1);
         }
     }
 }
