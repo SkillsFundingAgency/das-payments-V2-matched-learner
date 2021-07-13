@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
@@ -20,6 +21,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
         Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
         Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
+        Task RemoveApprenticeships(List<long> apprenticeshipIds);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -107,11 +109,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await _context.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
         }
 
+        public async Task RemoveApprenticeships(List<long> apprenticeshipIds)
+        {
+            var apprenticeshipBatches = apprenticeshipIds.Batch(2000);
+
+            foreach (var batch in apprenticeshipBatches)
+            {
+                await _context.RemoveApprenticeships(batch);
+            }
+        }
+
+        
+
         public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
             using (var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
             {
-                var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+                var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, SqlBulkCopyOptions = SqlBulkCopyOptions.KeepIdentity };
 
                 await ((DbContext)_context).BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
 

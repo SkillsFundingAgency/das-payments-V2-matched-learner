@@ -19,6 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
         Task<int> SaveChanges(CancellationToken cancellationToken = default(CancellationToken));
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
+        Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds);
     }
 
     public class MatchedLearnerContext : DbContext, IMatchedLearnerContext
@@ -35,8 +36,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
-            await Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = {ukprn} AND AcademicYear = {academicYear} AND CollectionPeriod IN {string.Join(",", collectionPeriod)}");
+            await Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = {ukprn} AND AcademicYear = {academicYear} AND CollectionPeriod IN { string.Join(",", collectionPeriod)}");
+        }
 
+        public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
+        {
+            await Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Payments2.Apprenticeship WHERE id IN { string.Join(",", apprenticeshipIds )}");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -46,6 +46,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             var apprenticeships = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
 
+            await _matchedLearnerRepository.RemoveApprenticeships(apprenticeshipIds);
+
             await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
 
             await _matchedLearnerRepository.StoreDataLocks(datalockData, CancellationToken.None);

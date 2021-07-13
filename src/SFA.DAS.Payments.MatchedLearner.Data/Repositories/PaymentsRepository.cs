@@ -30,7 +30,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var apprenticeshipModels = new List<ApprenticeshipModel>();
 
-            var apprenticeshipIdBatches = Batch(ids, 2000);
+            var apprenticeshipIdBatches = ids.Batch(2000);
 
             foreach (var batch in apprenticeshipIdBatches)
             {
@@ -44,8 +44,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             return apprenticeshipModels;
         }
 
-
-
         public async Task<List<DataLockEventModel>> GetDataLockEvents(long ukprn, short academicYear, byte collectionPeriod)
         {
             return await _paymentsDataContext.DataLockEvent
@@ -58,14 +56,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                     d.AcademicYear == academicYear &&
                     d.CollectionPeriod == collectionPeriod)
                 .ToListAsync();
-        }
-
-        private IEnumerable<IEnumerable<T>> Batch<T>( IEnumerable<T> items, int maxItems)
-        {
-            return items
-                .Select((item, inx) => new { item, inx })
-                .GroupBy(x => x.inx / maxItems)
-                .Select(g => g.Select(x => x.item));
         }
     }
 }
