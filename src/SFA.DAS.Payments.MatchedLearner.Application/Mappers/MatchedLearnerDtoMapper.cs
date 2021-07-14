@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using SFA.DAS.Payments.MatchedLearner.Application.Data;
-using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
@@ -90,7 +89,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         CollectionPeriod = dataLockEvent.CollectionPeriod,
                         Identifier = priceEpisode.Key.PriceEpisodeIdentifier,
                         AgreedPrice = priceEpisode.Key.AgreedPrice,
-                        StartDate = ExtractEpisodeStartDateFromPriceEpisodeIdentifier( priceEpisode.Key.PriceEpisodeIdentifier),
+                        StartDate = ExtractEpisodeStartDateFromPriceEpisodeIdentifier(priceEpisode.Key.PriceEpisodeIdentifier),
                         EndDate = priceEpisode.Key.ActualEndDate,
                         NumberOfInstalments = priceEpisode.Key.NumberOfInstalments,
                         InstalmentAmount = priceEpisode.Key.InstalmentAmount,

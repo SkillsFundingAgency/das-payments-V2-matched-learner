@@ -87,7 +87,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             }
         }
 
-
         [Then(@"the result matches the sample learner")]
         public void ThenTheResultMatchesTheSampleLearner()
         {
@@ -118,7 +117,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             priceEpisode.AcademicYear.Should().Be(1920);
             priceEpisode.CollectionPeriod.Should().Be(14);
             priceEpisode.AgreedPrice.Should().Be(3000);
-            priceEpisode.StartDate.Should().Be(new DateTime(2020, 10, 7));
+            priceEpisode.StartDate.Should().Be(new DateTime(2019, 08, 01));
             priceEpisode.EndDate.Should().Be(new DateTime(2020, 10, 12));
             priceEpisode.NumberOfInstalments.Should().Be(12);
             priceEpisode.InstalmentAmount.Should().Be(50);
@@ -160,7 +159,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             priceEpisode2.AcademicYear.Should().Be(2021);
             priceEpisode2.CollectionPeriod.Should().Be(1);
             priceEpisode2.AgreedPrice.Should().Be(3000);
-            priceEpisode2.StartDate.Should().Be(new DateTime(2020, 10, 7));
+            priceEpisode2.StartDate.Should().Be(new DateTime(2020, 08, 01));
             priceEpisode2.EndDate.Should().Be(new DateTime(2020, 10, 12));
             priceEpisode2.NumberOfInstalments.Should().Be(12);
             priceEpisode2.InstalmentAmount.Should().Be(50);
