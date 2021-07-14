@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using SFA.DAS.Payments.MatchedLearner.Application.Data;
+using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
@@ -88,7 +90,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         CollectionPeriod = dataLockEvent.CollectionPeriod,
                         Identifier = priceEpisode.Key.PriceEpisodeIdentifier,
                         AgreedPrice = priceEpisode.Key.AgreedPrice,
-                        StartDate = priceEpisode.Key.StartDate,
+                        StartDate = ExtractEpisodeStartDateFromPriceEpisodeIdentifier( priceEpisode.Key.PriceEpisodeIdentifier),
                         EndDate = priceEpisode.Key.ActualEndDate,
                         NumberOfInstalments = priceEpisode.Key.NumberOfInstalments,
                         InstalmentAmount = priceEpisode.Key.InstalmentAmount,
@@ -97,6 +99,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         TotalNegotiatedPriceStartDate = priceEpisode.Key.EffectiveTotalNegotiatedPriceStartDate
                     };
                 }).ToList();
+        }
+
+        private static DateTime ExtractEpisodeStartDateFromPriceEpisodeIdentifier(string priceEpisodeIdentifier)
+        {
+            return DateTime.TryParseExact(
+                   priceEpisodeIdentifier.Substring(priceEpisodeIdentifier.Length - 10),
+                    "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces,
+                    out DateTime episodeStartDate)
+                ? episodeStartDate
+                : throw new InvalidOperationException(
+                    $"Cannot determine episode start date from the price episode identifier: {priceEpisodeIdentifier}");
         }
 
         private static List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
