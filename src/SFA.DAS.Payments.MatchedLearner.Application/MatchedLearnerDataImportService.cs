@@ -35,12 +35,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             await _matchedLearnerRepository.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriods);
 
-            var datalockData = await _paymentsRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriod);
+            var dataLockEvents = await _paymentsRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriod);
 
-            var apprenticeshipIds = datalockData
+            var apprenticeshipIds = dataLockEvents
                 .SelectMany(dle => dle.PayablePeriods)
                 .Select(dlepp => dlepp.ApprenticeshipId.HasValue ? dlepp.ApprenticeshipId.Value : 0)
-                .Union(datalockData.SelectMany(dle => dle.NonPayablePeriods).SelectMany(dlenpp => dlenpp.Failures)
+                .Union(dataLockEvents.SelectMany(dle => dle.NonPayablePeriods).SelectMany(dlenpp => dlenpp.Failures)
                     .Select(dlenppf => dlenppf.ApprenticeshipId.HasValue ? dlenppf.ApprenticeshipId.Value : 0))
                 .ToList();
 
@@ -50,7 +50,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
 
-            await _matchedLearnerRepository.StoreDataLocks(datalockData, CancellationToken.None);
+            await _matchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
         }
     }
 }

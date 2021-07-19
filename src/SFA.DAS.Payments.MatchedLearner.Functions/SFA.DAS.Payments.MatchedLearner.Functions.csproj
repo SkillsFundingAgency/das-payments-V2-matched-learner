@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
@@ -12,8 +12,14 @@
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.13" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
+    <PackageReference Include="NServiceBus.AzureFunctions.InProcess.ServiceBus" Version="1.2.0" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
     <PackageReference Include="SFA.DAS.NLog.Targets.Redis" Version="1.2.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages">
+      <HintPath>..\SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Application\SFA.DAS.Payments.MatchedLearner.Application.csproj" />

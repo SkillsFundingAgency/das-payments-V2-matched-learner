@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Application;
+using SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions
 {
@@ -18,9 +19,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
         }
 
         [FunctionName("SubmissionSucceededHandler")]
-        public async Task Run([ServiceBusTrigger("%MatchedLearnerQueue%", Connection = "ServiceBusConnectionString")] string myQueueItem)
+        public async Task Run([ServiceBusTrigger("%MatchedLearnerQueue%", Connection = "MatchedLearnerServiceBusConnectionString")] SubmissionSucceededEvent submissionSucceededEvent)
         {
-            await _matchedLearnerDataImportService.Import(1, 1, 1);
+            await _matchedLearnerDataImportService.Import(submissionSucceededEvent.Ukprn, submissionSucceededEvent.CollectionPeriod, submissionSucceededEvent.AcademicYear);
         }
     }
 }

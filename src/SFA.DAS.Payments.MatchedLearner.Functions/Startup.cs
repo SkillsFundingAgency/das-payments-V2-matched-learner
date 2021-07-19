@@ -1,7 +1,9 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
@@ -28,6 +30,20 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
             builder.Services.AddOptions();
 
             builder.Services.AddAppDependencies();
+
+            builder.UseNServiceBus(() =>
+            {
+                var applicationSettings = builder.Services.GetApplicationSettings();
+                
+                Environment.SetEnvironmentVariable("AzureWebJobsServiceBus", applicationSettings.MatchedLearnerServiceBusConnectionString );
+
+                var endpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(applicationSettings.ServiceName);
+
+                var assemblyScanner = endpointConfiguration.AdvancedConfiguration.AssemblyScanner();
+                assemblyScanner.ThrowExceptions = false;
+
+                return endpointConfiguration;
+            });
         }
     }
 }

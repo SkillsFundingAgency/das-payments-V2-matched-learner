@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Steps\**" />
+    <EmbeddedResource Remove="Steps\**" />
+    <None Remove="Steps\**" />
+    <SpecFlowFeatureFiles Remove="Steps\**" />
+    <SpecFlowObsoleteCodeBehindFiles Remove="Steps\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.78" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.8" />
@@ -26,8 +34,9 @@
 
   
   <ItemGroup>
+    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Functions\SFA.DAS.Payments.MatchedLearner.Functions.csproj" />
+    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Types\SFA.DAS.Payments.MatchedLearner.Types.csproj" />
-    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Api\SFA.DAS.Payments.MatchedLearner.Api.csproj" />
   </ItemGroup>
 
   
@@ -39,15 +48,18 @@
 
   
   <ItemGroup>
-    <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
-      <Generator>SpecFlowSingleFileGenerator</Generator>
-      <LastGenOutput>SmokeTests.feature.cs</LastGenOutput>
-    </SpecFlowFeatureFiles>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
 
   
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SmokeTests.feature.cs</LastGenOutput>
+    </SpecFlowFeatureFiles>
   </ItemGroup>
 
 </Project>
