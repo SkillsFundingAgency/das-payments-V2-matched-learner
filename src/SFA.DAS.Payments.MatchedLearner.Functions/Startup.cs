@@ -2,10 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 
-[assembly: FunctionsStartup(typeof(SFA.DAS.Payments.MatchedLearner.Functions.Startup))]
+[assembly: FunctionsStartup(typeof(Startup))]
 namespace SFA.DAS.Payments.MatchedLearner.Functions
 {
     public class Startup : FunctionsStartup

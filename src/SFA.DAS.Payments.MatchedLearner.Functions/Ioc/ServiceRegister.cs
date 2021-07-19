@@ -11,34 +11,25 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
     {
         public static IServiceCollection AddAppDependencies(this IServiceCollection services)
         {
-            services.AddTransient<IMatchedLearnerContext, MatchedLearnerContext>(provider =>
-            {
-                var applicationSettings = ServiceCollectionExtensions.GetApplicationSettings(null, provider);
+            var applicationSettings = services.GetApplicationSettings();
 
-                var builder = new DbContextOptionsBuilder();
-                builder.UseSqlServer(applicationSettings.MatchedLearnerConnectionString);
-                return new MatchedLearnerContext(builder.Options);
-            });
+            var dbContextOptions = new DbContextOptionsBuilder()
+                .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                .Options;
 
-            services.AddTransient<IMatchedLearnerDataContextFactory, MatchedLearnerDataContextFactory>(x =>
+            services.AddTransient<IMatchedLearnerDataContextFactory, MatchedLearnerDataContextFactory>(provider => 
+                new MatchedLearnerDataContextFactory(dbContextOptions));
 
-            {
-                var applicationSettings = ServiceCollectionExtensions.GetApplicationSettings(null, x);
-
-                var builder = new DbContextOptionsBuilder();
-                builder.UseSqlServer(applicationSettings.MatchedLearnerConnectionString);
-
-                return new MatchedLearnerDataContextFactory(builder);
-            });
+            services.AddTransient<MatchedLearnerDataContext, MatchedLearnerDataContext>(provider => 
+                new MatchedLearnerDataContext(dbContextOptions));
 
             services.AddTransient<IPaymentsDataContext, PaymentsDataContext>(provider =>
             {
-                var applicationSettings = ServiceCollectionExtensions.GetApplicationSettings(null, provider);
+                var options = new DbContextOptionsBuilder()
+                    .UseSqlServer(applicationSettings.PaymentsConnectionString)
+                    .Options;
 
-                var builder = new DbContextOptionsBuilder();
-                builder.UseSqlServer(applicationSettings.PaymentsConnectionString);
-
-                return new PaymentsDataContext(builder.Options);
+                return new PaymentsDataContext(options);
             });
 
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();

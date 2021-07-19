@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
-using System;
-using System.IO;
 
 namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 {

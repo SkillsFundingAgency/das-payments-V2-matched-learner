@@ -12,14 +12,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Api.Ioc
     {
         public static IServiceCollection AddAppDependencies(this IServiceCollection services)
         {
-            services.AddTransient<IMatchedLearnerContext, MatchedLearnerContext>(provider =>
-            {
-                var applicationSettings = ServiceCollectionExtensions.GetApplicationSettings(null, provider);
+            var applicationSettings = services.GetApplicationSettings();
 
-                var builder = new DbContextOptionsBuilder();
-                builder.UseSqlServer(applicationSettings.MatchedLearnerConnectionString);
-                return new MatchedLearnerContext(builder.Options);
-            });
+            var dbContextOptions = new DbContextOptionsBuilder()
+                .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                .Options;
+
+            services.AddTransient<IMatchedLearnerDataContextFactory, MatchedLearnerDataContextFactory>(provider => 
+                new MatchedLearnerDataContextFactory(dbContextOptions));
+
+            services.AddTransient<MatchedLearnerDataContext, MatchedLearnerDataContext>(provider => 
+                new MatchedLearnerDataContext(dbContextOptions));
+
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
             services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
             services.AddTransient<IMatchedLearnerService, MatchedLearnerService>();

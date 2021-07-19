@@ -1,17 +1,17 @@
-﻿using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
-using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
-using SFA.DAS.Payments.MatchedLearner.Data.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
@@ -26,12 +26,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
     {
-        private readonly IMatchedLearnerContext _context;
+        private readonly MatchedLearnerDataContext _dataContext;
         private readonly ILogger<MatchedLearnerRepository> _logger;
         private readonly IMatchedLearnerDataContextFactory _retryDataContextFactory;
-        public MatchedLearnerRepository(IMatchedLearnerContext context, IMatchedLearnerDataContextFactory matchedLearnerDataContextFactory, ILogger<MatchedLearnerRepository> logger)
+        public MatchedLearnerRepository(MatchedLearnerDataContext dataContext, IMatchedLearnerDataContextFactory matchedLearnerDataContextFactory, ILogger<MatchedLearnerRepository> logger)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dataContext = dataContext ?? throw new ArgumentNullException(nameof(dataContext));
             _retryDataContextFactory = matchedLearnerDataContextFactory ?? throw new ArgumentNullException(nameof(matchedLearnerDataContextFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -42,7 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var dataLockEvents = await _context.DataLockEvent
+            var dataLockEvents = await _dataContext.DataLockEvent
                 .Where(x =>
                     x.LearningAimReference == "ZPROG001" &&
                     x.Ukprn == ukprn &&
@@ -59,41 +59,48 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             _logger.LogDebug($"Getting DataLock Event Data Uln: {uln}");
 
-            var eventId = dataLockEvents.Select(d => d.EventId).ToList();
+            var eventIds = dataLockEvents.Select(d => d.EventId).ToList();
 
-            var dataLockEventPriceEpisodes = await _context.DataLockEventPriceEpisode
-                .Where(d => eventId.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
+            var dataLockEventPriceEpisodes = await _dataContext.DataLockEventPriceEpisode
+                .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
                 .OrderBy(p => p.StartDate)
+                .ThenBy(p => p.PriceEpisodeIdentifier)
                 .ToListAsync();
 
-            var dataLockEventPayablePeriods = await _context.DataLockEventPayablePeriod
-                .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+            var dataLockEventPayablePeriods = await _dataContext.DataLockEventPayablePeriod
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
                 .OrderBy(p => p.DeliveryPeriod)
                 .ToListAsync();
 
-            var dataLockEventNonPayablePeriods = await _context.DataLockEventNonPayablePeriod
-                .Where(d => eventId.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+            var dataLockEventNonPayablePeriods = await _dataContext.DataLockEventNonPayablePeriod
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
                 .OrderBy(p => p.DeliveryPeriod)
                 .ToListAsync();
 
             var dataLockEventNonPayablePeriodIds = dataLockEventNonPayablePeriods.Select(d => d.DataLockEventNonPayablePeriodId).ToList();
 
-            var dataLockEventNonPayablePeriodFailures = await _context.DataLockEventNonPayablePeriodFailures
+            var dataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>();
+            if (dataLockEventNonPayablePeriodIds.Any())
+            {
+                dataLockEventNonPayablePeriodFailures = await _dataContext.DataLockEventNonPayablePeriodFailures
                 .Where(d => dataLockEventNonPayablePeriodIds.Contains(d.DataLockEventNonPayablePeriodId))
                 .ToListAsync();
+            }
 
             var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
                  .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
                  .Distinct()
                  .ToList();
 
-            var apprenticeshipDetails = await _context.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
-
-            stopwatch.Stop();
+            var apprenticeshipDetails = new List<ApprenticeshipModel>();
+            if (apprenticeshipIds.Any())
+            {
+                apprenticeshipDetails = await _dataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
+            }
 
             _logger.LogInformation($"Finished getting DataLock Event Data Duration: {stopwatch.ElapsedMilliseconds} Uln: {uln}");
 
-            return new MatchedLearnerDataLockInfo
+            var result = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = dataLockEvents,
                 DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
@@ -102,11 +109,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
                 Apprenticeships = apprenticeshipDetails
             };
+
+            stopwatch.Stop();
+
+            _logger.LogInformation($"Finished getting DataLock Event Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
+
+            return result;
         }
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
-            await _context.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
+            await _dataContext.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
         }
 
         public async Task RemoveApprenticeships(List<long> apprenticeshipIds)
@@ -115,19 +128,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             foreach (var batch in apprenticeshipBatches)
             {
-                await _context.RemoveApprenticeships(batch);
+                await _dataContext.RemoveApprenticeships(batch);
             }
         }
 
-        
+
 
         public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
-            using (var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
+            using (var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
             {
                 var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, SqlBulkCopyOptions = SqlBulkCopyOptions.KeepIdentity };
 
-                await ((DbContext)_context).BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+                await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
 
                 await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -143,7 +156,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             {
                 if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
 
-                _logger.LogInformation($"Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
+                _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
 
                 await SaveApprenticeshipsIndividually(models, cancellationToken).ConfigureAwait(false);
             }
@@ -159,7 +172,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             {
                 if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
 
-                _logger.LogInformation($"Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
+                _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
 
                 await SaveDataLocksIndividually(models, cancellationToken).ConfigureAwait(false);
             }
@@ -198,7 +211,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         private async Task SaveDataLockEvents(List<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
         {
-            using (var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
+            using (var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
             {
                 var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
                 var priceEpisodes = dataLockEvents
@@ -215,15 +228,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                         .SelectMany(npp => npp.Failures))
                     .ToList();
 
-                await ((DbContext)_context).BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
+                await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
                     .ConfigureAwait(false);
-                await ((DbContext)_context).BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
+                await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
                     .ConfigureAwait(false);
-                await ((DbContext)_context).BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
+                await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
                     .ConfigureAwait(false);
-                await ((DbContext)_context).BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
+                await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
                     .ConfigureAwait(false);
-                await ((DbContext)_context).BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
+                await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
                     .ConfigureAwait(false);
                 await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
             }

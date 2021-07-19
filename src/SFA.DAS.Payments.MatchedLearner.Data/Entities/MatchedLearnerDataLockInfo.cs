@@ -1,5 +1,4 @@
-﻿using SFA.DAS.Payments.MatchedLearner.Data.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
 {

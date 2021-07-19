@@ -18,11 +18,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
             builder.Property(x => x.Amount).HasColumnName(@"Amount").IsRequired();
             builder.Property(x => x.SfaContributionPercentage).HasColumnName(@"SfaContributionPercentage");
             builder.Property(x => x.LearningStartDate).HasColumnName(@"LearningStartDate");
-
-            builder.HasOne(pp => pp.DataLockEvent)
-                .WithMany(dle => dle.PayablePeriods)
-                .HasPrincipalKey(dle => dle.EventId)
-                .HasForeignKey(pp => pp.DataLockEventId);
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
 {
@@ -47,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             {
                 DataLockEvents = new List<DataLockEventModel>
                 {
-                    new DataLockEventModel()
+                    new DataLockEventModel
                     {
                         LearningStartDate = _expectedLearningStartDate,
                         EventTime = _expectedEventTime,
@@ -67,7 +66,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
                 DataLockEventPriceEpisodes = new List<DataLockEventPriceEpisodeModel>
                 {
-                    new DataLockEventPriceEpisodeModel()
+                    new DataLockEventPriceEpisodeModel
                     {
                         StartDate = _expectedPriceEpisodeStartDate,
                         ActualEndDate = _expectedPriceEpisodeEndDate,
@@ -83,7 +82,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
                 DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>
                 {
-                    new DataLockEventNonPayablePeriodModel()
+                    new DataLockEventNonPayablePeriodModel
                     {
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         DeliveryPeriod = 2,
@@ -92,12 +91,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
                 DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>
                 {
-                    new DataLockEventNonPayablePeriodFailureModel()
+                    new DataLockEventNonPayablePeriodFailureModel
                     {
                         ApprenticeshipId = 123,
                         DataLockFailureId = 2,
                     },
-                    new DataLockEventNonPayablePeriodFailureModel()
+                    new DataLockEventNonPayablePeriodFailureModel
                     {
                         ApprenticeshipId = 123,
                         DataLockFailureId = 3,
@@ -106,12 +105,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
                 Apprenticeships = new List<ApprenticeshipModel>
                 {
-                    new ApprenticeshipModel()
+                    new ApprenticeshipModel
                     {
                         Id = 123,
                         ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType
                     },
-                    new ApprenticeshipModel()
+                    new ApprenticeshipModel
                     {
                         Id = 456,
                         ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType
@@ -120,7 +119,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
                 DataLockEventPayablePeriods = new List<DataLockEventPayablePeriodModel>
                 {
-                    new DataLockEventPayablePeriodModel()
+                    new DataLockEventPayablePeriodModel
                     {
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         ApprenticeshipId = 456,

@@ -6,7 +6,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
     {
         public long Id { get; set; }
         public Guid DataLockEventNonPayablePeriodId { get; set; }
-        public virtual DataLockEventNonPayablePeriodModel DataLockEventNonPayablePeriod { get; set; }
         public byte DataLockFailureId { get; set; }
         public long? ApprenticeshipId { get; set; }
     }

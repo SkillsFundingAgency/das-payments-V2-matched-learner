@@ -21,13 +21,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
             builder.Ignore(x => x.CensusDate);
             builder.Property(x => x.LearningStartDate).HasColumnName(@"LearningStartDate");
 
-            builder.HasOne(x => x.DataLockEvent)
-                .WithMany(dl => dl.NonPayablePeriods)
-                .HasPrincipalKey(x => x.EventId)
-                .HasForeignKey(x => x.DataLockEventId);
-
             builder.HasMany(npp => npp.Failures)
-                .WithOne(nppf => nppf.DataLockEventNonPayablePeriod)
+                .WithOne()
                 .HasPrincipalKey(npp => npp.DataLockEventNonPayablePeriodId)
                 .HasForeignKey(nppf => nppf.DataLockEventNonPayablePeriodId);
         }

@@ -5,7 +5,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
     public class DataLockEventPayablePeriodModel
     {
         public long Id { get; set; }
-        public virtual DataLockEventModel DataLockEvent { get; set; }
         public Guid DataLockEventId { get; set; }
         public string PriceEpisodeIdentifier { get; set; }
         public byte TransactionType { get; set; }

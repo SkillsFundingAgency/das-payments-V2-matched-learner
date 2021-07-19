@@ -29,12 +29,5 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
         // public List<ApprenticeshipPauseModel> ApprenticeshipPauses { get; set; }
 
         public DateTimeOffset CreationDate { get; set; }
-
-        public ApprenticeshipModel()
-        {
-            //todo: decide if we need to migrate these foreign table key references into codebase
-            //ApprenticeshipPriceEpisodes = new List<ApprenticeshipPriceEpisodeModel>();
-            //ApprenticeshipPauses = new List<ApprenticeshipPauseModel>();
-        }
     }
 }

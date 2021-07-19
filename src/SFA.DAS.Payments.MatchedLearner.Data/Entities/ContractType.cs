@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
+﻿namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
 {
     public enum ContractType: byte
     {

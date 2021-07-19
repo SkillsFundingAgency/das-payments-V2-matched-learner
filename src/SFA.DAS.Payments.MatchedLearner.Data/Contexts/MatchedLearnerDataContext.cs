@@ -8,7 +8,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 {
-    public interface IMatchedLearnerContext
+    public interface IMatchedLearnerDataContext
     {
         DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
         DatabaseFacade Database { get; }
@@ -22,9 +22,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds);
     }
 
-    public class MatchedLearnerContext : DbContext, IMatchedLearnerContext
+    public class MatchedLearnerDataContext : DbContext, IMatchedLearnerDataContext
     {
-        public MatchedLearnerContext(DbContextOptions options) : base(options)
+        public MatchedLearnerDataContext(DbContextOptions options) : base(options)
         { }
 
         public DbSet<ApprenticeshipModel> Apprenticeship { get; set; }

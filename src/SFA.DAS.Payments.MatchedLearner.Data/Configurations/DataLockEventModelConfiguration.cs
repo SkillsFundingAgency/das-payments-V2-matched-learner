@@ -43,17 +43,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
             builder.Ignore(x => x.StartDate);
             builder.Ignore(x => x.NumberOfInstalments);
 
-            builder.HasMany<DataLockEventNonPayablePeriodModel>(dle => dle.NonPayablePeriods)
-                .WithOne(npp => npp.DataLockEvent)
+            builder.HasMany(dle => dle.NonPayablePeriods)
+                .WithOne()
                 .HasPrincipalKey(dle => dle.EventId)
                 .HasForeignKey(npp => npp.DataLockEventId);
 
-            builder.HasMany<DataLockEventPayablePeriodModel>(x => x.PayablePeriods)
-                .WithOne(pp => pp.DataLockEvent)
+            builder.HasMany(x => x.PayablePeriods)
+                .WithOne()
                 .HasPrincipalKey(dle => dle.EventId)
                 .HasForeignKey(pp => pp.DataLockEventId);
 
-            builder.HasMany<DataLockEventPriceEpisodeModel>(dle => dle.PriceEpisodes)
+            builder.HasMany(dle => dle.PriceEpisodes)
                 .WithOne()
                 .HasPrincipalKey(dle => dle.EventId)
                 .HasForeignKey(pe => pe.DataLockEventId);

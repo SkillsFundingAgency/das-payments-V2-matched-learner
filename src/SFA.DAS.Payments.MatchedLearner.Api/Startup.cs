@@ -113,7 +113,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
                 });
                 endpoints.MapHealthChecks("/ping", new HealthCheckOptions
                 {
-                    Predicate = (_) => false,
+                    Predicate = _ => false,
                     ResponseWriter = (context, report) =>
                     {
                         context.Response.ContentType = "application/json";
