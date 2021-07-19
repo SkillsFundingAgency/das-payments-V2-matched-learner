@@ -25,7 +25,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             {
                 new DataLockEvent
                 {
-                    AcademicYear = 2021,
+                    AcademicYear = 1920,
+                    CollectionPeriod = 14,
                     LearningAimPathwayCode = 1,
                     EventId = event1,
                 }
@@ -41,7 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 2m,
                     NumberOfInstalments = 5,
                     CompletionAmount = 1m,
-                    PriceEpisodeIdentifier = "1-1-1",
+                    PriceEpisodeIdentifier = "1-1-01/08/2020",
                 },
                 new DataLockEventPriceEpisode
                 {
@@ -51,7 +52,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 20m,
                     NumberOfInstalments = 50,
                     CompletionAmount = 10m,
-                    PriceEpisodeIdentifier = "2-2-2",
+                    PriceEpisodeIdentifier = "2-2-01/08/2020",
                 }
             };
             var nonPayableEventId1 = Guid.NewGuid();
@@ -61,7 +62,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 {
                     DataLockEventId = event1,
                     DataLockEventNonPayablePeriodId = nonPayableEventId1,
-                    PriceEpisodeIdentifier = "1-1-1",
+                    PriceEpisodeIdentifier = "1-1-01/08/2020",
                     DeliveryPeriod = 2,
                 }
             };
@@ -85,7 +86,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventPayablePeriod
                 {
                     DataLockEventId = event1,
-                    PriceEpisodeIdentifier = "2-2-2",
+                    PriceEpisodeIdentifier = "2-2-01/08/2020",
                     DeliveryPeriod = 1,
                 },
             };
@@ -93,6 +94,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             _testInput.DataLockEvents.Add(new DataLockEvent
             {
                 AcademicYear = 2021,
+                CollectionPeriod = 1,
                 LearningAimPathwayCode = 2,
                 EventId = event2,
             });
@@ -107,7 +109,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 200m,
                     NumberOfInstalments = 500,
                     CompletionAmount = 100m,
-                    PriceEpisodeIdentifier = "3-3-3",
+                    PriceEpisodeIdentifier = "3-3-01/08/2020",
                 },
                 new DataLockEventPriceEpisode
                 {
@@ -117,7 +119,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 200m,
                     NumberOfInstalments = 500,
                     CompletionAmount = 100m,
-                    PriceEpisodeIdentifier = "4-4-4",
+                    PriceEpisodeIdentifier = "4-4-01/08/2020",
                 }
             });
             
@@ -128,7 +130,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventNonPayablePeriod
                 {
                     DataLockEventId = event2,
-                    PriceEpisodeIdentifier = "3-3-3",
+                    PriceEpisodeIdentifier = "3-3-01/08/2020",
                     DeliveryPeriod = 200,
                     DataLockEventNonPayablePeriodId = nonPayableEventId2
                 }
@@ -154,7 +156,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventPayablePeriod
                 {
                     DataLockEventId = event2,
-                    PriceEpisodeIdentifier = "4-4-4",
+                    PriceEpisodeIdentifier = "4-4-01/08/2020",
                     DeliveryPeriod = 100,
                 }
             });
@@ -188,12 +190,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(2);
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "1-1-1" });
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "2-2-2" });
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "1-1-01/08/2020", AcademicYear = 1920, CollectionPeriod = 14 });
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "2-2-01/08/2020", AcademicYear = 1920, CollectionPeriod = 14 });
 
             actual.Training.Last().PriceEpisodes.Should().HaveCount(2);
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "3-3-3" });
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "4-4-4" });
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "3-3-01/08/2020", AcademicYear = 2021, CollectionPeriod = 1 });
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "4-4-01/08/2020", AcademicYear = 2021, CollectionPeriod = 1 });
         }
 
         [Test]

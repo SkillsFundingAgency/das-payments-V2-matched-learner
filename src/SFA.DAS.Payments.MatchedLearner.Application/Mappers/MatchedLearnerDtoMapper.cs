@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using SFA.DAS.Payments.MatchedLearner.Application.Data;
 using SFA.DAS.Payments.MatchedLearner.Types;
@@ -18,7 +19,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
             if (matchedLearnerDataLockInfo == null || !matchedLearnerDataLockInfo.DataLockEvents.Any())
                 return null;
 
-            var firstEvent = matchedLearnerDataLockInfo.DataLockEvents.First();
+            var firstEvent = matchedLearnerDataLockInfo.DataLockEvents
+                .OrderByDescending(x => x.AcademicYear)
+                .ThenBy(x => x.LearningStartDate)
+                .First();
 
             return new MatchedLearnerDto
             {
@@ -42,13 +46,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 x.LearningAimProgrammeType,
                 x.LearningAimFrameworkCode,
                 x.LearningAimPathwayCode,
-                x.AcademicYear,
                 x.LearningAimFundingLineType,
                 x.LearningStartDate,
                 x.LearnerUln,
-                x.Ukprn,
-                x.CollectionPeriod,
-                x.IlrSubmissionDateTime,
+                x.Ukprn
             }).Select(dataLockEvent => new TrainingDto
             {
                 Reference = dataLockEvent.Key.LearningAimReference,
@@ -58,26 +59,56 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 PathwayCode = dataLockEvent.Key.LearningAimPathwayCode,
                 FundingLineType = null,
                 StartDate = dataLockEvent.Key.LearningStartDate.GetValueOrDefault(),
-                PriceEpisodes = MapPriceEpisodes(dataLockEvent.First().EventId, matchedLearnerDataLockInfo)
+                PriceEpisodes = MapPriceEpisodes(dataLockEvent.Select(d => d.EventId), matchedLearnerDataLockInfo)
             }).ToList();
         }
 
-        private static List<PriceEpisodeDto> MapPriceEpisodes(Guid dataLockEventId, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
+        private static List<PriceEpisodeDto> MapPriceEpisodes(IEnumerable<Guid> dataLockEventIds, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
         {
             return matchedLearnerDataLockInfo
-                .DataLockEventPriceEpisodes
-                .Where(d => d.DataLockEventId == dataLockEventId)
-                .Select(priceEpisode => new PriceEpisodeDto
+                .DataLockEventPriceEpisodes.Where(p => dataLockEventIds.Contains(p.DataLockEventId))
+                .GroupBy(x => new
                 {
-                    Identifier = priceEpisode.PriceEpisodeIdentifier,
-                    AgreedPrice = priceEpisode.AgreedPrice,
-                    StartDate = priceEpisode.StartDate,
-                    EndDate = priceEpisode.ActualEndDate,
-                    NumberOfInstalments = priceEpisode.NumberOfInstalments,
-                    InstalmentAmount = priceEpisode.InstalmentAmount,
-                    CompletionAmount = priceEpisode.CompletionAmount,
-                    Periods = MapPeriods(priceEpisode.PriceEpisodeIdentifier, matchedLearnerDataLockInfo),
+                    x.PriceEpisodeIdentifier,
+                    x.AgreedPrice,
+                    x.StartDate,
+                    x.ActualEndDate,
+                    x.NumberOfInstalments,
+                    x.InstalmentAmount,
+                    x.CompletionAmount,
+                    x.EffectiveTotalNegotiatedPriceStartDate
+                })
+                .Select(priceEpisode =>
+                {
+                    var dataLockEvent = matchedLearnerDataLockInfo.DataLockEvents.Single(d =>
+                            priceEpisode.First().DataLockEventId == d.EventId);
+
+                    return new PriceEpisodeDto
+                    {
+                        AcademicYear = dataLockEvent.AcademicYear,
+                        CollectionPeriod = dataLockEvent.CollectionPeriod,
+                        Identifier = priceEpisode.Key.PriceEpisodeIdentifier,
+                        AgreedPrice = priceEpisode.Key.AgreedPrice,
+                        StartDate = ExtractEpisodeStartDateFromPriceEpisodeIdentifier(priceEpisode.Key.PriceEpisodeIdentifier),
+                        EndDate = priceEpisode.Key.ActualEndDate,
+                        NumberOfInstalments = priceEpisode.Key.NumberOfInstalments,
+                        InstalmentAmount = priceEpisode.Key.InstalmentAmount,
+                        CompletionAmount = priceEpisode.Key.CompletionAmount,
+                        Periods = MapPeriods(priceEpisode.Key.PriceEpisodeIdentifier, matchedLearnerDataLockInfo),
+                        TotalNegotiatedPriceStartDate = priceEpisode.Key.EffectiveTotalNegotiatedPriceStartDate
+                    };
                 }).ToList();
+        }
+
+        private static DateTime ExtractEpisodeStartDateFromPriceEpisodeIdentifier(string priceEpisodeIdentifier)
+        {
+            return DateTime.TryParseExact(
+                   priceEpisodeIdentifier.Substring(priceEpisodeIdentifier.Length - 10),
+                    "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces,
+                    out DateTime episodeStartDate)
+                ? episodeStartDate
+                : throw new InvalidOperationException(
+                    $"Cannot determine episode start date from the price episode identifier: {priceEpisodeIdentifier}");
         }
 
         private static List<PeriodDto> MapPeriods(string priceEpisodeIdentifier, MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
