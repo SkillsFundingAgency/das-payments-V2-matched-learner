@@ -44,7 +44,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 2m,
                     NumberOfInstalments = 5,
                     CompletionAmount = 1m,
-                    PriceEpisodeIdentifier = "1-1-1",
+                    PriceEpisodeIdentifier = "1-1-01/08/2020",
                 },
                 new DataLockEventPriceEpisodeModel()
                 {
@@ -54,7 +54,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 20m,
                     NumberOfInstalments = 50,
                     CompletionAmount = 10m,
-                    PriceEpisodeIdentifier = "2-2-2",
+                    PriceEpisodeIdentifier = "2-2-01/08/2020",
                 }
             };
 
@@ -65,7 +65,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventNonPayablePeriodModel()
                 {
                     DataLockEventId = event1,
-                    PriceEpisodeIdentifier = "1-1-1",
+                    PriceEpisodeIdentifier = "1-1-01/08/2020",
                     DeliveryPeriod = 2,
                     DataLockEventNonPayablePeriodId = nonPayableEventId
                 }
@@ -91,7 +91,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventPayablePeriodModel()
                 {
                     DataLockEventId = event1,
-                    PriceEpisodeIdentifier = "2-2-2",
+                    PriceEpisodeIdentifier = "2-2-01/08/2020",
                     DeliveryPeriod = 1,
                 },
             };
@@ -117,7 +117,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 200m,
                     NumberOfInstalments = 500,
                     CompletionAmount = 100m,
-                    PriceEpisodeIdentifier = "3-3-3",
+                    PriceEpisodeIdentifier = "3-3-01/08/2020",
                 },
                 new DataLockEventPriceEpisodeModel()
                 {
@@ -127,7 +127,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     InstalmentAmount = 200m,
                     NumberOfInstalments = 500,
                     CompletionAmount = 100m,
-                    PriceEpisodeIdentifier = "4-4-4",
+                    PriceEpisodeIdentifier = "4-4-01/08/2020",
                 }
             });
 
@@ -138,7 +138,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventNonPayablePeriodModel()
                 {
                     DataLockEventId = event2,
-                    PriceEpisodeIdentifier = "3-3-3",
+                    PriceEpisodeIdentifier = "3-3-01/08/2020",
                     DeliveryPeriod = 200,
                     DataLockEventNonPayablePeriodId = nonPayableEventId2
                 }
@@ -165,7 +165,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 new DataLockEventPayablePeriodModel()
                 {
                     DataLockEventId = event2,
-                    PriceEpisodeIdentifier = "4-4-4",
+                    PriceEpisodeIdentifier = "4-4-01/08/2020",
                     DeliveryPeriod = 100,
                 },
             });
@@ -187,11 +187,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(2);
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "1-1-1" });
-            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "2-2-2" });
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "1-1-01/08/2020" });
+            actual.Training.First().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "2-2-01/08/2020" });
             actual.Training.Last().PriceEpisodes.Should().HaveCount(2);
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "3-3-3" });
-            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "4-4-4" });
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "3-3-01/08/2020" });
+            actual.Training.Last().PriceEpisodes.Should().ContainEquivalentOf(new { Identifier = "4-4-01/08/2020" });
         }
 
         [Test]

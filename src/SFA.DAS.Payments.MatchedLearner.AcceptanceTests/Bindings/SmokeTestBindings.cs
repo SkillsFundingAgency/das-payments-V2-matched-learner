@@ -44,8 +44,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public async Task GivenWeHaveCreatedASampleLearner()
         {
             var repository = new TestRepository();
-            await repository.ClearLearner(-1000, -2000);
-            await repository.AddDataLockEvent(-1000, -2000);
+            await repository.ClearLearner(1000, 2000);
+            await repository.AddDataLockEvent(1000, 2000);
         }
 
         [Given(@"we have created (.*) sample learners")]
@@ -64,7 +64,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         {
             var request = new TestClient();
             
-            _context.MatchedLearnerDto = await request.Handle(-1000, -2000);
+            _context.MatchedLearnerDto = await request.Handle(1000, 2000);
         }
 
         [When(@"we call the API (.*) times with the sample learners details")]
@@ -87,7 +87,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             }
         }
 
-
         [Then(@"the result matches the sample learner")]
         public void ThenTheResultMatchesTheSampleLearner()
         {
@@ -99,8 +98,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             actual.IlrSubmissionDate.Should().Be(new DateTime(2020, 10, 10).ToDateTimeOffset(TimeSpan.FromHours(1)));
             actual.IlrSubmissionWindowPeriod.Should().Be(1);
             actual.AcademicYear.Should().Be(2021);
-            actual.Ukprn.Should().Be(-1000);
-            actual.Uln.Should().Be(-2000);
+            actual.Ukprn.Should().Be(1000);
+            actual.Uln.Should().Be(2000);
             actual.Training.Should().HaveCount(1);
 
             var training = actual.Training.First();
@@ -111,24 +110,27 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             training.PathwayCode.Should().Be(400);
             training.FundingLineType.Should().BeNullOrEmpty();
             training.StartDate.Should().Be(new DateTime(2020, 10, 9));
-            training.PriceEpisodes.Should().HaveCount(1);
+            training.PriceEpisodes.Should().HaveCount(2);
 
             var priceEpisode = training.PriceEpisodes.First();
-            priceEpisode.Identifier.Should().Be("TEST");
+            priceEpisode.Identifier.Should().Be("25-104-01/08/2019");
+            priceEpisode.AcademicYear.Should().Be(1920);
+            priceEpisode.CollectionPeriod.Should().Be(14);
             priceEpisode.AgreedPrice.Should().Be(3000);
-            priceEpisode.StartDate.Should().Be(new DateTime(2020, 10, 7));
+            priceEpisode.StartDate.Should().Be(new DateTime(2019, 08, 01));
             priceEpisode.EndDate.Should().Be(new DateTime(2020, 10, 12));
             priceEpisode.NumberOfInstalments.Should().Be(12);
             priceEpisode.InstalmentAmount.Should().Be(50);
             priceEpisode.CompletionAmount.Should().Be(550);
-            priceEpisode.Periods.Should().HaveCount(7);
+            priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
+            priceEpisode.Periods.Should().HaveCount(3);
 
             priceEpisode.Periods.Should().ContainEquivalentOf(new
             {
                 Period = 1,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = -123456,
+                ApprenticeshipId = 123456,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -137,7 +139,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 2,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = -123456,
+                ApprenticeshipId = 123456,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -146,36 +148,78 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 3,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = -123456,
+                ApprenticeshipId = 123456,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
-            priceEpisode.Periods.Should().ContainEquivalentOf(new
+            
+
+            var priceEpisode2 = training.PriceEpisodes.ElementAt(1);
+            priceEpisode2.Identifier.Should().Be("25-104-01/08/2020");
+            priceEpisode2.AcademicYear.Should().Be(2021);
+            priceEpisode2.CollectionPeriod.Should().Be(1);
+            priceEpisode2.AgreedPrice.Should().Be(3000);
+            priceEpisode2.StartDate.Should().Be(new DateTime(2020, 08, 01));
+            priceEpisode2.EndDate.Should().Be(new DateTime(2020, 10, 12));
+            priceEpisode2.NumberOfInstalments.Should().Be(12);
+            priceEpisode2.InstalmentAmount.Should().Be(50);
+            priceEpisode2.CompletionAmount.Should().Be(550);
+            priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
+            priceEpisode2.Periods.Should().HaveCount(7);
+
+            priceEpisode2.Periods.Should().ContainEquivalentOf(new
+            {
+                Period = 1,
+                IsPayable = true,
+                AccountId = 1000,
+                ApprenticeshipId = 123456,
+                ApprenticeshipEmployerType = 3,
+                TransferSenderAccountId = 500,
+            });
+            priceEpisode2.Periods.Should().ContainEquivalentOf(new
+            {
+                Period = 2,
+                IsPayable = true,
+                AccountId = 1000,
+                ApprenticeshipId = 123456,
+                ApprenticeshipEmployerType = 3,
+                TransferSenderAccountId = 500,
+            });
+            priceEpisode2.Periods.Should().ContainEquivalentOf(new
+            {
+                Period = 3,
+                IsPayable = true,
+                AccountId = 1000,
+                ApprenticeshipId = 123456,
+                ApprenticeshipEmployerType = 3,
+                TransferSenderAccountId = 500,
+            });
+            priceEpisode2.Periods.Should().ContainEquivalentOf(new
             {
                 Period = 3,
                 IsPayable = false,
                 AccountId = 1000,
-                ApprenticeshipId = -123456,
+                ApprenticeshipId = 123456,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
                 DataLockFailures = new HashSet<byte>{1, 2, 3},
             });
-            priceEpisode.Periods.Should().ContainEquivalentOf(new
+            priceEpisode2.Periods.Should().ContainEquivalentOf(new
             {
                 Period = 4,
                 IsPayable = false,
                 AccountId = 1000,
-                ApprenticeshipId = -123456,
+                ApprenticeshipId = 123456,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
                 DataLockFailures = new HashSet<byte>{7},
             });
-            priceEpisode.Periods.Should().ContainEquivalentOf(new
+            priceEpisode2.Periods.Should().ContainEquivalentOf(new
             {
                 Period = 5,
                 IsPayable = false,
                 AccountId = 1000,
-                ApprenticeshipId = -123456,
+                ApprenticeshipId = 123456,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
                 DataLockFailures = new HashSet<byte>{9},
