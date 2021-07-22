@@ -24,53 +24,8 @@ resources:
     ref: refs/tags/0.2.1
     endpoint: 'GitHub (SFA)'
 
-pool:
-  name: 'DAS - Continuous Integration'
-
-steps:
-  - task: gittools.gitversion.gitversion-task.GitVersion@5
-    displayName: GitVersion
-    inputs:
-      configFilePath: GitVersion.yml    
-      updateAssemblyInfo: true
-
-  - task: DotNetCoreCLI@2
-    displayName: Restore
-    inputs:
-      command: restore
-      projects: 'src/**/*.csproj'
-
-  - task: DotNetCoreCLI@2
-    displayName: Build
-    inputs:
-      projects: 'src/**/*.csproj'
-      arguments: '--configuration $(buildConfiguration) --no-restore'
-      
-  - task: DotNetCoreCLI@2
-    displayName: Unit Tests
-    inputs:
-      command: test
-      projects: '**/*.Application.UnitTests.csproj'
-      arguments: '--configuration $(buildConfiguration) --no-build'
-
-  - template: azure-pipelines-templates/dependency-check.yml@das-platform-building-blocks
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Publish API'
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: 'src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj'
-      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
-
-  - task: CopyFiles@2
-    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
-    inputs:
-      contents: |
-        azure/**
-      targetFolder: '$(build.artifactstagingdirectory)/publish'
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
-    inputs:
-      pathtoPublish: '$(build.artifactstagingdirectory)/publish'
+stages:
+- stage: Build
+  jobs:
+  - template: pipeline-templates/job/code-build.yml
+#  - template: pipeline-templates/job/dacpac-build.yml
