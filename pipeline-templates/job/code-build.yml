@@ -1,5 +1,5 @@
 jobs:
-- job: CodeBuild
+- job: ApiBuild
   pool:
     name: DAS - Continuous Integration
   variables:
@@ -17,7 +17,7 @@ jobs:
       configFilePath: GitVersion.yml
 
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
-      
+    
   - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
 
   - task: DotNetCoreCLI@2
@@ -41,3 +41,47 @@ jobs:
     inputs:
       targetPath: $(build.artifactstagingdirectory)/publish
       artifactName: MatchedLearnerApi
+
+- job: FunctionAppBuild
+  pool:
+    name: DAS - Continuous Integration
+    demands: Agent.OS -equals Windows_NT
+  variables:
+  - group: BUILD Management Resources
+  - name: buildConfiguration
+    value: release
+  workspace:
+    clean: all
+  steps:
+  - task: UseGitVersion@5
+    displayName: GitVersion
+    inputs:
+      versionSpec: 5.x
+      useConfigFile: true
+      configFilePath: GitVersion.yml
+
+  - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
+
+  - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Function App Payments Matched Learner'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/SFA.DAS.Payments.MatchedLearner.Functions/SFA.DAS.Payments.MatchedLearner.Functions.csproj'
+      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+    inputs:
+      Contents: |
+        azure/**
+      TargetFolder: '$(build.artifactstagingdirectory)/publish'
+      OverWrite: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(build.artifactstagingdirectory)/publish'
+      artifactName: MatchedLearnerFunctionApp
