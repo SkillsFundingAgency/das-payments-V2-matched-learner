@@ -6,16 +6,6 @@ trigger:
 
 pr: none
 
-workspace:
-  clean: all
-  
-variables:
-- name: BuildPlatform
-  value : 'any cpu'
-- name: BuildConfiguration
-  value: 'release'
-- group: 'Prod Management Resources'
-
 resources:
   repositories:
   - repository: das-platform-building-blocks
@@ -28,4 +18,3 @@ stages:
 - stage: Build
   jobs:
   - template: pipeline-templates/job/code-build.yml
-#  - template: pipeline-templates/job/dacpac-build.yml
