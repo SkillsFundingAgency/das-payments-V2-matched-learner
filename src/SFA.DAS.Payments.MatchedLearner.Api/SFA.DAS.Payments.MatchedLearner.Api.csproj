@@ -14,17 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="local.settings.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="local.settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.17.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.12.0" />
     <PackageReference Include="SFA.DAS.Api.Common" Version="1.0.13" />
@@ -37,6 +26,4 @@
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Application\SFA.DAS.Payments.MatchedLearner.Application.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj" />
   </ItemGroup>
-
-
 </Project>

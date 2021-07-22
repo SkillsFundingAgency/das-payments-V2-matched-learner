@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
@@ -58,11 +55,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         {
             HubName = hubName;
 
-            var fileConfig =  new ConfigurationBuilder()
+            var fileConfig = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("local.settings.json", optional: false)
                 .Build();
-            
+
             var appConfig = new Dictionary<string, string>{
                 { "EnvironmentName", "Development" },
                 { "AzureWebJobsStorage", "UseDevelopmentStorage=true" },
@@ -70,19 +67,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 { "MatchedLearnerServiceBusConnectionString",  fileConfig.GetValue<string>("Values:MatchedLearnerServiceBusConnectionString")},
             };
 
-           var directory = Directory.GetCurrentDirectory();
+            var directory = Directory.GetCurrentDirectory();
 
-           var inMemoryConfig =  new ConfigurationBuilder()
-               .SetBasePath(Directory.GetCurrentDirectory())
-               .AddInMemoryCollection(appConfig)
-               .Build();
+            var inMemoryConfig = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddInMemoryCollection(appConfig)
+                .Build();
 
-           var context = new WebJobsBuilderContext
-           {
-               ApplicationRootPath = directory[..directory.IndexOf("bin", StringComparison.Ordinal)], 
-               Configuration = inMemoryConfig,
-               EnvironmentName = "Development"
-           };
+            var context = new WebJobsBuilderContext
+            {
+                ApplicationRootPath = directory[..directory.IndexOf("bin", StringComparison.Ordinal)],
+                Configuration = inMemoryConfig,
+                EnvironmentName = "Development"
+            };
 
             _host = new HostBuilder()
                 .ConfigureAppConfiguration(a =>
