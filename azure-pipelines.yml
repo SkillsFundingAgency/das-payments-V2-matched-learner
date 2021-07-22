@@ -6,6 +6,9 @@ trigger:
 
 pr: none
 
+workspace:
+  clean: all
+
 resources:
   repositories:
   - repository: das-platform-building-blocks
