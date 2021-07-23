@@ -392,6 +392,10 @@
         }
     ],
     "outputs": {
+        "FunctionAppName": {
+            "type": "string",
+            "value": "[variables('functionAppName')]"
+        },
         "ApiAppServiceName": {
             "type": "string",
             "value": "[variables('apiAppServiceName')]"
