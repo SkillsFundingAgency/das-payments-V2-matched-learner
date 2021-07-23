@@ -59,6 +59,23 @@
         },
         "configNames": {
             "type": "string"
+        },
+        "appServicePlanInstances": {
+            "type": "int",
+            "defaultValue": 1
+        },
+        "subnetObject": {
+            "type": "object"
+        },
+        "subnetServiceEndpointList": {
+            "type": "array"
+        },
+        "subnetDelegations": {
+            "type": "array"
+        },
+          "appServicePlanSize": {
+            "type": "string",
+            "defaultValue": "1"
         }
     },
     "variables": {
