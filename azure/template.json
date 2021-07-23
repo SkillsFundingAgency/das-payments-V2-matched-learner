@@ -20,6 +20,9 @@
         "sharedBackEndSubnetResourceId": {
             "type": "string"
         },
+        "sharedEnvVirtualNetworkName": {
+            "type": "string"
+        },
         "appServiceAllowedIPs": {
             "type": "array",
             "defaultValue": []
@@ -34,6 +37,9 @@
             "type": "string"
         },
         "sharedManagementResourceGroup": {
+            "type": "string"
+        },
+        "sharedSQLServerName": {
             "type": "string"
         },
         "loggingRedisConnectionString": {
@@ -61,7 +67,8 @@
         "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
         "apiAppServiceName": "[concat(variables('resourceNamePrefix'), 'api-as')]",
         "functionAppName": "[concat(variables('resourceNamePrefix'), 'wkr-fa')]",
-        "databaseName": "[concat(variables('resourceNamePrefix'), '-db')]"
+        "databaseName": "[concat(variables('resourceNamePrefix'), '-db')]",
+        "appServicePlanName": "[concat(variables('resourceNamePrefix'), '-asp')]"
     },
     "resources": [
         {
