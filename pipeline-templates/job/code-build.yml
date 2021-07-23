@@ -28,42 +28,6 @@ jobs:
       projects: src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj
       arguments: --configuration release --output $(build.artifactstagingdirectory)/publish --no-restore --no-build
 
-  - task: CopyFiles@2
-    displayName: Copy Files to $(build.artifactstagingdirectory)/publish
-    inputs:
-      contents: |
-        azure/**
-      targetFolder: $(build.artifactstagingdirectory)/publish
-      overWrite: true
-
-  - task: PublishPipelineArtifact@1
-    displayName: Publish Artifact - MatchedLearnerApi
-    inputs:
-      targetPath: $(build.artifactstagingdirectory)/publish
-      artifactName: MatchedLearnerApi
-
-- job: FunctionAppBuild
-  pool:
-    name: DAS - Continuous Integration
-    demands: Agent.OS -equals Windows_NT
-  variables:
-  - group: BUILD Management Resources
-  - name: buildConfiguration
-    value: release
-  workspace:
-    clean: all
-  steps:
-  - task: UseGitVersion@5
-    displayName: GitVersion
-    inputs:
-      versionSpec: 5.x
-      useConfigFile: true
-      configFilePath: GitVersion.yml
-
-  - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
-
-  - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
-
   - task: DotNetCoreCLI@2
     displayName: 'Publish Function App Payments Matched Learner'
     inputs:
@@ -84,4 +48,4 @@ jobs:
     displayName: 'Publish Artifact'
     inputs:
       PathtoPublish: '$(build.artifactstagingdirectory)/publish'
-      artifactName: MatchedLearnerFunctionApp
+      artifactName: drop
