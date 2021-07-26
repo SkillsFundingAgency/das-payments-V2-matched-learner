@@ -23,6 +23,19 @@
         "sharedEnvVirtualNetworkName": {
             "type": "string"
         },
+        "sharedStorageAccountConnectionString": {
+            "type": "securestring"
+        },
+        "nServiceBusConnectionString": {
+            "type": "securestring"
+        },
+        "nServiceBusLicense": {
+            "type": "securestring"
+        },
+        "functionsExtensionVersion": {
+            "type": "string",
+            "defaultValue": "~3"
+        },
         "appServiceAllowedIPs": {
             "type": "array",
             "defaultValue": []
@@ -48,6 +61,9 @@
         "loggingRedisKey": {
             "type": "string"
         },
+        "logAnalyticsWorkspaceName": {
+            "type": "string"
+        },
         "configurationStorageConnectionString": {
             "type": "securestring"
         },
@@ -59,6 +75,18 @@
         },
         "configNames": {
             "type": "string"
+        },
+        "elasticPoolName": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "databaseSkuName": {
+            "type": "string",
+            "defaultValue": "S0"
+        },
+        "databaseTier": {
+            "type": "string",
+            "defaultValue": "Standard"
         },
         "appServicePlanInstances": {
             "type": "int",
@@ -73,7 +101,10 @@
         "subnetDelegations": {
             "type": "array"
         },
-          "appServicePlanSize": {
+        "workerAccessRestrictions": {
+            "type": "array"
+        },
+        "appServicePlanSize": {
             "type": "string",
             "defaultValue": "1"
         }
