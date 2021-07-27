@@ -10,7 +10,7 @@ jobs:
   - task: VSBuild@1
     displayName: Build DACPAC
     inputs:
-      solution: TBC
+      solution: src/SFA.DAS.Payments.MatchedLearner.Database/SFA.DAS.Payments.MatchedLearner.Database.sqlproj
       platform: any cpu
       configuration: release
       msbuildArgs: /p:PackageLocation="$(build.artifactstagingdirectory)/publish"
