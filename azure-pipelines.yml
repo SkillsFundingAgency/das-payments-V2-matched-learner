@@ -19,3 +19,4 @@ stages:
 - stage: Build
   jobs:
   - template: pipeline-templates/job/code-build.yml
+  - template: pipeline-templates/job/dacpac-build.yml
