@@ -53,7 +53,7 @@ steps:
       projects: '**/*.Application.UnitTests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build'
 
-  - template: azure-pipelines-templates/dependency-check.yml@das-platform-building-blocks
+  - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
 
   - task: DotNetCoreCLI@2
     displayName: 'Publish API'
