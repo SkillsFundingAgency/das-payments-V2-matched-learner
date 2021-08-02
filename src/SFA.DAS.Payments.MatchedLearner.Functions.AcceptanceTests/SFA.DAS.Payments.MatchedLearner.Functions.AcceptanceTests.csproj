@@ -8,11 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Steps\**" />
-    <EmbeddedResource Remove="Steps\**" />
-    <None Remove="Steps\**" />
-    <SpecFlowFeatureFiles Remove="Steps\**" />
-    <SpecFlowObsoleteCodeBehindFiles Remove="Steps\**" />
+    <Reference Include="SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages">
+      <HintPath>..\SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +23,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="NServiceBus.Azure" Version="7.0.0" />
+    <PackageReference Include="NServiceBus.Persistence.AzureStorage" Version="2.4.2" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="SpecFlow" Version="3.7.38" />
@@ -32,29 +32,24 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
   </ItemGroup>
-
   
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Functions\SFA.DAS.Payments.MatchedLearner.Functions.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Types\SFA.DAS.Payments.MatchedLearner.Types.csproj" />
   </ItemGroup>
-
   
   <ItemGroup>
     <Compile Update="Features\SmokeTests.feature.cs">
       <DesignTime>True</DesignTime>
     </Compile>
   </ItemGroup>
-
   
   <ItemGroup>
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
-
   
   <ItemGroup>
     <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">

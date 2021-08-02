@@ -34,14 +34,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
             builder.UseNServiceBus(() =>
             {
                 var applicationSettings = builder.Services.GetApplicationSettings();
+
+                Environment.SetEnvironmentVariable("MatchedLearnerServiceBusConnectionString", applicationSettings.MatchedLearnerServiceBusConnectionString);
                 
-                Environment.SetEnvironmentVariable("AzureWebJobsServiceBus", applicationSettings.MatchedLearnerServiceBusConnectionString );
-
-                var endpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(applicationSettings.ServiceName);
-
+                var endpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(applicationSettings.ServiceName, "MatchedLearnerServiceBusConnectionString");
+                
+#if DEBUG
+                //NOTE: This is required to run the function from Acceptance test project
                 var assemblyScanner = endpointConfiguration.AdvancedConfiguration.AssemblyScanner();
                 assemblyScanner.ThrowExceptions = false;
-
+#endif
+                
                 return endpointConfiguration;
             });
         }
