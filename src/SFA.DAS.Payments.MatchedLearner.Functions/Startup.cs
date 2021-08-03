@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
+using SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace SFA.DAS.Payments.MatchedLearner.Functions
@@ -31,19 +35,56 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies();
 
-            builder.UseNServiceBus(() =>
+            var applicationSettings = builder.Services.GetApplicationSettings();
+
+            EnsureQueueAndSubscription(applicationSettings,typeof(SubmissionSucceededEvent));
+        }
+
+        private static void EnsureQueueAndSubscription(IApplicationSettings settings, Type messageType)
+        {
+            try
             {
-                var applicationSettings = builder.Services.GetApplicationSettings();
-                
-                Environment.SetEnvironmentVariable("AzureWebJobsServiceBus", applicationSettings.MatchedLearnerServiceBusConnectionString );
+                var manageClient = new ManagementClient(settings.MatchedLearnerServiceBusConnectionString);
 
-                var endpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(applicationSettings.ServiceName);
+                if (!manageClient.QueueExistsAsync(settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
+                {
+                    var queueDescription = new QueueDescription(settings.MatchedLearnerQueue)
+                    {
+                        DefaultMessageTimeToLive = TimeSpan.FromDays(7),
+                        EnableDeadLetteringOnMessageExpiration = true,
+                        LockDuration = TimeSpan.FromMinutes(5),
+                        MaxDeliveryCount = 1,
+                        MaxSizeInMB = 5120,
+                        Path = settings.MatchedLearnerQueue
+                    };
 
-                var assemblyScanner = endpointConfiguration.AdvancedConfiguration.AssemblyScanner();
-                assemblyScanner.ThrowExceptions = false;
+                    manageClient.CreateQueueAsync(queueDescription, CancellationToken.None).GetAwaiter().GetResult();
+                }
 
-                return endpointConfiguration;
-            });
+                if (!manageClient.SubscriptionExistsAsync("bundle-1", settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
+                {
+                    var subscriptionDescription = new SubscriptionDescription("bundle-1", settings.MatchedLearnerQueue)
+                    {
+                        DefaultMessageTimeToLive = TimeSpan.FromDays(7),
+                        EnableDeadLetteringOnMessageExpiration = true,
+                        LockDuration = TimeSpan.FromMinutes(5),
+                        MaxDeliveryCount = 1,
+                        SubscriptionName = settings.MatchedLearnerQueue,
+                        ForwardTo = settings.MatchedLearnerQueue,
+                        EnableBatchedOperations = false,
+                    };
+
+                    var ruleDescription = new RuleDescription(messageType.Name, new SqlFilter($"[NServiceBus.EnclosedMessageTypes] LIKE '%{messageType.FullName}%'"));
+
+                    manageClient.CreateSubscriptionAsync(subscriptionDescription, ruleDescription, CancellationToken.None).GetAwaiter().GetResult();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error ensuring Ensure Queue And Subscription: {e.Message}.");
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }

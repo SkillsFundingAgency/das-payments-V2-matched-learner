@@ -1,22 +1,41 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 {
-    public class TestRepository
-    {
-        private readonly string _connectionString;
+	public class TestRepository : IDisposable
+	{
+		private readonly PaymentsDataContext _paymentsDataContext;
+		private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
 
-        public TestRepository()
-        {
-            _connectionString = TestConfiguration.ApplicationSettings.MatchedLearnerConnectionString;
-        }
+		public TestRepository()
+		{
+			var applicationSettings = TestConfiguration.ApplicationSettings;
 
-        public async Task AddDataLockEvent(long ukprn, long uln)
-        {
-            const string sql = @"
+			var matchedLearnerOptions = new DbContextOptionsBuilder()
+				.UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+				.Options;
+
+			_matchedLearnerDataContext = new MatchedLearnerDataContext(matchedLearnerOptions);
+
+
+			var paymentsOptions = new DbContextOptionsBuilder()
+				.UseSqlServer(applicationSettings.PaymentsConnectionString)
+				.Options;
+
+			_paymentsDataContext = new PaymentsDataContext(paymentsOptions);
+
+		}
+
+		public async Task AddDataLockEvent(long ukprn, long uln)
+		{
+			const string sql = @"
             declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
 
 
@@ -64,24 +83,32 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                     (@dataLockEventFailureId4, 1, 12345600)
             ";
 
-            var dataLockEventId1 = Guid.NewGuid();
-            var dataLockEventId2 = Guid.NewGuid();
-            var dataLockEventFailureId1 = Guid.NewGuid();
-            var dataLockEventFailureId2 = Guid.NewGuid();
-            var dataLockEventFailureId3 = Guid.NewGuid();
-            var dataLockEventFailureId4 = Guid.NewGuid();
+			var dataLockEventId1 = Guid.NewGuid();
+			var dataLockEventId2 = Guid.NewGuid();
+			var dataLockEventFailureId1 = Guid.NewGuid();
+			var dataLockEventFailureId2 = Guid.NewGuid();
+			var dataLockEventFailureId3 = Guid.NewGuid();
+			var dataLockEventFailureId4 = Guid.NewGuid();
 
-            await using var connection = new SqlConnection(_connectionString);
+			await _paymentsDataContext.Database.ExecuteSqlRawAsync(sql,
+				new SqlParameter("ukprn", ukprn),
+				new SqlParameter("uln", uln),
+				new SqlParameter("dataLockEventId1", dataLockEventId1),
+				new SqlParameter("dataLockEventId2", dataLockEventId2),
+				new SqlParameter("dataLockEventFailureId1", dataLockEventFailureId1),
+				new SqlParameter("dataLockEventFailureId2", dataLockEventFailureId2),
+				new SqlParameter("dataLockEventFailureId3", dataLockEventFailureId3),
+				new SqlParameter("dataLockEventFailureId4", dataLockEventFailureId4)
+			);
+		}
 
-            await connection.ExecuteAsync(sql, new
-            {
-                ukprn, uln, dataLockEventId1, dataLockEventId2, dataLockEventFailureId1, dataLockEventFailureId2, dataLockEventFailureId3, dataLockEventFailureId4
-            });
-        }
+		public async Task ClearDataLockEvent(long ukprn, long uln)
+		{
+			await ClearPaymentDataLockEvent(ukprn, uln);
+			await ClearMatchedLearnerDataLockEvent(ukprn, uln);
+		}
 
-        public async Task ClearLearner(long ukprn, long uln)
-        {
-            const string sql = @"
+		const string ClearDataLockEventSql = @"
             DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
             DELETE Payments2.Apprenticeship WHERE Id = 123456;
 
@@ -126,8 +153,34 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             AND Ukprn = @ukprn 
             ";
 
-            await using var connection = new SqlConnection(_connectionString);
-            await connection.ExecuteAsync(sql, new {ukprn, uln});
-        }
-    }
+		private async Task ClearPaymentDataLockEvent(long ukprn, long uln)
+		{
+			await _paymentsDataContext.Database.ExecuteSqlRawAsync(ClearDataLockEventSql, new SqlParameter("ukprn", ukprn), new SqlParameter("uln", uln));
+		}
+
+		private async Task ClearMatchedLearnerDataLockEvent(long ukprn, long uln)
+		{
+			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(ClearDataLockEventSql, new SqlParameter("ukprn", ukprn), new SqlParameter("uln", uln));
+		}
+
+		public async Task<List<DataLockEventModel>> GetMatchedLearnerDataLockEvents(long ukprn, short academicYear, byte collectionPeriod)
+		{
+			return await _matchedLearnerDataContext.DataLockEvent
+				.Include(d => d.NonPayablePeriods)
+				.ThenInclude(npp => npp.Failures)
+				.Include(d => d.PayablePeriods)
+				.Include(d => d.PriceEpisodes)
+				.Where(d =>
+					d.Ukprn == ukprn &&
+					d.AcademicYear == academicYear &&
+					d.CollectionPeriod == collectionPeriod)
+				.ToListAsync();
+		}
+
+		public void Dispose()
+		{
+			_paymentsDataContext?.Dispose();
+			_matchedLearnerDataContext?.Dispose();
+		}
+	}
 }

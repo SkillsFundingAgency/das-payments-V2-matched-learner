@@ -26,7 +26,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             _context = context;
         }
 
-        [When(@"we call the API with a learner that does not exist")]
+        [When("we call the API with a learner that does not exist")]
         public void WhenWeCallTheApiWithALearnerThatDoesNotExist()
         {
             var request = new TestClient();
@@ -34,13 +34,13 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             _context.FailedRequest = act;
         }
 
-        [Then(@"the result should be a (.*)")]
+        [Then("the result should be a (.*)")]
         public void ThenTheResultShouldBeA(int p0)
         {
             _context.FailedRequest.Should().Throw<Exception>().WithMessage($"{p0}");
         }
 
-        [Given(@"we have created a sample learner")]
+        [Given("we have created a sample learner")]
         public async Task GivenWeHaveCreatedASampleLearner()
         {
             var repository = new TestRepository();
@@ -48,7 +48,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             await repository.AddDataLockEvent(1000, 2000);
         }
 
-        [Given(@"we have created (.*) sample learners")]
+        [Given("we have created (.*) sample learners")]
         public async Task GivenWeHaveCreatedASampleLearner(int learnerCount)
         {
             var repository = new TestRepository();
@@ -59,7 +59,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             }
         }
 
-        [When(@"we call the API with the sample learners details")]
+        [When("we call the API with the sample learners details")]
         public async Task WhenWeCallTheApiWithTheSampleLearnersDetails()
         {
             var request = new TestClient();
@@ -67,7 +67,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             _context.MatchedLearnerDto = await request.Handle(1000, 2000);
         }
 
-        [When(@"we call the API (.*) times with the sample learners details")]
+        [When("we call the API (.*) times with the sample learners details")]
         public void WhenWeCallTheApiTimesWithTheSampleLearnersDetails(int learnerCount)
         {
             var request = new TestClient();
@@ -78,7 +78,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             }
         }
 
-        [Then(@"the result should not be any exceptions")]
+        [Then("the result should not be any exceptions")]
         public void ThenTheResultShouldBeAnyExceptions()
         {
             foreach (var request in _context.Requests)
@@ -87,7 +87,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             }
         }
 
-        [Then(@"the result matches the sample learner")]
+        [Then("the result matches the sample learner")]
         public void ThenTheResultMatchesTheSampleLearner()
         {
             var actual = _context.MatchedLearnerDto;
