@@ -85,7 +85,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 #if DEBUG
             if (isDevelopmentEnvironment)
             {
-                config.AddJsonFile("local.settings.json", optional: true);
+                config.AddJsonFile("local.settings.json", optional: false);
             }
 #endif
             return config.Build();
