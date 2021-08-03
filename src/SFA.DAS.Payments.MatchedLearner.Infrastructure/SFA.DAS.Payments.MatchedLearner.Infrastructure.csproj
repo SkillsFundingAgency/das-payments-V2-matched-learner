@@ -13,8 +13,4 @@
     <PackageReference Include="SFA.DAS.NLog.Targets.Redis" Version="1.2.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Application\SFA.DAS.Payments.MatchedLearner.Application.csproj" />
-  </ItemGroup>
-
 </Project>

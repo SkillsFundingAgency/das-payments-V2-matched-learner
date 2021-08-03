@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Application;
 using SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages;
 
