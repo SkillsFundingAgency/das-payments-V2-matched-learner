@@ -20,13 +20,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         }
 
         [BeforeScenario]
-        public async Task InitialiseHost()
+        public async Task Initialise()
         {
             //This is a Hack to check if the Tests are Running on Local Machine
-            Url = TestConfiguration.ApplicationSettings.TargetUrl;
-
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+
+            Url = TestConfiguration.ApplicationSettings.TargetUrl;
 
             if (string.IsNullOrEmpty(Url))
             {
@@ -39,7 +39,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             TestContext.TestRepository = new TestRepository();
 
+            TestContext.TimeToPause = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToPause);
+
+            TestContext.TimeToWait = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWait);
+
             stopwatch.Stop();
+
             Console.WriteLine($"Time it took to spin up Azure Functions Host: {stopwatch.Elapsed.Milliseconds} milliseconds");
         }
 
