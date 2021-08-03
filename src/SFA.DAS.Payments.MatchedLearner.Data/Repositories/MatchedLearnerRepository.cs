@@ -136,14 +136,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
-            using (var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
-            {
-                var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, SqlBulkCopyOptions = SqlBulkCopyOptions.KeepIdentity };
+            await using var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
 
-                await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, SqlBulkCopyOptions = SqlBulkCopyOptions.KeepIdentity };
 
-                await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-            }
+            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+
+            await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task StoreApprenticeships(List<ApprenticeshipModel> models, CancellationToken cancellationToken)
@@ -182,92 +181,87 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var mainContext = _retryDataContextFactory.Create();
 
-            using (var tx = await ((DbContext)mainContext).Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
+            await using var tx = await ((DbContext)mainContext).Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+
+            foreach (var apprenticeship in apprenticeships)
             {
-                foreach (var apprenticeship in apprenticeships)
+                try
                 {
-                    try
-                    {
-                        var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                        await retryDataContext.Apprenticeship.AddAsync(apprenticeship, cancellationToken).ConfigureAwait(false);
-                        await retryDataContext.SaveChanges(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e.IsUniqueKeyConstraintException())
-                        {
-                            _logger.LogInformation($"Discarding duplicate apprenticeship. Id: {apprenticeship.Id}, ukprn: {apprenticeship.Ukprn}");
-
-                            continue;
-                        }
-
-                        throw;
-                    }
+                    var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
+                    await retryDataContext.Apprenticeship.AddAsync(apprenticeship, cancellationToken).ConfigureAwait(false);
+                    await retryDataContext.SaveChanges(cancellationToken).ConfigureAwait(false);
                 }
+                catch (Exception e)
+                {
+                    if (!e.IsUniqueKeyConstraintException()) throw;
 
-                await tx.CommitAsync(cancellationToken);
+                    _logger.LogInformation($"Discarding duplicate apprenticeship. Id: {apprenticeship.Id}, ukprn: {apprenticeship.Ukprn}");
+                }
             }
+
+            await tx.CommitAsync(cancellationToken);
         }
 
-        private async Task SaveDataLockEvents(List<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
+        private async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
         {
-            using (var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
-            {
-                var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
-                var priceEpisodes = dataLockEvents
-                    .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
-                    .ToList();
-                var payablePeriods = dataLockEvents
-                    .SelectMany(dataLockEvent => dataLockEvent.PayablePeriods)
-                    .ToList();
-                var nonPayablePeriods = dataLockEvents
-                    .SelectMany(dataLockEvent => dataLockEvent.NonPayablePeriods)
-                    .ToList();
-                var failures = dataLockEvents
-                    .SelectMany(dataLockEvent => dataLockEvent.NonPayablePeriods
-                        .SelectMany(npp => npp.Failures))
-                    .ToList();
+            await using var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
 
-                await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
-                    .ConfigureAwait(false);
-                await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
-                    .ConfigureAwait(false);
-                await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
-                    .ConfigureAwait(false);
-                await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
-                    .ConfigureAwait(false);
-                await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
-                    .ConfigureAwait(false);
-                await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-            }
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+
+            var priceEpisodes = dataLockEvents
+                .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
+                .ToList();
+            var payablePeriods = dataLockEvents
+                .SelectMany(dataLockEvent => dataLockEvent.PayablePeriods)
+                .ToList();
+            var nonPayablePeriods = dataLockEvents
+                .SelectMany(dataLockEvent => dataLockEvent.NonPayablePeriods)
+                .ToList();
+            var failures = dataLockEvents
+                .SelectMany(dataLockEvent => dataLockEvent.NonPayablePeriods
+                .SelectMany(npp => npp.Failures))
+                .ToList();
+
+            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
+                .ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
+                .ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
+                .ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
+                .ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
+                .ConfigureAwait(false);
+
+            await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
         {
             var mainContext = _retryDataContextFactory.Create();
 
-            using (var tx = await ((DbContext)mainContext).Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false))
+            await using var tx = await ((DbContext)mainContext).Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+
+            foreach (var dataLockEvent in dataLockEvents)
             {
-                foreach (var dataLockEvent in dataLockEvents)
+                try
                 {
-                    try
-                    {
-                        var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                        await retryDataContext.DataLockEvent.AddAsync(dataLockEvent, cancellationToken).ConfigureAwait(false);
-                        await retryDataContext.SaveChanges(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e.IsUniqueKeyConstraintException())
-                        {
-                            _logger.LogInformation($"Discarding duplicate DataLock event. Event Id: {dataLockEvent.EventId}, JobId: {dataLockEvent.JobId}, Learn ref: {dataLockEvent.LearnerReferenceNumber},  Event Type: {dataLockEvent.EventType}");
-                            continue;
-                        }
-                        throw;
-                    }
+                    var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
+                    await retryDataContext.DataLockEvent.AddAsync(dataLockEvent, cancellationToken).ConfigureAwait(false);
+                    await retryDataContext.SaveChanges(cancellationToken).ConfigureAwait(false);
                 }
-                await tx.CommitAsync(cancellationToken);
+                catch (Exception e)
+                {
+                    if (e.IsUniqueKeyConstraintException())
+                    {
+                        _logger.LogInformation($"Discarding duplicate DataLock event. Event Id: {dataLockEvent.EventId}, JobId: {dataLockEvent.JobId}, Learn ref: {dataLockEvent.LearnerReferenceNumber},  Event Type: {dataLockEvent.EventType}");
+                        continue;
+                    }
+                    throw;
+                }
             }
+
+            await tx.CommitAsync(cancellationToken);
         }
     }
 }

@@ -33,7 +33,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
-            await Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = {ukprn} AND AcademicYear = {academicYear} AND CollectionPeriod IN ({ collectionPeriod })");
+
+            var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
+            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
+
+            sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
+            sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
+
+            await Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ({ sqlParamName })", sqlParameters);
         }
 
         public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
