@@ -5,8 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Common;
-using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
@@ -48,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             while (!dataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait)
             {
                 dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000, 2021, 1);
-                
+
                 if (!dataLockEvents.Any())
                     Thread.Sleep(_testContext.TimeToPause);
             }
@@ -63,135 +61,181 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         public void AssertDataLockEvents(DataLockEventModel actual)
         {
             actual.Should().NotBeNull();
-            
-            //actual!.StartDate.Should().Be(new DateTime(2020, 10, 9));
-            //actual.IlrSubmissionDateTime.Should().Be(new DateTime(2020, 10, 10));
-            //actual.CollectionPeriod.Should().Be(1);
-            //actual.AcademicYear.Should().Be(2021);
-            //actual.Ukprn.Should().Be(1000);
-            //actual.LearnerUln.Should().Be(2000);
-            //actual.AcademicYear.Should().Be(1920);
-            //actual.CollectionPeriod.Should().Be(14);
 
-            //actual.LearningAimReference.Should().Be("ZPROG001");
-            //actual.LearningAimProgrammeType.Should().Be(100);
-            //actual.LearningAimStandardCode.Should().Be(200);
-            //actual.LearningAimFrameworkCode.Should().Be(300);
-            //actual.LearningAimPathwayCode.Should().Be(400);
-            //actual.LearningAimFundingLineType.Should().BeNullOrEmpty();
-            //actual.StartDate.Should().Be(new DateTime(2020, 10, 9));
-            //actual.PriceEpisodes.Should().HaveCount(2);
+            actual.Ukprn.Should().Be(1000);
+            actual.ContractType.Should().Be(ContractType.Act1);
+            actual.CollectionPeriod.Should().Be(1);
+            actual.AcademicYear.Should().Be(2021);
+            actual.LearnerReferenceNumber.Should().Be("ref#");
 
-            //var priceEpisode = actual.PriceEpisodes.First();
-            //priceEpisode.PriceEpisodeIdentifier.Should().Be("25-104-01/08/2019");
-            //priceEpisode.AgreedPrice.Should().Be(3000);
-            //priceEpisode.StartDate.Should().Be(new DateTime(2019, 08, 01));
-            //priceEpisode.ActualEndDate.Should().Be(new DateTime(2020, 10, 12));
-            //priceEpisode.NumberOfInstalments.Should().Be(12);
-            //priceEpisode.InstalmentAmount.Should().Be(50);
-            //priceEpisode.CompletionAmount.Should().Be(550);
-            //priceEpisode.EffectiveTotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
-            //actual.Periods.Should().HaveCount(3);
+            actual.LearnerUln.Should().Be(2000);
+            actual.LearningAimReference.Should().Be("ZPROG001");
+            actual.LearningAimProgrammeType.Should().Be(100);
+            actual.LearningAimStandardCode.Should().Be(200);
+            actual.LearningAimFrameworkCode.Should().Be(300);
+            actual.LearningAimPathwayCode.Should().Be(400);
+            actual.LearningAimFundingLineType.Should().Be("funding");
+            actual.IlrSubmissionDateTime.Should().Be(new DateTime(2020, 10, 10));
+            actual.IsPayable.Should().Be(false);
+            actual.DataLockSource.Should().Be(0);
+            actual.JobId.Should().Be(123);
+            actual.EventTime.Date.Should().Be(DateTimeOffset.Now.Date);
+            actual.LearningStartDate.Should().Be(new DateTime(2020, 10, 09));
 
-            //priceEpisode.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 1,
-            //    IsPayable = true,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //});
-            //priceEpisode.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 2,
-            //    IsPayable = true,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //});
-            //priceEpisode.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 3,
-            //    IsPayable = true,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //});
-            
+            //(DataLockEventId, PriceEpisodeIdentifier, SfaContributionPercentage, TotalNegotiatedPrice1, TotalNegotiatedPrice2, TotalNegotiatedPrice3, TotalNegotiatedPrice4, StartDate, EffectiveTotalNegotiatedPriceStartDate, PlannedEndDate, ActualEndDate, NumberOfInstalments, InstalmentAmount, CompletionAmount, Completed)
+            //VALUES (@dataLockEventId2, '25-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
 
-            //var priceEpisode2 = training.PriceEpisodes.ElementAt(1);
-            //priceEpisode2.Identifier.Should().Be("25-104-01/08/2020");
-            //priceEpisode2.AcademicYear.Should().Be(2021);
-            //priceEpisode2.CollectionPeriod.Should().Be(1);
-            //priceEpisode2.AgreedPrice.Should().Be(3000);
-            //priceEpisode2.StartDate.Should().Be(new DateTime(2020, 08, 01));
-            //priceEpisode2.EndDate.Should().Be(new DateTime(2020, 10, 12));
-            //priceEpisode2.NumberOfInstalments.Should().Be(12);
-            //priceEpisode2.InstalmentAmount.Should().Be(50);
-            //priceEpisode2.CompletionAmount.Should().Be(550);
-            //priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
-            //priceEpisode2.Periods.Should().HaveCount(7);
+            actual.PriceEpisodes.Count.Should().Be(1);
+            var actualPriceEpisodes = actual.PriceEpisodes.First();
+            actualPriceEpisodes.DataLockEventId.Should().Be(actual.EventId);
+            actualPriceEpisodes.PriceEpisodeIdentifier.Should().Be("25-104-01/08/2020");
+            actualPriceEpisodes.SfaContributionPercentage.Should().Be(1);
+            actualPriceEpisodes.TotalNegotiatedPrice1.Should().Be(1000);
+            actualPriceEpisodes.TotalNegotiatedPrice2.Should().Be(2000);
+            actualPriceEpisodes.TotalNegotiatedPrice3.Should().Be(0);
+            actualPriceEpisodes.TotalNegotiatedPrice4.Should().Be(0);
+            actualPriceEpisodes.StartDate.Should().Be(new DateTime(2020, 10, 07));
+            actualPriceEpisodes.EffectiveTotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
+            actualPriceEpisodes.PlannedEndDate.Should().Be(new DateTime(2020, 10, 11));
+            actualPriceEpisodes.ActualEndDate.Should().Be(new DateTime(2020, 10, 12));
+            actualPriceEpisodes.NumberOfInstalments.Should().Be(12);
+            actualPriceEpisodes.InstalmentAmount.Should().Be(50);
+            actualPriceEpisodes.CompletionAmount.Should().Be(550);
+            actualPriceEpisodes.Completed.Should().Be(false);
 
-            //priceEpisode2.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 1,
-            //    IsPayable = true,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //});
-            //priceEpisode2.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 2,
-            //    IsPayable = true,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //});
-            //priceEpisode2.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 3,
-            //    IsPayable = true,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //});
-            //priceEpisode2.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 3,
-            //    IsPayable = false,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //    DataLockFailures = new HashSet<byte>{1, 2, 3},
-            //});
-            //priceEpisode2.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 4,
-            //    IsPayable = false,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //    DataLockFailures = new HashSet<byte>{7},
-            //});
-            //priceEpisode2.Periods.Should().ContainEquivalentOf(new
-            //{
-            //    Period = 5,
-            //    IsPayable = false,
-            //    AccountId = 1000,
-            //    ApprenticeshipId = 123456,
-            //    ApprenticeshipEmployerType = 3,
-            //    TransferSenderAccountId = 500,
-            //    DataLockFailures = new HashSet<byte>{9},
-            //});
+            //INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
+            //VALUES  (@dataLockEventId2, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, 123456),
+            //        (@dataLockEventId2, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, 123456),
+            //        (@dataLockEventId2, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, 123456)
+
+            actual.PayablePeriods.Count.Should().Be(3);
+            actual.PayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 1,
+                Amount = 100M,
+                SfaContributionPercentage = 1M,
+                ApprenticeshipId = 123456L
+            });
+
+            actual.PayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 2,
+                Amount = 200M,
+                SfaContributionPercentage = 1,
+                ApprenticeshipId = 123456L
+            });
+
+            actual.PayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 3,
+                Amount = 300M,
+                SfaContributionPercentage = 1,
+                ApprenticeshipId = 123456L
+            });
+
+            //INSERT INTO Payments2.DataLockEventNonPayablePeriod (DataLockEventId, DataLockEventNonPayablePeriodId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
+            //VALUES  (@dataLockEventId2, @dataLockEventFailureId1, '25-104-01/08/2020', 1, 3, 400, 1),
+            //        (@dataLockEventId2, @dataLockEventFailureId2, '25-104-01/08/2020', 1, 4, 500, 1),
+            //        (@dataLockEventId2, @dataLockEventFailureId3, '25-104-01/08/2020', 1, 5, 600, 1),
+            //        (@dataLockEventId2, @dataLockEventFailureId4, '25-104-01/08/2020', 1, 6, 600, 1)
+
+            actual.NonPayablePeriods.Count.Should().Be(4);
+            actual.NonPayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 3,
+                Amount = 400,
+                SfaContributionPercentage = 1,
+            });
+
+            actual.NonPayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 4,
+                Amount = 500,
+                SfaContributionPercentage = 1,
+            });
+
+            actual.NonPayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 5,
+                Amount = 600,
+                SfaContributionPercentage = 1,
+            });
+
+            actual.NonPayablePeriods.Should().ContainEquivalentOf(new
+            {
+                DataLockEventId = actual.EventId,
+                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                TransactionType = 1,
+                DeliveryPeriod = 6,
+                Amount = 600,
+                SfaContributionPercentage = 1,
+            });
+
+            //INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DataLockEventNonPayablePeriodId, DataLockFailureId, ApprenticeshipId)
+            //VALUES  (@dataLockEventFailureId1, 1, 123456), 
+            //        (@dataLockEventFailureId1, 2, 123456), 
+            //        (@dataLockEventFailureId1, 3, 123456), 
+            //        (@dataLockEventFailureId2, 7, 123456), 
+            //        (@dataLockEventFailureId3, 9, 123456),
+            //        (@dataLockEventFailureId4, 1, 12345600)
+
+            var actualNonPayablePeriodFailures = actual.NonPayablePeriods.SelectMany(np => np.Failures).ToList();
+
+            actualNonPayablePeriodFailures.Count.Should().Be(6);
+
+            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            {
+                DataLockFailureId = 1,
+                ApprenticeshipId = 123456
+            });
+
+            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            {
+                DataLockFailureId = 2,
+                ApprenticeshipId = 123456
+            });
+
+            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            {
+                DataLockFailureId = 3,
+                ApprenticeshipId = 123456
+            });
+
+            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            {
+                DataLockFailureId = 7,
+                ApprenticeshipId = 123456
+            });
+
+            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            {
+                DataLockFailureId = 9,
+                ApprenticeshipId = 123456
+            });
+
+            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            {
+                DataLockFailureId = 1,
+                ApprenticeshipId = 12345600
+            });
         }
     }
 }
