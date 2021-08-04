@@ -51,16 +51,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                     Thread.Sleep(_testContext.TimeToPause);
             }
 
-            AssertDataLockEvents(dataLockEvents.FirstOrDefault());
+            AssertDataLockEvents(dataLockEvents);
 
             timer.Stop();
 
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
         }
 
-        public void AssertDataLockEvents(DataLockEventModel actual)
+        public void AssertDataLockEvents(List<DataLockEventModel> dataLockEvents)
         {
-            actual.Should().NotBeNull();
+            dataLockEvents.Count.Should().Be(1);
+            var actual = dataLockEvents.First();
 
             actual.Ukprn.Should().Be(1000);
             actual.ContractType.Should().Be(ContractType.Act1);
