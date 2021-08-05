@@ -62,6 +62,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             var assemblyScanner = endpointConfiguration.AssemblyScanner();
             assemblyScanner.ThrowExceptions = false;
 
+            endpointConfiguration.DisableFeature<AutoSubscribe>();
+            
+            endpointConfiguration.SendOnly();
+
             return endpointConfiguration;
         }
 
