@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
@@ -31,6 +32,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         {
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
             await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear);
+        }
+
+        [Given("there is existing data For CollectionPeriod (.*) and AcademicYear (.*)")]
+        public async Task GivenExistingDataForPeriod(byte collectionPeriod, short academicYear)
+        {
+            _testContext.ExistingMatchedLearnerDataLockId = await _testContext.TestRepository.AddExistingMatchedLearnerData(1000, 2000, collectionPeriod, academicYear);
         }
 
         [When("A SubmissionJobSucceeded message is received")]
@@ -91,6 +98,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             timer.Stop();
 
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
+        }
+
+        [Then("the existing matched Learners are deleted")]
+        public async Task ThenTheExistingMatchedLearnersAreDeleted()
+        {
+            var timer = new Stopwatch();
+
+            timer.Start();
+
+            IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
+            bool first = true;
+
+            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait))
+            {
+                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
+                existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
+
+                if (existingMatchedLearnerDataLockEvents.Any())
+                    Thread.Sleep(_testContext.TimeToPause);
+                first = false;
+            }
+
+            timer.Stop();
+
+            existingMatchedLearnerDataLockEvents.Should().BeEmpty();
         }
 
         public void AssertSingleDataLockEventForPeriod(List<DataLockEventModel> dataLockEvents, byte collectionPeriod, short academicYear)
