@@ -43,6 +43,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             TestContext.TimeToWait = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWait);
 
+            TestContext.TimeToWaitUnexpected = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWaitUnexpected);
+
             stopwatch.Stop();
 
             Console.WriteLine($"Time it took to spin up Azure Functions Host: {stopwatch.Elapsed.Milliseconds} milliseconds");

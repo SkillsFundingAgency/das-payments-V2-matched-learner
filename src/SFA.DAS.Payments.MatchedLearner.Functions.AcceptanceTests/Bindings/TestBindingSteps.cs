@@ -100,6 +100,30 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
         }
 
+        [Then("the existing matched Learners are NOT deleted")]
+        public async Task ThenTheExistingMatchedLearnersAreNotDeleted()
+        {
+            var timer = new Stopwatch();
+
+            timer.Start();
+
+            IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
+            bool first = true;
+
+            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWaitUnexpected))
+            {
+                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
+                existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
+
+                Thread.Sleep(_testContext.TimeToPause);
+                first = false;
+            }
+
+            timer.Stop();
+
+            existingMatchedLearnerDataLockEvents.Should().NotBeEmpty();
+        }
+
         [Then("the existing matched Learners are deleted")]
         public async Task ThenTheExistingMatchedLearnersAreDeleted()
         {
@@ -127,8 +151,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
         public void AssertSingleDataLockEventForPeriod(List<DataLockEventModel> dataLockEvents, byte collectionPeriod, short academicYear)
         {
-            dataLockEvents.Count.Should().Be(1);
-            var actual = dataLockEvents.First();
+            var dataLockEventsForPeriod = dataLockEvents.Where(x =>
+                x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod).ToList();
+
+            dataLockEventsForPeriod.Count.Should().Be(1);
+            var actual = dataLockEventsForPeriod.First();
 
             actual.Ukprn.Should().Be(1000);
             actual.ContractType.Should().Be(ContractType.Act1);

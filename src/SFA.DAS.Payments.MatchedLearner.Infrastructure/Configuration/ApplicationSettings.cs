@@ -12,6 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
         string AzureWebJobsStorage { get; set; }
         string TargetUrl { get; set; }
         string TimeToWait { get; set; }
+        string TimeToWaitUnexpected { get; set; }
         string TimeToPause { get; set; }
     }
 
@@ -25,6 +26,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
         public string AzureWebJobsStorage { get; set; }
         public string TargetUrl { get; set; }
         public string TimeToWait { get; set; }
+        public string TimeToWaitUnexpected { get; set; }
         public string TimeToPause { get; set; }
     }
 }
