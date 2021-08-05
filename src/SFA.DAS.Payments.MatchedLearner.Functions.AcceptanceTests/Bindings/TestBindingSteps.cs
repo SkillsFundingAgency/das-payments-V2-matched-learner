@@ -23,16 +23,51 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Given("A Submission Job Succeeded")]
         public async Task GivenASuccessfulSubmissionIsCompleted()
         {
+            await GivenASuccessfulSubmissionIsCompletedForPeriod(1, 2021);
+        }
+
+        [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
+        public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
+        {
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
-            await _testContext.TestRepository.AddDataLockEvent(1000, 2000);
+            await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear);
         }
 
         [When("A SubmissionJobSucceeded message is received")]
-        public async Task WhenWeReceiveSubmissionSucceededEvent()
+        public async Task WhenWeReceiveSubmissionSucceeded()
         {
-            await _testContext.TestEndpointInstance.PublishSubmissionSucceededEvent(1000, 2021, 1);
+            await WhenWeReceiveSubmissionSucceededEventForPeriod(1, 2021);
         }
 
+        [When("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
+        public async Task WhenWeReceiveSubmissionSucceededEventForPeriod(byte collectionPeriod, short academicYear)
+        {
+            await _testContext.TestEndpointInstance.PublishSubmissionSucceededEvent(1000, academicYear, collectionPeriod);
+        }
+
+        [Then("the matched Learners are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
+        public async Task ThenTheMatchedLearnersAreOnlyImportedForCollectionPeriodAndAcademicYear(byte collectionPeriod, short academicYear)
+        {
+            var timer = new Stopwatch();
+
+            timer.Start();
+
+            var dataLockEvents = new List<DataLockEventModel>();
+
+            while (!dataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait)
+            {
+                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
+
+                if (!dataLockEvents.Any())
+                    Thread.Sleep(_testContext.TimeToPause);
+            }
+
+            AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
+
+            timer.Stop();
+
+            await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
+        }
 
         [Then("the matched Learners are Imported")]
         public async Task ThenTheMatchedLearnersAreImported()
@@ -45,28 +80,28 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             while (!dataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait)
             {
-                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000, 2021, 1);
+                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
 
                 if (!dataLockEvents.Any())
                     Thread.Sleep(_testContext.TimeToPause);
             }
 
-            AssertDataLockEvents(dataLockEvents);
+            AssertSingleDataLockEventForPeriod(dataLockEvents, 1, 2021);
 
             timer.Stop();
 
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
         }
 
-        public void AssertDataLockEvents(List<DataLockEventModel> dataLockEvents)
+        public void AssertSingleDataLockEventForPeriod(List<DataLockEventModel> dataLockEvents, byte collectionPeriod, short academicYear)
         {
             dataLockEvents.Count.Should().Be(1);
             var actual = dataLockEvents.First();
 
             actual.Ukprn.Should().Be(1000);
             actual.ContractType.Should().Be(ContractType.Act1);
-            actual.CollectionPeriod.Should().Be(1);
-            actual.AcademicYear.Should().Be(2021);
+            actual.CollectionPeriod.Should().Be(collectionPeriod);
+            actual.AcademicYear.Should().Be(academicYear);
             actual.LearnerReferenceNumber.Should().Be("ref#");
 
             actual.LearnerUln.Should().Be(2000);

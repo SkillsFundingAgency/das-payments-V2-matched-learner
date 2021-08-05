@@ -33,7 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
 		}
 
-		public async Task AddDataLockEvent(long ukprn, long uln)
+		public async Task AddDataLockEvent(long ukprn, long uln, byte collectionPeriod, short academicYear)
 		{
 			const string sql = @"
             declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
@@ -58,7 +58,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
 
             INSERT INTO Payments2.DataLockEvent (EventId, EarningEventId, Ukprn, ContractType, CollectionPeriod, AcademicYear, LearnerReferenceNumber, LearnerUln, LearningAimReference, LearningAimProgrammeType, LearningAimStandardCode, LearningAimFrameworkCode, LearningAimPathwayCode, LearningAimFundingLineType, IlrSubmissionDateTime, IsPayable, DataLockSourceId, JobId, EventTime, LearningStartDate)
-            VALUES (@dataLockEventId2, NewID(), @ukprn, 1, 1, 2021, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', '2020-10-10', 0, 0, 123, @testDateTime, '2020-10-09 0:00 +00:00')
+            VALUES (@dataLockEventId2, NewID(), @ukprn, 1, @collectionPeriod, @academicYear, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', '2020-10-10', 0, 0, 123, @testDateTime, '2020-10-09 0:00 +00:00')
 
             INSERT INTO Payments2.DataLockEventPriceEpisode (DataLockEventId, PriceEpisodeIdentifier, SfaContributionPercentage, TotalNegotiatedPrice1, TotalNegotiatedPrice2, TotalNegotiatedPrice3, TotalNegotiatedPrice4, StartDate, EffectiveTotalNegotiatedPriceStartDate, PlannedEndDate, ActualEndDate, NumberOfInstalments, InstalmentAmount, CompletionAmount, Completed)
             VALUES (@dataLockEventId2, '25-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
@@ -98,7 +98,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 				new SqlParameter("dataLockEventFailureId1", dataLockEventFailureId1),
 				new SqlParameter("dataLockEventFailureId2", dataLockEventFailureId2),
 				new SqlParameter("dataLockEventFailureId3", dataLockEventFailureId3),
-				new SqlParameter("dataLockEventFailureId4", dataLockEventFailureId4)
+				new SqlParameter("dataLockEventFailureId4", dataLockEventFailureId4),
+                new SqlParameter("collectionPeriod", collectionPeriod),
+                new SqlParameter("academicYear", academicYear)
 			);
 		}
 
@@ -163,7 +165,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(ClearDataLockEventSql, new SqlParameter("ukprn", ukprn), new SqlParameter("uln", uln));
 		}
 
-		public async Task<List<DataLockEventModel>> GetMatchedLearnerDataLockEvents(long ukprn, short academicYear, byte collectionPeriod)
+		public async Task<List<DataLockEventModel>> GetMatchedLearnerDataLockEvents(long ukprn)
 		{
 			return await _matchedLearnerDataContext.DataLockEvent
 				.Include(d => d.NonPayablePeriods)
@@ -171,9 +173,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 				.Include(d => d.PayablePeriods)
 				.Include(d => d.PriceEpisodes)
 				.Where(d =>
-					d.Ukprn == ukprn &&
-					d.AcademicYear == academicYear &&
-					d.CollectionPeriod == collectionPeriod)
+					d.Ukprn == ukprn)
 				.ToListAsync();
 		}
 
