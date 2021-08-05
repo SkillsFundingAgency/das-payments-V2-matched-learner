@@ -12,7 +12,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 
-namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.PaymentsDataLockRepositoryTests
+namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.MatchedLearnerRepositoryTests
 {
     [TestFixture]
     public class WhenGettingDataLockEvents
