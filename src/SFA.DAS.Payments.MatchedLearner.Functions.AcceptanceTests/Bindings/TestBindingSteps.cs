@@ -21,12 +21,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             _testContext = testContext;
         }
 
-        [Given("A Submission Job Succeeded")]
-        public async Task GivenASuccessfulSubmissionIsCompleted()
-        {
-            await GivenASuccessfulSubmissionIsCompletedForPeriod(1, 2021);
-        }
-
         [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
         {
@@ -38,12 +32,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         public async Task GivenExistingDataForPeriod(byte collectionPeriod, short academicYear)
         {
             _testContext.ExistingMatchedLearnerDataLockId = await _testContext.TestRepository.AddExistingMatchedLearnerData(1000, 2000, collectionPeriod, academicYear);
-        }
-
-        [When("A SubmissionJobSucceeded message is received")]
-        public async Task WhenWeReceiveSubmissionSucceeded()
-        {
-            await WhenWeReceiveSubmissionSucceededEventForPeriod(1, 2021);
         }
 
         [When("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
@@ -70,30 +58,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             }
 
             AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
-
-            timer.Stop();
-
-            await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
-        }
-
-        [Then("the matched Learners are Imported")]
-        public async Task ThenTheMatchedLearnersAreImported()
-        {
-            var timer = new Stopwatch();
-
-            timer.Start();
-
-            var dataLockEvents = new List<DataLockEventModel>();
-
-            while (!dataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait)
-            {
-                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
-
-                if (!dataLockEvents.Any())
-                    Thread.Sleep(_testContext.TimeToPause);
-            }
-
-            AssertSingleDataLockEventForPeriod(dataLockEvents, 1, 2021);
 
             timer.Stop();
 

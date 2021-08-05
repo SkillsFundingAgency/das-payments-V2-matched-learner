@@ -1,15 +1,16 @@
 ﻿Feature: SmokeTests
 
-Scenario: Function pulls the data from Payments DB and saves to Matched Learner DB
-	Given A Submission Job Succeeded
-	When A SubmissionJobSucceeded message is received
-	Then the matched Learners are Imported
-
-Scenario: Function pulls the data from Payments DB and saves to matched learner DB 2122
-	Given A Submission Job Succeeded for CollectionPeriod 1 and AcademicYear 2122
+Scenario: Function pulls the data from Payments DB and saves to matched learner DB
+	Given A Submission Job Succeeded for CollectionPeriod <collection-period> and AcademicYear <academic-year>
 	#And There is No Existing Data For CollectionPeriod 1 and AcademicYear 2122
-	When A SubmissionJobSucceeded message is received for CollectionPeriod 1 and AcademicYear 2122
-	Then the matched Learners are only Imported for CollectionPeriod 1 and AcademicYear 2122
+	When A SubmissionJobSucceeded message is received for CollectionPeriod <collection-period> and AcademicYear <academic-year>
+	Then the matched Learners are only Imported for CollectionPeriod <collection-period> and AcademicYear <academic-year>
+
+Examples:
+| academic-year | collection-period |
+| 2122          | 1                 |
+| 2021          | 1                 |
+| 2021          | 14                |
 
 Scenario: Existing data for current collection data is deleted before saving new Data to matched learner DB
 	Given A Submission Job Succeeded for CollectionPeriod 1 and AcademicYear 2122
