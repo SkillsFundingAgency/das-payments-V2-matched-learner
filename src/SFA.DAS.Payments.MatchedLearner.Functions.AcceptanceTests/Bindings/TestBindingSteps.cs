@@ -54,6 +54,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
                 if (!dataLockEvents.Any())
                     Thread.Sleep(_testContext.TimeToPause);
+                else
+                    Thread.Sleep(_testContext.TimeToWait - timer.Elapsed);
             }
 
             AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
