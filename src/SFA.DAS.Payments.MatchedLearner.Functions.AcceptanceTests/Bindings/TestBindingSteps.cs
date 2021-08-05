@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
@@ -25,13 +24,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
         {
             await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
-            await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear);
+            await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear, false);
         }
 
         [Given("there is existing data For CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenExistingDataForPeriod(byte collectionPeriod, short academicYear)
         {
-            _testContext.ExistingMatchedLearnerDataLockId = await _testContext.TestRepository.AddExistingMatchedLearnerData(1000, 2000, collectionPeriod, academicYear);
+            _testContext.ExistingMatchedLearnerDataLockId = await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear, true);
         }
 
         [When("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
