@@ -17,6 +17,8 @@ jobs:
       configFilePath: GitVersion.yml
 
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
+    parameters:
+        AcceptanceTest: true
     
   - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
 
