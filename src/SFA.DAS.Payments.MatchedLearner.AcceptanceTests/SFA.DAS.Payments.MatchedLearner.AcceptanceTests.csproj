@@ -1,12 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
-
+  <ItemGroup>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.78" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
@@ -23,26 +26,19 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
   </ItemGroup>
-
-  
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Types\SFA.DAS.Payments.MatchedLearner.Types.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Api\SFA.DAS.Payments.MatchedLearner.Api.csproj" />
   </ItemGroup>
-
-  
   <ItemGroup>
     <Compile Update="Features\SmokeTests.feature.cs">
       <DesignTime>True</DesignTime>
     </Compile>
   </ItemGroup>
-
-  
   <ItemGroup>
     <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SmokeTests.feature.cs</LastGenOutput>
     </SpecFlowFeatureFiles>
   </ItemGroup>
-
 </Project>

@@ -9,17 +9,18 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 {
-    public class TestFunction : IDisposable
+    public class TestFunctionHost : IDisposable
     {
         private readonly IHost _host;
         private bool _isDisposed;
 
-        public TestFunction()
+        public TestFunctionHost()
         {
             var appConfig = new Dictionary<string, string>{
                 { "EnvironmentName", "Development" },
                 { "AzureWebJobsStorage", TestConfiguration.ApplicationSettings.AzureWebJobsStorage },
-                { "MatchedLearnerServiceBusConnectionString",  TestConfiguration.ApplicationSettings.MatchedLearnerServiceBusConnectionString },
+                { "MatchedLearnerServiceBusConnectionString", TestConfiguration.ApplicationSettings.MatchedLearnerServiceBusConnectionString },
+                { "MatchedLearnerQueue", TestConfiguration.ApplicationSettings.MatchedLearnerQueue },
             };
 
             var directory = Directory.GetCurrentDirectory();

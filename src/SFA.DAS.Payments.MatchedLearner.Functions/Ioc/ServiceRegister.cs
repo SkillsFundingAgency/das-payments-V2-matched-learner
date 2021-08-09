@@ -3,16 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.Payments.MatchedLearner.Application;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 {
     public static class ServiceRegister
     {
-        public static IServiceCollection AddAppDependencies(this IServiceCollection services)
+        public static IServiceCollection AddAppDependencies(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            var applicationSettings = services.GetApplicationSettings();
-
             var dbContextOptions = new DbContextOptionsBuilder()
                 .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
                 .Options;

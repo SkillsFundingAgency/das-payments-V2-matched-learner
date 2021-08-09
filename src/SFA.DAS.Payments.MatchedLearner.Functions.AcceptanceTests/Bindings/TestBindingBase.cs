@@ -30,8 +30,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             if (string.IsNullOrEmpty(Url))
             {
-                TestContext.TestFunction = new TestFunction();
-                await TestContext.TestFunction.StartHost();
+                TestContext.TestFunctionHost = new TestFunctionHost();
+                await TestContext.TestFunctionHost.StartHost();
             }
 
             TestContext.TestEndpointInstance = new TestEndpoint();
@@ -61,7 +61,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             if (string.IsNullOrEmpty(Url))
             {
-                TestContext.TestFunction.Dispose();
+                TestContext.TestFunctionHost.Dispose();
             }
 
             TestContext.TestRepository.Dispose();

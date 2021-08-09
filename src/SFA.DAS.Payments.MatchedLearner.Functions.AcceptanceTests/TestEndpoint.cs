@@ -10,7 +10,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
     public class TestEndpoint
     {
         private IEndpointInstance _endpointInstance;
-        private readonly IApplicationSettings _testConfiguration;
+        private readonly ApplicationSettings _testConfiguration;
         public TestEndpoint()
         {
             _testConfiguration = TestConfiguration.ApplicationSettings;

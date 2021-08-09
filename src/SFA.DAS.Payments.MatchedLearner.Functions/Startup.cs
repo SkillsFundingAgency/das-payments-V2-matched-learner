@@ -19,28 +19,24 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            var serviceProvider = builder.Services.BuildServiceProvider();
+            builder.Services.AddOptions();
 
-            var configuration = serviceProvider.GetService<IConfiguration>();
+            var configuration = builder.GetContext().Configuration;
 
             var config = configuration.InitialiseConfigure();
 
             builder.Services.Replace(ServiceDescriptor.Singleton(typeof(IConfiguration), config));
 
-            builder.Services.AddApiConfigurationSections(config);
+            var applicationSettings = builder.Services.AddApplicationSettings(config);
 
-            builder.Services.AddNLog(config);
+            builder.Services.AddNLog(applicationSettings,"Functions");
 
-            builder.Services.AddOptions();
-
-            builder.Services.AddAppDependencies();
-
-            var applicationSettings = builder.Services.GetApplicationSettings();
+            builder.Services.AddAppDependencies(applicationSettings);
 
             EnsureQueueAndSubscription(applicationSettings,typeof(SubmissionSucceededEvent));
         }
 
-        private static void EnsureQueueAndSubscription(IApplicationSettings settings, Type messageType)
+        private static void EnsureQueueAndSubscription(ApplicationSettings settings, Type messageType)
         {
             try
             {
