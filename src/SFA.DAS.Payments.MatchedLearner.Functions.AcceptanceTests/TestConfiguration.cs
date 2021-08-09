@@ -9,16 +9,24 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
     {
         static TestConfiguration()
         {
-            var config = GetConfigurationRoot();
+            var config = GetAzureConfiguration();
 
+            ApplicationSettings = config
+                .GetSection("MatchedLearner")
+                .Get<ApplicationSettings>();
+
+            if (!string.IsNullOrWhiteSpace(ApplicationSettings.TargetUrl)) return;
+
+            config = GetLocalFileConfiguration();
+                
             ApplicationSettings = config
                 .GetSection("MatchedLearner")
                 .Get<ApplicationSettings>();
         }
 
-        public static IConfigurationRoot GetConfigurationRoot()
+        public static IConfigurationRoot GetAzureConfiguration()
         {
-            return new ConfigurationBuilder()
+            var config = new ConfigurationBuilder()
                  .SetBasePath(Directory.GetCurrentDirectory())
                  .AddAzureTableStorage(options =>
                  {
@@ -26,6 +34,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                      options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
                  })
                  .Build();
+
+            return config;
+        }
+        
+        public static IConfigurationRoot GetLocalFileConfiguration()
+        {
+            var config = new ConfigurationBuilder()
+                 .SetBasePath(Directory.GetCurrentDirectory())
+                 .AddJsonFile("local.settings.json", optional: false)
+                 .Build();
+
+            return config;
         }
         
         public static IApplicationSettings ApplicationSettings { get; }

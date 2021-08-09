@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.16.1" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Application\SFA.DAS.Payments.MatchedLearner.Application.csproj" />
+    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Functions\SFA.DAS.Payments.MatchedLearner.Functions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages">
+      <HintPath>..\SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

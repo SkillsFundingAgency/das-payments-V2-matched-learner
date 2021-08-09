@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Payments.MatchedLea
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SFA.DAS.Payments.MatchedLearner.Database", "SFA.DAS.Payments.MatchedLearner.Database\SFA.DAS.Payments.MatchedLearner.Database.sqlproj", "{8E748972-E4C9-4D9D-8513-2F64B0F08239}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.Payments.MatchedLearner.Functions.UnitTests", "SFA.DAS.Payments.MatchedLearner.Functions.UnitTests\SFA.DAS.Payments.MatchedLearner.Functions.UnitTests.csproj", "{CF807107-19FC-4D16-BF7A-EAAF375CD62E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{8E748972-E4C9-4D9D-8513-2F64B0F08239}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E748972-E4C9-4D9D-8513-2F64B0F08239}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E748972-E4C9-4D9D-8513-2F64B0F08239}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{CF807107-19FC-4D16-BF7A-EAAF375CD62E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF807107-19FC-4D16-BF7A-EAAF375CD62E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF807107-19FC-4D16-BF7A-EAAF375CD62E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF807107-19FC-4D16-BF7A-EAAF375CD62E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +87,7 @@ Global
 		{67E9B3DB-7225-4751-8A2C-A2D20D678268} = {0BB168E1-4E04-455A-9CC0-391E35BBE800}
 		{EAD6929D-EB81-4EE0-849C-815D83A14303} = {0BB168E1-4E04-455A-9CC0-391E35BBE800}
 		{C9842DB8-B433-478C-B338-8D5DFD18603F} = {0BB168E1-4E04-455A-9CC0-391E35BBE800}
+		{CF807107-19FC-4D16-BF7A-EAAF375CD62E} = {0BB168E1-4E04-455A-9CC0-391E35BBE800}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4A79D805-738D-4DA2-AA7D-1DC9ECD4A6BB}

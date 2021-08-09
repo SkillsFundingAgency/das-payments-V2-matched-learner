@@ -76,16 +76,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             {
                 config.AddAzureTableStorage(options =>
                 {
-                    options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
-                    options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
-                    options.EnvironmentName = configuration["EnvironmentName"];
                     options.PreFixConfigurationKeys = false;
+                    options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
                 });
             }
 #if DEBUG
             if (isDevelopmentEnvironment)
             {
-                config.AddJsonFile("local.settings.json", optional: true);
+                config.AddJsonFile("local.settings.json", optional: false);
             }
 #endif
             return config.Build();

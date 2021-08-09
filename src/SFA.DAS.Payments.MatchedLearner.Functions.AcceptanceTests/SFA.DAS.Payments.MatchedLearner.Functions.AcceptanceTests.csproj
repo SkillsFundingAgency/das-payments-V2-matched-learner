@@ -6,56 +6,38 @@
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Remove="Steps\**" />
-    <EmbeddedResource Remove="Steps\**" />
-    <None Remove="Steps\**" />
-    <SpecFlowFeatureFiles Remove="Steps\**" />
-    <SpecFlowObsoleteCodeBehindFiles Remove="Steps\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.78" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.8" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.23" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="NServiceBus.Azure" Version="7.0.0" />
+    <PackageReference Include="NServiceBus.Persistence.AzureStorage" Version="2.4.2" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="SFA.DAS.Payments.Monitoring.SubmissionJobStatus.Messages" Version="0.0.12" />
     <PackageReference Include="SpecFlow" Version="3.7.38" />
     <PackageReference Include="SpecFlow.NUnit" Version="3.7.38" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
   </ItemGroup>
-
-  
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Functions\SFA.DAS.Payments.MatchedLearner.Functions.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj" />
-    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Types\SFA.DAS.Payments.MatchedLearner.Types.csproj" />
   </ItemGroup>
-
-  
   <ItemGroup>
     <Compile Update="Features\SmokeTests.feature.cs">
       <DesignTime>True</DesignTime>
     </Compile>
   </ItemGroup>
-
-  
   <ItemGroup>
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
-
-  
   <ItemGroup>
     <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
