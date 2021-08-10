@@ -19,6 +19,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             const string sql = @"
             declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
 
+            INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate, Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status, IsLevyPayer, ApprenticeshipEmployerType)
+            VALUES (@apprenticeshipId, 1000, @testDateTime, @uln, @ukprn, @testDateTime, @testDateTime, 1, 100, 200, 300, 400, 500, 0, 0, 3)
 
             INSERT INTO Payments2.DataLockEvent (EventId, EarningEventId, Ukprn, ContractType, CollectionPeriod, AcademicYear, LearnerReferenceNumber, LearnerUln, LearningAimReference, LearningAimProgrammeType, LearningAimStandardCode, LearningAimFrameworkCode, LearningAimPathwayCode, LearningAimFundingLineType, IlrSubmissionDateTime, IsPayable, DataLockSourceId, JobId, EventTime, LearningStartDate)
             VALUES (@dataLockEventId1, NewID(), @ukprn, 1, 14, 1920, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', '2020-10-10', 0, 0, 456, @testDateTime, '2020-10-09 0:00 +00:00')
@@ -27,12 +29,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             VALUES (@dataLockEventId1, '25-104-01/08/2019', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
             
             INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
-            VALUES  (@dataLockEventId1, '25-104-01/08/2019', 1, 1, 100, 1, @testDateTime, 123456),
-                    (@dataLockEventId1, '25-104-01/08/2019', 1, 2, 200, 1, @testDateTime, 123456),
-                    (@dataLockEventId1, '25-104-01/08/2019', 1, 3, 300, 1, @testDateTime, 123456)
-
-            INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate, Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status, IsLevyPayer, ApprenticeshipEmployerType)
-            VALUES (123456, 1000, @testDateTime, @uln, @ukprn, @testDateTime, @testDateTime, 1, 100, 200, 300, 400, 500, 0, 0, 3)
+            VALUES  (@dataLockEventId1, '25-104-01/08/2019', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId1, '25-104-01/08/2019', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId1, '25-104-01/08/2019', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
 
 
 
@@ -45,9 +44,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             VALUES (@dataLockEventId2, '25-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
 
             INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
-            VALUES  (@dataLockEventId2, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, 123456),
-                    (@dataLockEventId2, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, 123456),
-                    (@dataLockEventId2, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, 123456)
+            VALUES  (@dataLockEventId2, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId2, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId2, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
 
             INSERT INTO Payments2.DataLockEventNonPayablePeriod (DataLockEventId, DataLockEventNonPayablePeriodId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
             VALUES  (@dataLockEventId2, @dataLockEventFailureId1, '25-104-01/08/2020', 1, 3, 400, 1),
@@ -56,11 +55,11 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                     (@dataLockEventId2, @dataLockEventFailureId4, '25-104-01/08/2020', 1, 6, 600, 1)
 
             INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DataLockEventNonPayablePeriodId, DataLockFailureId, ApprenticeshipId)
-            VALUES  (@dataLockEventFailureId1, 1, 123456), 
-                    (@dataLockEventFailureId1, 2, 123456), 
-                    (@dataLockEventFailureId1, 3, 123456), 
-                    (@dataLockEventFailureId2, 7, 123456), 
-                    (@dataLockEventFailureId3, 9, 123456),
+            VALUES  (@dataLockEventFailureId1, 1, @apprenticeshipId), 
+                    (@dataLockEventFailureId1, 2, @apprenticeshipId), 
+                    (@dataLockEventFailureId1, 3, @apprenticeshipId), 
+                    (@dataLockEventFailureId2, 7, @apprenticeshipId), 
+                    (@dataLockEventFailureId3, 9, @apprenticeshipId),
                     (@dataLockEventFailureId4, 1, 12345600)
             ";
 
@@ -70,12 +69,14 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             var dataLockEventFailureId2 = Guid.NewGuid();
             var dataLockEventFailureId3 = Guid.NewGuid();
             var dataLockEventFailureId4 = Guid.NewGuid();
+            
+            var apprenticeshipId = ukprn + uln;
 
             await using var connection = new SqlConnection(_connectionString);
 
             await connection.ExecuteAsync(sql, new
             {
-                ukprn, uln, dataLockEventId1, dataLockEventId2, dataLockEventFailureId1, dataLockEventFailureId2, dataLockEventFailureId3, dataLockEventFailureId4
+	            apprenticeshipId, ukprn, uln, dataLockEventId1, dataLockEventId2, dataLockEventFailureId1, dataLockEventFailureId2, dataLockEventFailureId3, dataLockEventFailureId4
             });
         }
 
@@ -83,7 +84,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         {
             const string sql = @"
             DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
-            DELETE Payments2.Apprenticeship WHERE Id = 123456;
+            DELETE Payments2.Apprenticeship WHERE id = @apprenticeshipId;
 
             DELETE Payments2.DataLockEventPayablePeriod
             WHERE DataLockEventId IN (
@@ -126,8 +127,10 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             AND Ukprn = @ukprn 
             ";
 
+            var apprenticeshipId = ukprn + uln;
+
             await using var connection = new SqlConnection(_connectionString);
-            await connection.ExecuteAsync(sql, new {ukprn, uln});
+            await connection.ExecuteAsync(sql, new {apprenticeshipId, ukprn, uln});
         }
     }
 }
