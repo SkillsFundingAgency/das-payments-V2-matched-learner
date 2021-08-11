@@ -102,7 +102,7 @@
         "MatchedLearnerQueue": {
             "type": "string"
         },
-        "MatchedLearnerServiceBusConnectionString": {
+        "PaymentsServiceBusConnectionString": {
             "type": "string"
         }
 
@@ -368,8 +368,8 @@
                                     "value": "[parameters('MatchedLearnerQueue')]"
                                 },
                                 {
-                                    "name": "MatchedLearnerServiceBusConnectionString",
-                                    "value": "[parameters('MatchedLearnerServiceBusConnectionString')]"
+                                    "name": "PaymentsServiceBusConnectionString",
+                                    "value": "[parameters('PaymentsServiceBusConnectionString')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
