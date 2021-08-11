@@ -98,7 +98,14 @@
         "appServicePlanSize": {
             "type": "string",
             "defaultValue": "1"
+        },
+        "MatchedLearnerQueue": {
+            "type": "string"
+        },
+        "MatchedLearnerServiceBusConnectionString": {
+            "type": "string"
         }
+
     },
     "variables": {
         "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
