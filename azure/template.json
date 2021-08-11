@@ -23,13 +23,7 @@
         "sharedEnvVirtualNetworkName": {
             "type": "string"
         },
-        "sharedStorageAccountConnectionString": {
-            "type": "securestring"
-        },
-        "nServiceBusConnectionString": {
-            "type": "securestring"
-        },
-        "nServiceBusLicense": {
+        "AzureWebJobsStorage": {
             "type": "securestring"
         },
         "functionsExtensionVersion": {
@@ -63,9 +57,6 @@
         },
         "logAnalyticsWorkspaceName": {
             "type": "string"
-        },
-        "configurationStorageConnectionString": {
-            "type": "securestring"
         },
         "tags": {
             "type": "object"
@@ -205,8 +196,8 @@
                                     "value": "[parameters('loggingRedisConnectionString')]"
                                 },
                                 {
-                                    "name": "ConfigurationStorageConnectionString",
-                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                    "name": "AzureWebJobsStorage",
+                                    "value": "[parameters('AzureWebJobsStorage')]"
                                 },
                                 {
                                     "name": "LoggingRedisKey",
@@ -346,28 +337,8 @@
                         "value": {
                             "array": [
                                 {
-                                    "name": "ConfigurationStorageConnectionString",
-                                    "value": "[parameters('configurationStorageConnectionString')]"
-                                },
-                                {
-                                    "name": "NServiceBusConnectionString",
-                                    "value": "[parameters('nServiceBusConnectionString')]"
-                                },
-                                {
-                                    "name": "NServiceBusLicense",
-                                    "value": "[parameters('nServiceBusLicense')]"
-                                },
-                                {
-                                    "name": "ConfigNames",
-                                    "value": "[parameters('configNames')]"
-                                },
-                                {
                                     "name": "EnvironmentName",
                                     "value": "[parameters('environmentName')]"
-                                },
-                                {
-                                    "name": "AzureWebJobsStorage",
-                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
                                 {
                                     "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -379,7 +350,19 @@
                                 },
                                 {
                                     "name": "AppName",
-                                    "value": "das-apprentice-commitments-jobs"
+                                    "value": "sfa-das-payments-matchedlearner"
+                                },
+                                {
+                                    "name": "AzureWebJobsStorage",
+                                    "value": "[parameters('AzureWebJobsStorage')]"
+                                },
+                                {
+                                    "name": "MatchedLearnerQueue",
+                                    "value": "[parameters('MatchedLearnerQueue')]"
+                                },
+                                {
+                                    "name": "MatchedLearnerServiceBusConnectionString",
+                                    "value": "[parameters('MatchedLearnerServiceBusConnectionString')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
