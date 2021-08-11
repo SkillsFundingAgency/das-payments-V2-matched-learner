@@ -17,7 +17,7 @@
     <PackageReference Include="NServiceBus.Persistence.AzureStorage" Version="2.4.2" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="SFA.DAS.Payments.Monitoring.SubmissionJobStatus.Messages" Version="0.0.12" />
+    <PackageReference Include="SFA.DAS.Payments.Monitoring.Jobs.Messages" Version="0.0.14" />
     <PackageReference Include="SpecFlow" Version="3.7.38" />
     <PackageReference Include="SpecFlow.NUnit" Version="3.7.38" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />

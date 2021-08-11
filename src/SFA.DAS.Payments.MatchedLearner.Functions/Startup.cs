@@ -10,7 +10,7 @@ using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
-using SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace SFA.DAS.Payments.MatchedLearner.Functions
@@ -33,14 +33,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            EnsureQueueAndSubscription(applicationSettings,typeof(SubmissionSucceededEvent));
+            EnsureQueueAndSubscription(applicationSettings,typeof(SubmissionJobSucceeded));
         }
 
         private static void EnsureQueueAndSubscription(ApplicationSettings settings, Type messageType)
         {
             try
             {
-                var manageClient = new ManagementClient(settings.MatchedLearnerServiceBusConnectionString);
+                var manageClient = new ManagementClient(settings.PaymentsServiceBusConnectionString);
 
                 if (!manageClient.QueueExistsAsync(settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
                 {

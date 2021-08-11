@@ -5,7 +5,7 @@
         public string MatchedLearnerQueue { get; set; }
         public string PaymentsConnectionString { get; set; }
         public string MatchedLearnerConnectionString { get; set; }
-        public string MatchedLearnerServiceBusConnectionString { get; set; }
+        public string PaymentsServiceBusConnectionString { get; set; }
         public string AzureWebJobsStorage { get; set; }
         public string TargetUrl { get; set; }
         public string TimeToWait { get; set; }

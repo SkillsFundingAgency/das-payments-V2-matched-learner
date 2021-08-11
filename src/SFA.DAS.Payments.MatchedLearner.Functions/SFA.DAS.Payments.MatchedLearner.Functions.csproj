@@ -14,7 +14,7 @@
     <PackageReference Include="NServiceBus.AzureFunctions.InProcess.ServiceBus" Version="1.2.0" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
     <PackageReference Include="SFA.DAS.NLog.Targets.Redis" Version="1.2.1" />
-    <PackageReference Include="SFA.DAS.Payments.Monitoring.SubmissionJobStatus.Messages" Version="0.0.12" />
+    <PackageReference Include="SFA.DAS.Payments.Monitoring.Jobs.Messages" Version="0.0.14" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Application\SFA.DAS.Payments.MatchedLearner.Application.csproj" />
