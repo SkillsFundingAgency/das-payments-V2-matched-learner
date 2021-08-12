@@ -23,7 +23,7 @@
         "sharedEnvVirtualNetworkName": {
             "type": "string"
         },
-        "AzureWebJobsStorage": {
+        "sharedStorageAccountConnectionString": {
             "type": "securestring"
         },
         "functionsExtensionVersion": {
@@ -204,7 +204,7 @@
                                 },
                                 {
                                     "name": "AzureWebJobsStorage",
-                                    "value": "[parameters('AzureWebJobsStorage')]"
+                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
                                 {
                                     "name": "LoggingRedisKey",
@@ -361,7 +361,7 @@
                                 },
                                 {
                                     "name": "AzureWebJobsStorage",
-                                    "value": "[parameters('AzureWebJobsStorage')]"
+                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
                                 {
                                     "name": "MatchedLearnerQueue",
