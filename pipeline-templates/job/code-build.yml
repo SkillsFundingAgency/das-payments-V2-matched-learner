@@ -45,12 +45,12 @@ jobs:
       OverWrite: true
 
   - task: CopyFiles@2
-    displayName: 'Copy Artifact AcceptanceTests'
+    displayName: 'Copy AcceptanceTests Files to: $(build.artifactstagingdirectory)'
     inputs:
       SourceFolder: '$(System.DefaultWorkingDirectory)/src/'
       Contents: |
-        **\*AcceptanceTests*\**\bin\$(BuildConfiguration)\**
-      TargetFolder: '$(build.artifactstagingdirectory)\publish'
+        *AcceptanceTests*/**/bin/$(BuildConfiguration)/**
+      TargetFolder: '$(build.artifactstagingdirectory)/publish'
       CleanTargetFolder: true
 
   - task: PublishBuildArtifacts@1
