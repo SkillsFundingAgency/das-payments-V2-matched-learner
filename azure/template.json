@@ -104,6 +104,9 @@
         },
         "paymentsServiceBusConnectionString": {
             "type": "string"
+        },
+        "configurationStorageConnectionString" : {
+            "type": "securestring"
         }
 
     },
@@ -206,6 +209,11 @@
                                     "name": "AzureWebJobsStorage",
                                     "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
+                                {  
+                                    "name": "ConfigurationStorageConnectionString",
+                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                },
+
                                 {
                                     "name": "LoggingRedisKey",
                                     "value": "[parameters('loggingRedisKey')]"
