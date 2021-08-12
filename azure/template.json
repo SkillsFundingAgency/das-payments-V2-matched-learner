@@ -99,10 +99,10 @@
             "type": "string",
             "defaultValue": "1"
         },
-        "MatchedLearnerQueue": {
+        "matchedLearnerQueue": {
             "type": "string"
         },
-        "PaymentsServiceBusConnectionString": {
+        "paymentsServiceBusConnectionString": {
             "type": "string"
         }
 
@@ -365,11 +365,11 @@
                                 },
                                 {
                                     "name": "MatchedLearnerQueue",
-                                    "value": "[parameters('MatchedLearnerQueue')]"
+                                    "value": "[parameters('matchedLearnerQueue')]"
                                 },
                                 {
                                     "name": "PaymentsServiceBusConnectionString",
-                                    "value": "[parameters('PaymentsServiceBusConnectionString')]"
+                                    "value": "[parameters('paymentsServiceBusConnectionString')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
