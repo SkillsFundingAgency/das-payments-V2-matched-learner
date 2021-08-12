@@ -44,6 +44,15 @@ jobs:
       TargetFolder: '$(build.artifactstagingdirectory)/publish'
       OverWrite: true
 
+  - task: CopyFiles@2
+    displayName: 'Copy Artifact AcceptanceTests'
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)/src/'
+      Contents: |
+        **\*AcceptanceTests*\**\bin\$(BuildConfiguration)\**
+      TargetFolder: '$(build.artifactstagingdirectory)\publish'
+      CleanTargetFolder: true
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
