@@ -66,6 +66,7 @@
     <Folder Include="dbo\Tables" />
     <Folder Include="Payments2\Schemas" />
     <Folder Include="Payments2\Tables" />
+    <Folder Include="dbo\Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Payments2\Tables\Payments2.Apprenticeship.sql" />
@@ -75,6 +76,7 @@
     <Build Include="Payments2\Tables\Payments2.DataLockEventPayablePeriod.sql" />
     <Build Include="Payments2\Tables\Payments2.DataLockEventPriceEpisode.sql" />
     <Build Include="Payments2\Schemas\Payments2.sql" />
+    <Build Include="dbo\Stored Procedures\dbo.usp_DisplayDeploymentProperties.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SFA.DAS.Payments.MatchedLearner.Database.publish.xml" />
