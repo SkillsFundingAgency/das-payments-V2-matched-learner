@@ -36,6 +36,14 @@ jobs:
       projects: 'src/SFA.DAS.Payments.MatchedLearner.Functions/SFA.DAS.Payments.MatchedLearner.Functions.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build Acceptance Tests'
+    inputs: 
+      command: build
+      projects: 'src/*AcceptanceTests/*AcceptanceTests.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-restore'
+
+
   - task: CopyFiles@2
     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
     inputs:
