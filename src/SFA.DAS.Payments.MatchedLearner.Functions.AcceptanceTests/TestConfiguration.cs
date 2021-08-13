@@ -23,11 +23,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             IConfigurationRoot config;
             try
             {
-                var str = Environment.GetEnvironmentVariable("ConfigurationStorageConnectionStringNew");
-                if (string.IsNullOrWhiteSpace(str))
-                {
-                    throw new Exception("Missing environment variable 'ConfigurationStorageConnectionString'. It should be present and set to a connection string pointing to the storage account containing a 'Configuration' table.");
-                };
 
                 config = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
@@ -35,8 +30,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                     {
                         options.PreFixConfigurationKeys = false;
                         options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
-                        options.StorageConnectionStringEnvironmentVariableName = "ConfigurationStorageConnectionStringNew";
-                        options.EnvironmentNameEnvironmentVariableName = "EnvironmentNameNew";
+                        options.StorageConnectionStringEnvironmentVariableName = "ConfigurationStorageConnectionString";
                     })
                     .Build();
             }
