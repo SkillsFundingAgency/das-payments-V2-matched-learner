@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using SFA.DAS.Configuration.AzureTableStorage;
@@ -22,12 +23,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             IConfigurationRoot config;
             try
             {
+                var str = Environment.GetEnvironmentVariable("ConfigurationStorageConnectionString");
+                if (string.IsNullOrWhiteSpace(str))
+                {
+                    throw new Exception("Missing environment variable 'ConfigurationStorageConnectionString'. It should be present and set to a connection string pointing to the storage account containing a 'Configuration' table.");
+                };
+
                 config = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddAzureTableStorage(options =>
                     {
                         options.PreFixConfigurationKeys = false;
                         options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
+                        options.StorageConnectionStringEnvironmentVariableName = "ConfigurationStorageConnectionString";
                     })
                     .Build();
             }
