@@ -371,6 +371,10 @@
                                     "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
                                 {
+                                    "name": "ConfigurationStorageConnectionString",
+                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                },
+                                {
                                     "name": "MatchedLearnerQueue",
                                     "value": "[parameters('matchedLearnerQueue')]"
                                 },
