@@ -36,6 +36,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                         options.PreFixConfigurationKeys = false;
                         options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
                         options.StorageConnectionStringEnvironmentVariableName = "ConfigurationStorageConnectionStringNew";
+                        options.EnvironmentNameEnvironmentVariableName = "EnvironmentNameNew";
                     })
                     .Build();
             }
