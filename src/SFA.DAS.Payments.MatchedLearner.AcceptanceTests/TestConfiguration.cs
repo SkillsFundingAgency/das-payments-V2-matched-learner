@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using SFA.DAS.Configuration.AzureTableStorage;
@@ -28,6 +29,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                     {
                         options.PreFixConfigurationKeys = false;
                         options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
+                        options.StorageConnectionStringEnvironmentVariableName = "ConfigurationStorageConnectionStringNew";
+                        options.EnvironmentNameEnvironmentVariableName = "EnvironmentNameNew";
                     })
                     .Build();
             }
