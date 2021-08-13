@@ -63,7 +63,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 {
                     options.PreFixConfigurationKeys = false;
                     options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
-                    options.StorageConnectionStringEnvironmentVariableName = "AzureWebJobsStorage";
                 });
             }
 #if DEBUG
