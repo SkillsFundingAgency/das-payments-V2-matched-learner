@@ -12,13 +12,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 {
     public static class ServiceRegister
     {
-        private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider("RunAs=App;");
+        private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
 
         public static IServiceCollection AddAppDependencies(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            if (string.IsNullOrWhiteSpace(applicationSettings.MatchedLearnerConnectionString))
-                throw new InvalidOperationException("MatchedLearnerConnectionString is null or empty, in Function");
-
             var connection = new SqlConnection
             {
                 ConnectionString = applicationSettings.MatchedLearnerConnectionString,

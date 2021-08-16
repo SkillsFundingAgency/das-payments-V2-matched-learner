@@ -14,14 +14,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 	{
 		private readonly PaymentsDataContext _paymentsDataContext;
 		private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
-		private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider("RunAs=App;");
+		private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
 
 		public TestRepository()
 		{
 			var applicationSettings = TestConfiguration.ApplicationSettings;
-
-			if (string.IsNullOrWhiteSpace(applicationSettings.MatchedLearnerConnectionString))
-				throw new InvalidOperationException("MatchedLearnerConnectionString is null or empty, in Function Acceptance tests");
 
 			var connection = new SqlConnection
 			{
