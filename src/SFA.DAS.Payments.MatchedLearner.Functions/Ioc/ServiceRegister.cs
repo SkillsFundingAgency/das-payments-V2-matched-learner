@@ -18,7 +18,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
             var connection = new SqlConnection
             {
                 ConnectionString = applicationSettings.MatchedLearnerConnectionString,
-                AccessToken = AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/").GetAwaiter().GetResult()
+#if !DEBUG
+                AccessToken = AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/").GetAwaiter().GetResult()          
+#endif
             };
 
             var matchedLearnerOptions = new DbContextOptionsBuilder()
