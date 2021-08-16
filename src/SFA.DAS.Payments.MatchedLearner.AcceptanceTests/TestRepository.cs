@@ -1,22 +1,42 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Dapper;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 {
-    public class TestRepository
-    {
-        private readonly string _connectionString;
+	public class TestRepository
+	{
+		private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
+		private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
 
-        public TestRepository()
-        {
-            _connectionString = TestConfiguration.ApplicationSettings.MatchedLearnerConnectionString;
-        }
+		public TestRepository()
+		{
+			var applicationSettings = TestConfiguration.ApplicationSettings;
 
-        public async Task AddDataLockEvent(long ukprn, long uln)
-        {
-            const string sql = @"
+			if (string.IsNullOrWhiteSpace(applicationSettings.MatchedLearnerConnectionString))
+				throw new InvalidOperationException("MatchedLearnerConnectionString is null or empty, in API Acceptance tests");
+
+			var connection = new SqlConnection
+			{
+				ConnectionString = applicationSettings.MatchedLearnerConnectionString,
+#if !DEBUG
+                AccessToken = AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/").GetAwaiter().GetResult()          
+#endif
+			};
+
+			var matchedLearnerOptions = new DbContextOptionsBuilder()
+				.UseSqlServer(connection)
+				.Options;
+
+			_matchedLearnerDataContext = new MatchedLearnerDataContext(matchedLearnerOptions);
+		}
+
+		public async Task AddDataLockEvent(long ukprn, long uln)
+		{
+			const string sql = @"
             declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
 
             INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate, Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status, IsLevyPayer, ApprenticeshipEmployerType)
@@ -63,26 +83,30 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                     (@dataLockEventFailureId4, 1, 12345600)
             ";
 
-            var dataLockEventId1 = Guid.NewGuid();
-            var dataLockEventId2 = Guid.NewGuid();
-            var dataLockEventFailureId1 = Guid.NewGuid();
-            var dataLockEventFailureId2 = Guid.NewGuid();
-            var dataLockEventFailureId3 = Guid.NewGuid();
-            var dataLockEventFailureId4 = Guid.NewGuid();
-            
-            var apprenticeshipId = ukprn + uln;
+			var dataLockEventId1 = Guid.NewGuid();
+			var dataLockEventId2 = Guid.NewGuid();
+			var dataLockEventFailureId1 = Guid.NewGuid();
+			var dataLockEventFailureId2 = Guid.NewGuid();
+			var dataLockEventFailureId3 = Guid.NewGuid();
+			var dataLockEventFailureId4 = Guid.NewGuid();
 
-            await using var connection = new SqlConnection(_connectionString);
+			var apprenticeshipId = ukprn + uln;
 
-            await connection.ExecuteAsync(sql, new
-            {
-	            apprenticeshipId, ukprn, uln, dataLockEventId1, dataLockEventId2, dataLockEventFailureId1, dataLockEventFailureId2, dataLockEventFailureId3, dataLockEventFailureId4
-            });
-        }
+			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(sql,
+				new SqlParameter("apprenticeshipId", apprenticeshipId),
+				new SqlParameter("ukprn", ukprn),
+				new SqlParameter("uln", uln),
+				new SqlParameter("dataLockEventId1", dataLockEventId1),
+				new SqlParameter("dataLockEventId2", dataLockEventId2),
+				new SqlParameter("dataLockEventFailureId1", dataLockEventFailureId1),
+				new SqlParameter("dataLockEventFailureId2", dataLockEventFailureId2),
+				new SqlParameter("dataLockEventFailureId3", dataLockEventFailureId3),
+				new SqlParameter("dataLockEventFailureId4", dataLockEventFailureId4));
+		}
 
-        public async Task ClearLearner(long ukprn, long uln)
-        {
-            const string sql = @"
+		public async Task ClearLearner(long ukprn, long uln)
+		{
+			const string sql = @"
             DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
             DELETE Payments2.Apprenticeship WHERE id = @apprenticeshipId;
 
@@ -127,10 +151,12 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             AND Ukprn = @ukprn 
             ";
 
-            var apprenticeshipId = ukprn + uln;
+			var apprenticeshipId = ukprn + uln;
 
-            await using var connection = new SqlConnection(_connectionString);
-            await connection.ExecuteAsync(sql, new {apprenticeshipId, ukprn, uln});
-        }
-    }
+			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(sql,
+				new SqlParameter("apprenticeshipId", apprenticeshipId),
+				new SqlParameter("ukprn", ukprn),
+				new SqlParameter("uln", uln));
+		}
+	}
 }

@@ -22,10 +22,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [BeforeScenario]
         public async Task Initialise()
         {
-            //This is a Hack to check if the Tests are Running on Local Machine
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            //This is a Hack to check if the Tests are Running on Local Machine
             Url = TestConfiguration.ApplicationSettings.TargetUrl;
 
             if (string.IsNullOrEmpty(Url))
