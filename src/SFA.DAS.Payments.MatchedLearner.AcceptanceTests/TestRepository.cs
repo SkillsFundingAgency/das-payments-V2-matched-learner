@@ -16,6 +16,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 		{
 			var applicationSettings = TestConfiguration.ApplicationSettings;
 
+			if (string.IsNullOrWhiteSpace(applicationSettings.MatchedLearnerConnectionString))
+				throw new InvalidOperationException("MatchedLearnerConnectionString is null or empty, in API Acceptance tests");
+
 			var connection = new SqlConnection
 			{
 				ConnectionString = applicationSettings.MatchedLearnerConnectionString,

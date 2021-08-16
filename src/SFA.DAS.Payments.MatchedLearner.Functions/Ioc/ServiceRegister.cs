@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Services.AppAuthentication;
+﻿using System;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 
         public static IServiceCollection AddAppDependencies(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
+            if (string.IsNullOrWhiteSpace(applicationSettings.MatchedLearnerConnectionString))
+                throw new InvalidOperationException("MatchedLearnerConnectionString is null or empty, in Function");
+
             var connection = new SqlConnection
             {
                 ConnectionString = applicationSettings.MatchedLearnerConnectionString,
