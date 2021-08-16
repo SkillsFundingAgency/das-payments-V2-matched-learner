@@ -12,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 {
     public static class ServiceRegister
     {
-        private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
+        private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider("RunAs=App;");
 
         public static IServiceCollection AddAppDependencies(this IServiceCollection services, ApplicationSettings applicationSettings)
         {

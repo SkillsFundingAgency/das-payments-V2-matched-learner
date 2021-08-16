@@ -14,7 +14,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 	{
 		private readonly PaymentsDataContext _paymentsDataContext;
 		private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
-		private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
+		private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider("RunAs=App;");
 
 		public TestRepository()
 		{
