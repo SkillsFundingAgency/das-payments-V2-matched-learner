@@ -25,7 +25,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.ApiBaseUrl))
+            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.TargetUrl))
             {
                 TestContext.TestFunctionHost = new TestFunctionHost();
                 await TestContext.TestFunctionHost.StartHost();
@@ -55,7 +55,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.ApiBaseUrl))
+            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.TargetUrl))
             {
                 TestContext.TestFunctionHost.Dispose();
             }
