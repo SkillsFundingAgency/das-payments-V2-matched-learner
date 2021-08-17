@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
@@ -43,11 +44,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var persistence = endpointConfiguration.UsePersistence<AzureStoragePersistence>();
 
+            if (string.IsNullOrWhiteSpace(_testConfiguration.AzureWebJobsStorage))
+                throw new InvalidOperationException("AzureWebJobsStorage is null");
+
             persistence.ConnectionString(_testConfiguration.AzureWebJobsStorage);
 
             endpointConfiguration.DisableFeature<TimeoutManager>();
 
             var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
+
+            if (string.IsNullOrWhiteSpace(_testConfiguration.PaymentsServiceBusConnectionString))
+                throw new InvalidOperationException("PaymentsServiceBusConnectionString is null");
 
             transport.ConnectionString(_testConfiguration.PaymentsServiceBusConnectionString)
                 .Transactions(TransportTransactionMode.ReceiveOnly)

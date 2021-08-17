@@ -9,8 +9,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
     [Binding]
     public class TestBindingBase
     {
-        public string Url;
-
         public readonly TestContext TestContext;
         public readonly FeatureContext FeatureContext;
 
@@ -27,9 +25,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            Url = TestConfiguration.TestApplicationSettings.TargetUrl;
-
-            if (string.IsNullOrEmpty(Url))
+            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.ApiBaseUrl))
             {
                 TestContext.TestFunctionHost = new TestFunctionHost();
                 await TestContext.TestFunctionHost.StartHost();
@@ -54,13 +50,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [AfterScenario]
         public async Task Cleanup()
         {
-            //This is a Hack to check if the Tests are Running on Local Machine
-            Url = TestConfiguration.TestApplicationSettings.TargetUrl;
-
+            
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            if (string.IsNullOrEmpty(Url))
+            //This is a Hack to check if the Tests are Running on Local Machine
+            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.ApiBaseUrl))
             {
                 TestContext.TestFunctionHost.Dispose();
             }
