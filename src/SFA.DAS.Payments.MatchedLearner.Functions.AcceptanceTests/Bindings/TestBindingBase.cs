@@ -50,19 +50,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [AfterScenario]
         public async Task Cleanup()
         {
-            
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.TargetUrl))
+            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.TargetUrl) && TestContext.TestFunctionHost != null)
             {
                 TestContext.TestFunctionHost.Dispose();
             }
 
             TestContext.TestRepository.Dispose();
 
-            await TestContext.TestEndpointInstance.Stop();
+            if (TestContext.TestEndpointInstance != null) await TestContext.TestEndpointInstance.Stop();
 
             stopwatch.Stop();
             Console.WriteLine($"Time it took to Cleanup  FunctionsHost: {stopwatch.Elapsed.Milliseconds} milliseconds");
