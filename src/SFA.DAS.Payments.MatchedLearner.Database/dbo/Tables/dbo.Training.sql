@@ -2,6 +2,7 @@
 (
 	[Id] BIGINT NOT NULL PRIMARY KEY, 
 	[EventTime] DATETIMEOFFSET NOT NULL,
+	[EventId] UNIQUEIDENTIFIER NOT NULL,
 	[IlrSubmissionDate] DATETIMEOFFSET NOT NULL, 
     [IlrSubmissionWindowPeriod] INT NOT NULL,
 	[AcademicYear] INT NOT NULL,
@@ -14,5 +15,6 @@
 	[PathwayCode] INT NOT NULL,
 	[FundingLineType] NVARCHAR(100) NOT NULL,
 	[StartDate] DATETIME NOT NULL,
+	[CompletionStatus] INT NULL,
 	[CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_Training__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
 )
