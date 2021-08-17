@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
@@ -26,7 +27,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            Url = TestConfiguration.ApplicationSettings.TargetUrl;
+            Url = TestConfiguration.TestApplicationSettings.TargetUrl;
 
             if (string.IsNullOrEmpty(Url))
             {
@@ -39,11 +40,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             TestContext.TestRepository = new TestRepository();
 
-            TestContext.TimeToPause = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToPause);
+            TestContext.TimeToPause = TimeSpan.Parse(TestConfiguration.TestApplicationSettings.TimeToPause);
 
-            TestContext.TimeToWait = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWait);
+            TestContext.TimeToWait = TimeSpan.Parse(TestConfiguration.TestApplicationSettings.TimeToWait);
 
-            TestContext.TimeToWaitUnexpected = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWaitUnexpected);
+            TestContext.TimeToWaitUnexpected = TimeSpan.Parse(TestConfiguration.TestApplicationSettings.TimeToWaitUnexpected);
 
             stopwatch.Stop();
 
@@ -54,7 +55,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         public async Task Cleanup()
         {
             //This is a Hack to check if the Tests are Running on Local Machine
-            Url = TestConfiguration.ApplicationSettings.TargetUrl;
+            Url = TestConfiguration.TestApplicationSettings.TargetUrl;
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
