@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
@@ -14,22 +14,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 	{
 		private readonly PaymentsDataContext _paymentsDataContext;
 		private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
-		private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
 
 		public TestRepository()
 		{
-			var applicationSettings = TestConfiguration.ApplicationSettings;
-
-			var connection = new SqlConnection
-			{
-				ConnectionString = applicationSettings.MatchedLearnerConnectionString,
-#if !DEBUG
-                AccessToken = AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/").GetAwaiter().GetResult()          
-#endif
-			};
+			var applicationSettings = TestConfiguration.TestApplicationSettings;
 
 			var matchedLearnerOptions = new DbContextOptionsBuilder()
-				.UseSqlServer(connection)
+				.UseSqlServer(applicationSettings.MatchedLearnerAcceptanceTestConnectionString)
 				.Options;
 
 			_matchedLearnerDataContext = new MatchedLearnerDataContext(matchedLearnerOptions);
