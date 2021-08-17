@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Api;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
@@ -17,7 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
         public TestClient()
         {
-            _url = TestConfiguration.ApplicationSettings.TargetUrl;
+            _url = TestConfiguration.TestApplicationSettings.TargetUrl;
 
             if (!string.IsNullOrEmpty(_url)) return;
 

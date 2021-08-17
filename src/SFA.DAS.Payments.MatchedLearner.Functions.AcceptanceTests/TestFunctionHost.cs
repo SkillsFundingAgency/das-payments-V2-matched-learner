@@ -6,6 +6,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 {
@@ -18,9 +19,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         {
             var appConfig = new Dictionary<string, string>{
                 { "EnvironmentName", "Development" },
-                { "AzureWebJobsStorage", TestConfiguration.ApplicationSettings.AzureWebJobsStorage },
-                { "PaymentsServiceBusConnectionString", TestConfiguration.ApplicationSettings.PaymentsServiceBusConnectionString },
-                { "MatchedLearnerQueue", TestConfiguration.ApplicationSettings.MatchedLearnerQueue },
+                { "AzureWebJobsStorage", TestConfiguration.TestApplicationSettings.AzureWebJobsStorage },
+                { "PaymentsServiceBusConnectionString", TestConfiguration.TestApplicationSettings.PaymentsServiceBusConnectionString },
+                { "MatchedLearnerQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerQueue },
             };
 
             var directory = Directory.GetCurrentDirectory();

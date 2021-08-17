@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
@@ -10,10 +10,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
     public class TestEndpoint
     {
         private IEndpointInstance _endpointInstance;
-        private readonly ApplicationSettings _testConfiguration;
+        private readonly TestApplicationSettings _testConfiguration;
         public TestEndpoint()
         {
-            _testConfiguration = TestConfiguration.ApplicationSettings;
+            _testConfiguration = TestConfiguration.TestApplicationSettings;
         }
 
         public async Task<IEndpointInstance> Start()

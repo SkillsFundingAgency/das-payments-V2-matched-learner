@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 
-namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
+namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
 {
     public static class TestConfiguration
     {
@@ -13,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         {
             GetAzureConfiguration();
 
-            if (!string.IsNullOrWhiteSpace(ApplicationSettings.TargetUrl)) return;
+            if (!string.IsNullOrWhiteSpace(TestApplicationSettings.TargetUrl)) return;
 
             GetLocalFileConfiguration();
         }
@@ -23,6 +22,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             IConfigurationRoot config;
             try
             {
+
                 config = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddAzureTableStorage(options =>
@@ -40,9 +40,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                 return;
             }
 
-            ApplicationSettings = config
+            TestApplicationSettings = config
                 .GetSection("MatchedLearner")
-                .Get<ApplicationSettings>();
+                .Get<TestApplicationSettings>();
         }
         
         public static void GetLocalFileConfiguration()
@@ -55,11 +55,11 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                 .AddJsonFile("local.settings.json", optional: false)
                 .Build();
 
-            ApplicationSettings = config
+            TestApplicationSettings = config
                 .GetSection("MatchedLearner")
-                .Get<ApplicationSettings>();
+                .Get<TestApplicationSettings>();
         }
 
-        public static ApplicationSettings ApplicationSettings { get; private set; } = new ApplicationSettings();
+        public static TestApplicationSettings TestApplicationSettings { get; private set; } = new TestApplicationSettings();
     }
 }
