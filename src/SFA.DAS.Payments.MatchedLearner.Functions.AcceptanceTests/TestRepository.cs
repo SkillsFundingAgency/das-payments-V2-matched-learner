@@ -19,6 +19,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 		{
 			var applicationSettings = TestConfiguration.TestApplicationSettings;
 
+			if (string.IsNullOrWhiteSpace(applicationSettings.MatchedLearnerAcceptanceTestConnectionString))
+				throw new InvalidOperationException("MatchedLearnerAcceptanceTestConnectionString is null");
+
 			var matchedLearnerOptions = new DbContextOptionsBuilder()
 				.UseSqlServer(applicationSettings.MatchedLearnerAcceptanceTestConnectionString)
 				.Options;
