@@ -10,10 +10,10 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
         {
             GetReleaseFileConfiguration();
 
-            if (string.IsNullOrWhiteSpace(TestAzureAdClientSettings.ApiBaseUrl))
-            {
-                GetLocalFileConfiguration();
-            }
+            //if (string.IsNullOrWhiteSpace(TestAzureAdClientSettings.ApiBaseUrl))
+            //{
+            //    GetLocalFileConfiguration();
+            //}
         }
 
         public static void GetLocalFileConfiguration()
@@ -32,12 +32,23 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
 
         public static void GetReleaseFileConfiguration()
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("release.settings.json", optional: false)
-                .Build();
+            IConfigurationRoot config;
+            try
+            {
+                config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("release.settings.json", optional: false)
+                    .Build();
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"unable to read or find release.settings.json from {Directory.GetCurrentDirectory()}");
+            }
 
             var isTemplateValue = config.GetValue<string>("MatchedLearner:TimeToWait");
+            if (string.Equals(isTemplateValue, string.Empty, StringComparison.InvariantCultureIgnoreCase))
+                throw new InvalidOperationException("release.settings.json is empty");
+
             if (string.Equals(isTemplateValue, "__TimeToWait__", StringComparison.InvariantCultureIgnoreCase))
                 return;
 
