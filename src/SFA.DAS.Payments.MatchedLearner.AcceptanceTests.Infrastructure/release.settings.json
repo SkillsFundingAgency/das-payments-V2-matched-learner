@@ -12,13 +12,11 @@
     "TimeToPause": "__TimeToPause__",
     "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
 
-    "MatchedLearnerQueue": "__MatchedLearnerQueue__",
-
     "AzureWebJobsStorage": "__AzureWebJobsStorage__",
 
     "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
 
     "PaymentsConnectionString": "__PaymentsConnectionString__",
-    "MatchedLearnerConnectionString": "__MatchedLearnerConnectionString__"
+    "MatchedLearnerAcceptanceTestConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__"
   }
 }
