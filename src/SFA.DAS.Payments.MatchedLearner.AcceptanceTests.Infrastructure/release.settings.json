@@ -1,9 +1,9 @@
 {
   "AzureAd": {
-    "ApiBaseUrl": "__ApiBaseUrl__",
+    "ApiBaseUrl": "__MatchedLearnerAcceptanceTestApiTargetUrl__",
+    "ClientId": "__MatchedLearnerAcceptanceTestClientId__",
+    "ClientSecret": "__MatchedLearnerAcceptanceTestClientSecret__",
     "Tenant": "__Tenant__",
-    "ClientId": "__ClientId__",
-    "ClientSecret": "__ClientSecret__",
     "IdentifierUri": "__IdentifierUri__"
   },
 
