@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Net.Http.Headers;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
 {
@@ -32,6 +33,13 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
 
         public static void GetReleaseFileConfiguration()
         {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "release.settings.json");
+            var exists = File.Exists(path);
+            if (!exists)
+            {
+                throw new InvalidOperationException($"relase.settings.json not found at {path}");
+            }
+
             IConfigurationRoot config;
             try
             {
