@@ -19,7 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         {
             var appConfig = new Dictionary<string, string>{
                 { "EnvironmentName", "Development" },
-                { "AzureWebJobsStorage", TestConfiguration.TestApplicationSettings.AzureWebJobsStorage },
+                { "AzureWebJobsStorage", TestConfiguration.TestApplicationSettings.MatchedLearnerAcceptanceTestStorageAccountConnectionString },
                 { "PaymentsServiceBusConnectionString", TestConfiguration.TestApplicationSettings.PaymentsServiceBusConnectionString },
                 { "MatchedLearnerQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerQueue },
             };

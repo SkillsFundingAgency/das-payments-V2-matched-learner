@@ -3,8 +3,8 @@
     "ApiBaseUrl": "__MatchedLearnerAcceptanceTestApiTargetUrl__",
     "ClientId": "__MatchedLearnerAcceptanceTestClientId__",
     "ClientSecret": "__MatchedLearnerAcceptanceTestClientSecret__",
-    "Tenant": "__Tenant__",
-    "IdentifierUri": "__IdentifierUri__"
+    "IdentifierUri": "__MatchedLearnerIdentifier__",
+    "Tenant": "__Tenant__"
   },
 
   "MatchedLearner": {
@@ -12,7 +12,7 @@
     "TimeToPause": "__TimeToPause__",
     "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
 
-    "AzureWebJobsStorage": "__AzureWebJobsStorage__",
+    "MatchedLearnerAcceptanceTestStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
 
     "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
 

@@ -44,10 +44,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var persistence = endpointConfiguration.UsePersistence<AzureStoragePersistence>();
 
-            if (string.IsNullOrWhiteSpace(_testConfiguration.AzureWebJobsStorage))
-                throw new InvalidOperationException("AzureWebJobsStorage is null");
+            if (string.IsNullOrWhiteSpace(_testConfiguration.MatchedLearnerAcceptanceTestStorageAccountConnectionString))
+                throw new InvalidOperationException("MatchedLearnerAcceptanceTestStorageAccountConnectionString is null");
 
-            persistence.ConnectionString(_testConfiguration.AzureWebJobsStorage);
+            persistence.ConnectionString(_testConfiguration.MatchedLearnerAcceptanceTestStorageAccountConnectionString);
 
             endpointConfiguration.DisableFeature<TimeoutManager>();
 
