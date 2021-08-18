@@ -1,19 +1,20 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
-using SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 {
     public class TestEndpoint
     {
         private IEndpointInstance _endpointInstance;
-        private readonly IApplicationSettings _testConfiguration;
+        private readonly TestApplicationSettings _testConfiguration;
         public TestEndpoint()
         {
-            _testConfiguration = TestConfiguration.ApplicationSettings;
+            _testConfiguration = TestConfiguration.TestApplicationSettings;
         }
 
         public async Task<IEndpointInstance> Start()
@@ -39,17 +40,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var conventions = endpointConfiguration.Conventions();
 
-            conventions.DefiningEventsAs(t => typeof(SubmissionSucceededEvent).IsAssignableFrom(t));
+            conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
 
             var persistence = endpointConfiguration.UsePersistence<AzureStoragePersistence>();
 
-            persistence.ConnectionString(_testConfiguration.AzureWebJobsStorage);
+            if (string.IsNullOrWhiteSpace(_testConfiguration.MatchedLearnerAcceptanceTestStorageAccountConnectionString))
+                throw new InvalidOperationException("MatchedLearnerAcceptanceTestStorageAccountConnectionString is null");
+
+            persistence.ConnectionString(_testConfiguration.MatchedLearnerAcceptanceTestStorageAccountConnectionString);
 
             endpointConfiguration.DisableFeature<TimeoutManager>();
 
             var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
 
-            transport.ConnectionString(_testConfiguration.MatchedLearnerServiceBusConnectionString)
+            if (string.IsNullOrWhiteSpace(_testConfiguration.PaymentsServiceBusConnectionString))
+                throw new InvalidOperationException("PaymentsServiceBusConnectionString is null");
+
+            transport.ConnectionString(_testConfiguration.PaymentsServiceBusConnectionString)
                 .Transactions(TransportTransactionMode.ReceiveOnly)
                 .SubscriptionRuleNamingConvention(rule => rule.Name.Split('.').LastOrDefault() ?? rule.Name);
 
@@ -71,7 +78,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
         public async Task PublishSubmissionSucceededEvent(long ukprn, short academicYear, byte collectionPeriod)
         {
-            await _endpointInstance.Publish(new SubmissionSucceededEvent
+            await _endpointInstance.Publish(new SubmissionJobSucceeded
             {
                 Ukprn = ukprn,
                 CollectionPeriod = collectionPeriod,

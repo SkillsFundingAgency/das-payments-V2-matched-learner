@@ -11,28 +11,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IApplicationSettings GetApplicationSettings(this IServiceCollection services, IServiceProvider serviceProvider = null)
-        {
-            var provider = serviceProvider ?? services.BuildServiceProvider();
-
-            var applicationSettings = provider.GetService<IApplicationSettings>();
-            if (applicationSettings == null)
-            {
-                throw new InvalidOperationException($"invalid Configuration, unable create instance of {ApplicationSettingsKeys.MatchedLearnerConfigKey}");
-            }
-
-            return applicationSettings;
-        }
-
-        public static IServiceCollection AddNLog(this IServiceCollection serviceCollection, IConfiguration configuration)
+        public static IServiceCollection AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
         {
             var nLogConfiguration = new NLogConfiguration();
 
             serviceCollection.AddLogging(options =>
             {
-                var applicationSettings = options.Services.GetApplicationSettings();
-
-                options.AddFilter("SFA.DAS", LogLevel.Information); // this is because all logging is filtered out by defualt
+                options.AddFilter("SFA.DAS", LogLevel.Information); // this is because all logging is filtered out by default
                 options.SetMinimumLevel(LogLevel.Trace);
                 options.AddNLog(new NLogProviderOptions
                 {
@@ -41,26 +26,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 });
                 options.AddConsole();
 
-                var isDevelopmentEnvironment = configuration.IsDevelopment();
-
-                nLogConfiguration.ConfigureNLog(applicationSettings.ServiceName, isDevelopmentEnvironment);
+                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment);
             });
 
             return serviceCollection;
         }
 
-        public static IServiceCollection AddApiConfigurationSections(this IServiceCollection services, IConfiguration configuration)
+        public static ApplicationSettings AddApplicationSettings(this IServiceCollection services, IConfiguration configuration)
         {
-            var matchedLearnerConfig = configuration
+            var applicationSettings = configuration
                 .GetSection(ApplicationSettingsKeys.MatchedLearnerConfigKey)
                 .Get<ApplicationSettings>();
 
-            if (matchedLearnerConfig == null)
+            if (applicationSettings == null)
                 throw new InvalidOperationException("invalid Configuration, unable find 'MatchedLearner' Configuration section");
 
-            services.AddSingleton<IApplicationSettings>(matchedLearnerConfig);
+            applicationSettings.IsDevelopment = configuration.IsDevelopment();
 
-            return services;
+            services.AddSingleton(applicationSettings);
+
+            return applicationSettings;
         }
 
         public static IConfiguration InitialiseConfigure(this IConfiguration configuration)

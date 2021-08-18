@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
@@ -8,8 +9,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
     [Binding]
     public class TestBindingBase
     {
-        public string Url;
-
         public readonly TestContext TestContext;
         public readonly FeatureContext FeatureContext;
 
@@ -22,28 +21,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [BeforeScenario]
         public async Task Initialise()
         {
-            //This is a Hack to check if the Tests are Running on Local Machine
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            Url = TestConfiguration.ApplicationSettings.TargetUrl;
-
-            if (string.IsNullOrEmpty(Url))
+            //This is a Hack to check if the Tests are Running on Local Machine
+            if (string.IsNullOrEmpty(TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl))
             {
-                TestContext.TestFunction = new TestFunction();
-                await TestContext.TestFunction.StartHost();
+                Console.WriteLine($"Starting Functions Host");
+
+                TestContext.TestFunctionHost = new TestFunctionHost();
+                await TestContext.TestFunctionHost.StartHost();
             }
 
             TestContext.TestEndpointInstance = new TestEndpoint();
             await TestContext.TestEndpointInstance.Start();
 
             TestContext.TestRepository = new TestRepository();
-
-            TestContext.TimeToPause = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToPause);
-
-            TestContext.TimeToWait = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWait);
-
-            TestContext.TimeToWaitUnexpected = TimeSpan.Parse(TestConfiguration.ApplicationSettings.TimeToWaitUnexpected);
 
             stopwatch.Stop();
 
@@ -53,20 +46,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [AfterScenario]
         public async Task Cleanup()
         {
-            //This is a Hack to check if the Tests are Running on Local Machine
-            Url = TestConfiguration.ApplicationSettings.TargetUrl;
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            if (string.IsNullOrEmpty(Url))
+            //This is a Hack to check if the Tests are Running on Local Machine
+            if (string.IsNullOrEmpty(TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl) && TestContext.TestFunctionHost != null)
             {
-                TestContext.TestFunction.Dispose();
+                TestContext.TestFunctionHost.Dispose();
             }
 
             TestContext.TestRepository.Dispose();
 
-            await TestContext.TestEndpointInstance.Stop();
+            if (TestContext.TestEndpointInstance != null) await TestContext.TestEndpointInstance.Stop();
 
             stopwatch.Stop();
             Console.WriteLine($"Time it took to Cleanup  FunctionsHost: {stopwatch.Elapsed.Milliseconds} milliseconds");

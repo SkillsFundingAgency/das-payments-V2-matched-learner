@@ -4,26 +4,28 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Common;
-using SFA.DAS.Payments.MatchedLearner.Types;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 {
-    public class SmokeTestContext
-    {
-        public Func<Task> FailedRequest { get; set; }
-        public List<Func<Task>> Requests { get; set; } = new List<Func<Task>>();
-        public MatchedLearnerDto MatchedLearnerDto { get; set; }
-    }
-
     [Binding]
     public class SmokeTestBindings
     {
         private readonly SmokeTestContext _context;
 
+        private readonly long _ukprn;
+        private readonly long _learnerUln;
+        private readonly long _apprenticeshipId;
+
         public SmokeTestBindings(SmokeTestContext context)
         {
             _context = context;
+
+            var random = new Random();
+
+            _ukprn = random.Next(100000);
+            _learnerUln = random.Next(100000);
+            _apprenticeshipId = _ukprn + _learnerUln;
         }
 
         [When("we call the API with a learner that does not exist")]
@@ -44,8 +46,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public async Task GivenWeHaveCreatedASampleLearner()
         {
             var repository = new TestRepository();
-            await repository.ClearLearner(1000, 2000);
-            await repository.AddDataLockEvent(1000, 2000);
+            await repository.ClearLearner(_ukprn, _learnerUln);
+            await repository.AddDataLockEvent(_ukprn, _learnerUln);
         }
 
         [Given("we have created (.*) sample learners")]
@@ -64,7 +66,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         {
             var request = new TestClient();
             
-            _context.MatchedLearnerDto = await request.Handle(1000, 2000);
+            _context.MatchedLearnerDto = await request.Handle(_ukprn, _learnerUln);
         }
 
         [When("we call the API (.*) times with the sample learners details")]
@@ -98,8 +100,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             actual.IlrSubmissionDate.Should().Be(new DateTime(2020, 10, 10).ToDateTimeOffset(TimeSpan.FromHours(1)));
             actual.IlrSubmissionWindowPeriod.Should().Be(1);
             actual.AcademicYear.Should().Be(2021);
-            actual.Ukprn.Should().Be(1000);
-            actual.Uln.Should().Be(2000);
+            actual.Ukprn.Should().Be(_ukprn);
+            actual.Uln.Should().Be(_learnerUln);
             actual.Training.Should().HaveCount(1);
 
             var training = actual.Training.First();
@@ -130,7 +132,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 1,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -139,7 +141,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 2,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -148,7 +150,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 3,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -172,7 +174,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 1,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -181,7 +183,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 2,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -190,7 +192,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 3,
                 IsPayable = true,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
             });
@@ -199,7 +201,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 3,
                 IsPayable = false,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
                 DataLockFailures = new HashSet<byte>{1, 2, 3},
@@ -209,7 +211,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 4,
                 IsPayable = false,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
                 DataLockFailures = new HashSet<byte>{7},
@@ -219,7 +221,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 Period = 5,
                 IsPayable = false,
                 AccountId = 1000,
-                ApprenticeshipId = 123456,
+                ApprenticeshipId = _apprenticeshipId,
                 ApprenticeshipEmployerType = 3,
                 TransferSenderAccountId = 500,
                 DataLockFailures = new HashSet<byte>{9},

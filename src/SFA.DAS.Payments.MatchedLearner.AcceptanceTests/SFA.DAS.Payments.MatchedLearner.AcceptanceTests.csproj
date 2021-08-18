@@ -1,14 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.78" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.8" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.2" />
@@ -16,33 +13,28 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-    <PackageReference Include="NUnit" Version="3.13.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="SFA.DAS.Http" Version="3.2.62" />
     <PackageReference Include="SpecFlow" Version="3.7.38" />
     <PackageReference Include="SpecFlow.NUnit" Version="3.7.38" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
   </ItemGroup>
-
-  
   <ItemGroup>
+    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure\SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Types\SFA.DAS.Payments.MatchedLearner.Types.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Api\SFA.DAS.Payments.MatchedLearner.Api.csproj" />
   </ItemGroup>
-
-  
   <ItemGroup>
     <Compile Update="Features\SmokeTests.feature.cs">
       <DesignTime>True</DesignTime>
     </Compile>
   </ItemGroup>
-
-  
   <ItemGroup>
     <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SmokeTests.feature.cs</LastGenOutput>
     </SpecFlowFeatureFiles>
   </ItemGroup>
-
 </Project>

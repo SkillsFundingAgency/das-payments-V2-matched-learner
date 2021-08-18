@@ -1,0 +1,22 @@
+{
+  "AzureAd": {
+    "ApiBaseUrl": "__MatchedLearnerAcceptanceTestApiTargetUrl__",
+    "ClientId": "__MatchedLearnerAcceptanceTestClientId__",
+    "ClientSecret": "__MatchedLearnerAcceptanceTestClientSecret__",
+    "IdentifierUri": "__MatchedLearnerIdentifier__",
+    "Tenant": "__Tenant__"
+  },
+
+  "MatchedLearner": {
+    "TimeToWait": "__TimeToWait__",
+    "TimeToPause": "__TimeToPause__",
+    "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
+
+    "MatchedLearnerAcceptanceTestStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
+
+    "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
+
+    "PaymentsConnectionString": "__PaymentsConnectionString__",
+    "MatchedLearnerAcceptanceTestConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__"
+  }
+}

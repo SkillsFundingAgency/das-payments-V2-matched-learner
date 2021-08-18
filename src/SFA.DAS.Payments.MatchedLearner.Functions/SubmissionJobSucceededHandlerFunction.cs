@@ -4,7 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SFA.DAS.Payments.MatchedLearner.Application;
-using SFA.DAS.Payments.Monitoring.SubmissionJobs.Messages;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions
 {
@@ -20,17 +20,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
         }
 
         [FunctionName("SubmissionSucceededHandler")]
-        public async Task Run([ServiceBusTrigger("%MatchedLearner:MatchedLearnerQueue%", Connection = "MatchedLearnerServiceBusConnectionString")] string message)
+        public async Task Run([ServiceBusTrigger("%MatchedLearnerQueue%", Connection = "PaymentsServiceBusConnectionString")] string message)
         {
             try
             {
-                var submissionSucceededEvent = JsonConvert.DeserializeObject<SubmissionSucceededEvent>(message);
+                var submissionSucceededEvent = JsonConvert.DeserializeObject<SubmissionJobSucceeded>(message);
+
+                if (submissionSucceededEvent == null) throw new InvalidOperationException("Error parsing SubmissionJobSucceeded message");
 
                 await _matchedLearnerDataImportService.Import(submissionSucceededEvent.Ukprn, submissionSucceededEvent.CollectionPeriod, submissionSucceededEvent.AcademicYear);
             }
             catch (Exception e)
             {
-                _logger.LogError("Error Handling Submission Succeeded Event, Please see internal exception for more info", e);
+                _logger.LogError(e, "Error Handling Submission Succeeded Event, Please see internal exception for more info");
             }
         }
     }

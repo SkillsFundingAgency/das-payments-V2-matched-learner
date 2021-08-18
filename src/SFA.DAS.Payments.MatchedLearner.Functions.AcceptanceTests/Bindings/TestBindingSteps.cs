@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
@@ -14,29 +15,40 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
     public class TestBindingSteps
     {
         private readonly TestContext _testContext;
+        private readonly long _ukprn;
+        private readonly long _learnerUln;
+        private readonly long _apprenticeshipId;
+        private readonly TestApplicationSettings _settings;
 
         public TestBindingSteps(TestContext testContext)
         {
+            var random = new Random();
+
+            _ukprn = random.Next(100000);
+            _learnerUln = random.Next(100000);
+            _apprenticeshipId = _ukprn + _learnerUln;
+
             _testContext = testContext;
+            _settings = TestConfiguration.TestApplicationSettings;
         }
 
         [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
         {
-            await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
-            await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear, false);
+            await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
+            await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, false);
         }
 
         [Given("there is existing data For CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenExistingDataForPeriod(byte collectionPeriod, short academicYear)
         {
-            _testContext.ExistingMatchedLearnerDataLockId = await _testContext.TestRepository.AddDataLockEvent(1000, 2000, collectionPeriod, academicYear, true);
+            _testContext.ExistingMatchedLearnerDataLockId = await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, true);
         }
 
         [When("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task WhenWeReceiveSubmissionSucceededEventForPeriod(byte collectionPeriod, short academicYear)
         {
-            await _testContext.TestEndpointInstance.PublishSubmissionSucceededEvent(1000, academicYear, collectionPeriod);
+            await _testContext.TestEndpointInstance.PublishSubmissionSucceededEvent(_ukprn, academicYear, collectionPeriod);
         }
 
         [Then("the matched Learners are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
@@ -48,21 +60,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             var dataLockEvents = new List<DataLockEventModel>();
 
-            while (!dataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait)
+            while (!dataLockEvents.Any() && timer.Elapsed < _settings.TimeToWait)
             {
-                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
+                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
 
                 if (!dataLockEvents.Any())
-                    Thread.Sleep(_testContext.TimeToPause);
+                    Thread.Sleep(_settings.TimeToPause);
                 else
-                    Thread.Sleep(_testContext.TimeToWait - timer.Elapsed);
+                    Thread.Sleep(_settings.TimeToWait - timer.Elapsed);
             }
 
             AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
 
             timer.Stop();
 
-            await _testContext.TestRepository.ClearDataLockEvent(1000, 2000);
+            await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
         }
 
         [Then("the existing matched Learners are NOT deleted")]
@@ -73,14 +85,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             timer.Start();
 
             IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
-            bool first = true;
+            var first = true;
 
-            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWaitUnexpected))
+            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _settings.TimeToWaitUnexpected))
             {
-                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
+                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
                 existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
 
-                Thread.Sleep(_testContext.TimeToPause);
+                Thread.Sleep(_settings.TimeToPause);
                 first = false;
             }
 
@@ -97,15 +109,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             timer.Start();
 
             IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
-            bool first = true;
+            var first = true;
 
-            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait))
+            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _settings.TimeToWait))
             {
-                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(1000);
+                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
                 existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
 
                 if (existingMatchedLearnerDataLockEvents.Any())
-                    Thread.Sleep(_testContext.TimeToPause);
+                    Thread.Sleep(_settings.TimeToPause);
                 first = false;
             }
 
@@ -122,13 +134,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             dataLockEventsForPeriod.Count.Should().Be(1);
             var actual = dataLockEventsForPeriod.First();
 
-            actual.Ukprn.Should().Be(1000);
+            actual.Ukprn.Should().Be(_ukprn);
             actual.ContractType.Should().Be(ContractType.Act1);
             actual.CollectionPeriod.Should().Be(collectionPeriod);
             actual.AcademicYear.Should().Be(academicYear);
             actual.LearnerReferenceNumber.Should().Be("ref#");
 
-            actual.LearnerUln.Should().Be(2000);
+            actual.LearnerUln.Should().Be(_learnerUln);
             actual.LearningAimReference.Should().Be("ZPROG001");
             actual.LearningAimProgrammeType.Should().Be(100);
             actual.LearningAimStandardCode.Should().Be(200);
@@ -143,7 +155,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actual.LearningStartDate.Should().Be(new DateTime(2020, 10, 09));
 
             //(DataLockEventId, PriceEpisodeIdentifier, SfaContributionPercentage, TotalNegotiatedPrice1, TotalNegotiatedPrice2, TotalNegotiatedPrice3, TotalNegotiatedPrice4, StartDate, EffectiveTotalNegotiatedPriceStartDate, PlannedEndDate, ActualEndDate, NumberOfInstalments, InstalmentAmount, CompletionAmount, Completed)
-            //VALUES (@dataLockEventId2, '25-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
+            //VALUES (@dataLockEventId2, '25-104-01/08/2020', 1, _ukprn, _learnerUln, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
 
             actual.PriceEpisodes.Count.Should().Be(1);
             var actualPriceEpisodes = actual.PriceEpisodes.First();
@@ -164,9 +176,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actualPriceEpisodes.Completed.Should().Be(false);
 
             //INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
-            //VALUES  (@dataLockEventId2, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, 123456),
-            //        (@dataLockEventId2, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, 123456),
-            //        (@dataLockEventId2, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, 123456)
+            //VALUES  (@dataLockEventId2, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, _apprenticeshipId),
+            //        (@dataLockEventId2, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, _apprenticeshipId),
+            //        (@dataLockEventId2, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, _apprenticeshipId)
 
             actual.PayablePeriods.Count.Should().Be(3);
             actual.PayablePeriods.Should().ContainEquivalentOf(new
@@ -177,7 +189,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                 DeliveryPeriod = 1,
                 Amount = 100M,
                 SfaContributionPercentage = 1M,
-                ApprenticeshipId = 123456L
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actual.PayablePeriods.Should().ContainEquivalentOf(new
@@ -188,7 +200,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                 DeliveryPeriod = 2,
                 Amount = 200M,
                 SfaContributionPercentage = 1,
-                ApprenticeshipId = 123456L
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actual.PayablePeriods.Should().ContainEquivalentOf(new
@@ -199,7 +211,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                 DeliveryPeriod = 3,
                 Amount = 300M,
                 SfaContributionPercentage = 1,
-                ApprenticeshipId = 123456L
+                ApprenticeshipId = _apprenticeshipId
             });
 
             //INSERT INTO Payments2.DataLockEventNonPayablePeriod (DataLockEventId, DataLockEventNonPayablePeriodId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
@@ -250,12 +262,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             });
 
             //INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DataLockEventNonPayablePeriodId, DataLockFailureId, ApprenticeshipId)
-            //VALUES  (@dataLockEventFailureId1, 1, 123456), 
-            //        (@dataLockEventFailureId1, 2, 123456), 
-            //        (@dataLockEventFailureId1, 3, 123456), 
-            //        (@dataLockEventFailureId2, 7, 123456), 
-            //        (@dataLockEventFailureId3, 9, 123456),
-            //        (@dataLockEventFailureId4, 1, 12345600)
+            //VALUES  (@dataLockEventFailureId1, 1, _apprenticeshipId), 
+            //        (@dataLockEventFailureId1, 2, _apprenticeshipId), 
+            //        (@dataLockEventFailureId1, 3, _apprenticeshipId), 
+            //        (@dataLockEventFailureId2, 7, _apprenticeshipId), 
+            //        (@dataLockEventFailureId3, 9, _apprenticeshipId),
+            //        (@dataLockEventFailureId4, 1, 9876500)
 
             var actualNonPayablePeriodFailures = actual.NonPayablePeriods.SelectMany(np => np.Failures).ToList();
 
@@ -264,37 +276,37 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
             {
                 DataLockFailureId = 1,
-                ApprenticeshipId = 123456
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
             {
                 DataLockFailureId = 2,
-                ApprenticeshipId = 123456
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
             {
                 DataLockFailureId = 3,
-                ApprenticeshipId = 123456
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
             {
                 DataLockFailureId = 7,
-                ApprenticeshipId = 123456
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
             {
                 DataLockFailureId = 9,
-                ApprenticeshipId = 123456
+                ApprenticeshipId = _apprenticeshipId
             });
 
             actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
             {
                 DataLockFailureId = 1,
-                ApprenticeshipId = 12345600
+                ApprenticeshipId = 9876500
             });
         }
     }

@@ -17,8 +17,6 @@ jobs:
       configFilePath: GitVersion.yml
 
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
-    parameters:
-        AcceptanceTest: true
     
   - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
 
@@ -38,6 +36,14 @@ jobs:
       projects: 'src/SFA.DAS.Payments.MatchedLearner.Functions/SFA.DAS.Payments.MatchedLearner.Functions.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build Acceptance Tests'
+    inputs: 
+      command: build
+      projects: 'src/*AcceptanceTests/*AcceptanceTests.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-restore'
+
+
   - task: CopyFiles@2
     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
     inputs:
@@ -45,6 +51,14 @@ jobs:
         azure/**
       TargetFolder: '$(build.artifactstagingdirectory)/publish'
       OverWrite: true
+
+  - task: CopyFiles@2
+    displayName: 'Copy AcceptanceTests Files to: $(build.artifactstagingdirectory)'
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)/src/'
+      Contents: |
+        *AcceptanceTests*/**/bin/$(BuildConfiguration)/**
+      TargetFolder: '$(build.artifactstagingdirectory)/publish'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'

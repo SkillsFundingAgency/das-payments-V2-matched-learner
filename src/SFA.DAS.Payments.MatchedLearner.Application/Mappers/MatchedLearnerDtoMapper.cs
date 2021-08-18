@@ -105,7 +105,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
             return DateTime.TryParseExact(
                    priceEpisodeIdentifier.Substring(priceEpisodeIdentifier.Length - 10),
                     "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces,
-                    out DateTime episodeStartDate)
+                    out var episodeStartDate)
                 ? episodeStartDate
                 : throw new InvalidOperationException(
                     $"Cannot determine episode start date from the price episode identifier: {priceEpisodeIdentifier}");

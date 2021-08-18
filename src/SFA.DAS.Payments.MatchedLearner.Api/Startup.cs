@@ -32,12 +32,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         {
             Configuration = Configuration.InitialiseConfigure();
 
-            services.AddApiConfigurationSections(Configuration)
-                .AddAppDependencies()
+            var applicationSettings = services.AddApplicationSettings(Configuration);
+
+            services
+                .AddAppDependencies(applicationSettings)
                 .AddApplicationInsightsTelemetry()
                 .AddHealthChecks();
 
-            services.AddNLog(Configuration);
+            services.AddNLog(applicationSettings, "Api");
 
             if (!Configuration.IsDevelopment())
             {

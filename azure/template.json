@@ -26,12 +26,6 @@
         "sharedStorageAccountConnectionString": {
             "type": "securestring"
         },
-        "nServiceBusConnectionString": {
-            "type": "securestring"
-        },
-        "nServiceBusLicense": {
-            "type": "securestring"
-        },
         "functionsExtensionVersion": {
             "type": "string",
             "defaultValue": "~3"
@@ -63,9 +57,6 @@
         },
         "logAnalyticsWorkspaceName": {
             "type": "string"
-        },
-        "configurationStorageConnectionString": {
-            "type": "securestring"
         },
         "tags": {
             "type": "object"
@@ -107,7 +98,17 @@
         "appServicePlanSize": {
             "type": "string",
             "defaultValue": "1"
+        },
+        "matchedLearnerQueue": {
+            "type": "string"
+        },
+        "paymentsServiceBusConnectionString": {
+            "type": "string"
+        },
+        "configurationStorageConnectionString" : {
+            "type": "securestring"
         }
+
     },
     "variables": {
         "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
@@ -205,6 +206,10 @@
                                     "value": "[parameters('loggingRedisConnectionString')]"
                                 },
                                 {
+                                    "name": "AzureWebJobsStorage",
+                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
+                                },
+                                {  
                                     "name": "ConfigurationStorageConnectionString",
                                     "value": "[parameters('configurationStorageConnectionString')]"
                                 },
@@ -346,28 +351,8 @@
                         "value": {
                             "array": [
                                 {
-                                    "name": "ConfigurationStorageConnectionString",
-                                    "value": "[parameters('configurationStorageConnectionString')]"
-                                },
-                                {
-                                    "name": "NServiceBusConnectionString",
-                                    "value": "[parameters('nServiceBusConnectionString')]"
-                                },
-                                {
-                                    "name": "NServiceBusLicense",
-                                    "value": "[parameters('nServiceBusLicense')]"
-                                },
-                                {
-                                    "name": "ConfigNames",
-                                    "value": "[parameters('configNames')]"
-                                },
-                                {
                                     "name": "EnvironmentName",
                                     "value": "[parameters('environmentName')]"
-                                },
-                                {
-                                    "name": "AzureWebJobsStorage",
-                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
                                 {
                                     "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -379,7 +364,23 @@
                                 },
                                 {
                                     "name": "AppName",
-                                    "value": "das-apprentice-commitments-jobs"
+                                    "value": "sfa-das-payments-matchedlearner"
+                                },
+                                {
+                                    "name": "AzureWebJobsStorage",
+                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
+                                },
+                                {
+                                    "name": "ConfigurationStorageConnectionString",
+                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                },
+                                {
+                                    "name": "MatchedLearnerQueue",
+                                    "value": "[parameters('matchedLearnerQueue')]"
+                                },
+                                {
+                                    "name": "PaymentsServiceBusConnectionString",
+                                    "value": "[parameters('paymentsServiceBusConnectionString')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
@@ -447,6 +448,10 @@
         }
     ],
     "outputs": {
+        "databaseName": {
+            "type": "string",
+            "value": "[variables('databaseName')]"
+        },
         "FunctionAppName": {
             "type": "string",
             "value": "[variables('functionAppName')]"

@@ -21,7 +21,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         private MatchedLearnerDataImportService _sut;
         private List<DataLockEventModel> _dataLockEvents;
         private List<ApprenticeshipModel> _apprenticeships;
-        private Guid _dataLockEventId;
+        private readonly Guid _dataLockEventId = Guid.NewGuid();
 
         [SetUp]
         public async Task SetUp()

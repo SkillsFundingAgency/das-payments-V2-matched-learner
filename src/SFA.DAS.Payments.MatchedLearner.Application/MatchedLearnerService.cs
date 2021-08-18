@@ -37,7 +37,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             }
             catch (Exception exception)
             {
-                _logger.LogError($"Error Getting MatchedLearner data for Uln {uln}", exception);
+                _logger.LogError(exception, $"Error Getting MatchedLearner data for Uln {uln}");
                 throw;
             }
         }
