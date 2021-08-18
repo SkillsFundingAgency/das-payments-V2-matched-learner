@@ -1,0 +1,24 @@
+{
+  "AzureAd": {
+    "ApiBaseUrl": "__ApiBaseUrl__",
+    "Tenant": "__Tenant__",
+    "ClientId": "__ClientId__",
+    "ClientSecret": "__ClientSecret__",
+    "IdentifierUri": "__IdentifierUri__"
+  },
+
+  "MatchedLearner": {
+    "TimeToWait": "__TimeToWait__",
+    "TimeToPause": "__TimeToPause__",
+    "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
+
+    "MatchedLearnerQueue": "__MatchedLearnerQueue__",
+
+    "AzureWebJobsStorage": "__AzureWebJobsStorage__",
+
+    "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
+
+    "PaymentsConnectionString": "__PaymentsConnectionString__",
+    "MatchedLearnerConnectionString": "__MatchedLearnerConnectionString__"
+  }
+}

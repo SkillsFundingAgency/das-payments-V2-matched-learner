@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
@@ -17,6 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         private readonly long _ukprn;
         private readonly long _learnerUln;
         private readonly long _apprenticeshipId;
+        private readonly TestApplicationSettings _settings;
 
         public TestBindingSteps(TestContext testContext)
         {
@@ -27,6 +29,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             _apprenticeshipId = _ukprn + _learnerUln;
 
             _testContext = testContext;
+            _settings = TestConfiguration.TestApplicationSettings;
         }
 
         [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
@@ -57,14 +60,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             var dataLockEvents = new List<DataLockEventModel>();
 
-            while (!dataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait)
+            while (!dataLockEvents.Any() && timer.Elapsed < _settings.TimeToWait)
             {
                 dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
 
                 if (!dataLockEvents.Any())
-                    Thread.Sleep(_testContext.TimeToPause);
+                    Thread.Sleep(_settings.TimeToPause);
                 else
-                    Thread.Sleep(_testContext.TimeToWait - timer.Elapsed);
+                    Thread.Sleep(_settings.TimeToWait - timer.Elapsed);
             }
 
             AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
@@ -82,14 +85,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             timer.Start();
 
             IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
-            bool first = true;
+            var first = true;
 
-            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWaitUnexpected))
+            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _settings.TimeToWaitUnexpected))
             {
                 var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
                 existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
 
-                Thread.Sleep(_testContext.TimeToPause);
+                Thread.Sleep(_settings.TimeToPause);
                 first = false;
             }
 
@@ -106,15 +109,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             timer.Start();
 
             IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
-            bool first = true;
+            var first = true;
 
-            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _testContext.TimeToWait))
+            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _settings.TimeToWait))
             {
                 var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
                 existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
 
                 if (existingMatchedLearnerDataLockEvents.Any())
-                    Thread.Sleep(_testContext.TimeToPause);
+                    Thread.Sleep(_settings.TimeToPause);
                 first = false;
             }
 

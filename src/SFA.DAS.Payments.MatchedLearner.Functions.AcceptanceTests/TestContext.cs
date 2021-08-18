@@ -7,9 +7,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         public TestRepository TestRepository { get; set; }
         public TestFunctionHost TestFunctionHost { get; set; }
         public TestEndpoint TestEndpointInstance { get; set; }
-        public TimeSpan TimeToWait { get; set; }
-        public TimeSpan TimeToWaitUnexpected { get; set; }
-        public TimeSpan TimeToPause { get; set; }
         public Guid? ExistingMatchedLearnerDataLockId { get; set; }
     }
 }

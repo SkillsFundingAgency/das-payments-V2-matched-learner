@@ -1,65 +1,56 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage;
-using SFA.DAS.Configuration.AzureTableStorage;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
 {
-    public static class TestConfiguration
+    public class TestConfiguration
     {
         static TestConfiguration()
         {
-            GetAzureConfiguration();
+            GetReleaseFileConfiguration();
 
-            if (!string.IsNullOrWhiteSpace(TestApplicationSettings.TargetUrl)) return;
-
-            GetLocalFileConfiguration();
+            if (string.IsNullOrWhiteSpace(TestAzureAdClientSettings.ApiBaseUrl))
+            {
+                GetLocalFileConfiguration();
+            }
         }
 
-        public static void GetAzureConfiguration()
-        {
-            IConfigurationRoot config;
-            try
-            {
-
-                config = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddAzureTableStorage(options =>
-                    {
-                        options.PreFixConfigurationKeys = false;
-                        options.ConfigurationKeys = new[] { ApplicationSettingsKeys.MatchedLearnerApiKey };
-                        options.StorageConnectionStringEnvironmentVariableName = "ConfigurationStorageConnectionStringNew";
-                        options.EnvironmentNameEnvironmentVariableName = "EnvironmentNameNew";
-                    })
-                    .Build();
-            }
-            catch (StorageException)
-            {
-                //suppressing this as we might be running in local development environment
-                return;
-            }
-
-            TestApplicationSettings = config
-                .GetSection("MatchedLearner")
-                .Get<TestApplicationSettings>();
-        }
-        
         public static void GetLocalFileConfiguration()
         {
-            //NOTE: this will throw an exception if the local.settings.json is not found
-            //this is a fail safe i.e. if azure storage is not fund and ths local setting is also not fund then tests can't start
-            //at release stage the azure config will always be there and at development stage either azure storage or file will be mandatory
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("local.settings.json", optional: false)
+                .AddJsonFile("local.settings.json", optional: true)
                 .Build();
 
             TestApplicationSettings = config
                 .GetSection("MatchedLearner")
                 .Get<TestApplicationSettings>();
+            
+            TestApplicationSettings.IsDevelopment = true;
         }
 
-        public static TestApplicationSettings TestApplicationSettings { get; private set; } = new TestApplicationSettings();
+        public static void GetReleaseFileConfiguration()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("release.settings.json", optional: false)
+                .Build();
+
+            var isTemplateValue = config.GetValue<string>("MatchedLearner:TimeToWait");
+            if (string.Equals(isTemplateValue, "__TimeToWait__", StringComparison.InvariantCultureIgnoreCase))
+                return;
+
+            TestApplicationSettings = config
+                .GetSection("MatchedLearner")
+                .Get<TestApplicationSettings>();
+
+            TestAzureAdClientSettings = config
+                .GetSection("AzureAd")
+                .Get<TestAzureAdClientSettings>();
+        }
+
+        public static TestApplicationSettings TestApplicationSettings { get; set; } = new TestApplicationSettings();
+        public static TestAzureAdClientSettings TestAzureAdClientSettings { get; set; } = new TestAzureAdClientSettings();
     }
 }

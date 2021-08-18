@@ -4,18 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Common;
-using SFA.DAS.Payments.MatchedLearner.Types;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 {
-    public class SmokeTestContext
-    {
-        public Func<Task> FailedRequest { get; set; }
-        public List<Func<Task>> Requests { get; set; } = new List<Func<Task>>();
-        public MatchedLearnerDto MatchedLearnerDto { get; set; }
-    }
-
     [Binding]
     public class SmokeTestBindings
     {

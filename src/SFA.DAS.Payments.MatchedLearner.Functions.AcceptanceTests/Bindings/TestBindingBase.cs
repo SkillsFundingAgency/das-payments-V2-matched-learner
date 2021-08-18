@@ -25,8 +25,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.TargetUrl))
+            if (string.IsNullOrEmpty(TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl))
             {
+                Console.WriteLine($"Starting Functions Host");
+
                 TestContext.TestFunctionHost = new TestFunctionHost();
                 await TestContext.TestFunctionHost.StartHost();
             }
@@ -35,12 +37,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             await TestContext.TestEndpointInstance.Start();
 
             TestContext.TestRepository = new TestRepository();
-
-            TestContext.TimeToPause = TimeSpan.Parse(TestConfiguration.TestApplicationSettings.TimeToPause);
-
-            TestContext.TimeToWait = TimeSpan.Parse(TestConfiguration.TestApplicationSettings.TimeToWait);
-
-            TestContext.TimeToWaitUnexpected = TimeSpan.Parse(TestConfiguration.TestApplicationSettings.TimeToWaitUnexpected);
 
             stopwatch.Stop();
 
@@ -55,7 +51,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             stopwatch.Start();
 
             //This is a Hack to check if the Tests are Running on Local Machine
-            if (string.IsNullOrEmpty(TestConfiguration.TestApplicationSettings.TargetUrl) && TestContext.TestFunctionHost != null)
+            if (string.IsNullOrEmpty(TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl) && TestContext.TestFunctionHost != null)
             {
                 TestContext.TestFunctionHost.Dispose();
             }
