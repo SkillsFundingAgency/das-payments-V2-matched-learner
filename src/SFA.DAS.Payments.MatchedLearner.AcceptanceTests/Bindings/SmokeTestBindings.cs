@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Common;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
@@ -96,8 +95,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 
             actual.Should().NotBeNull();
             
-            actual!.StartDate.Should().Be(new DateTime(2020, 10, 9).ToDateTimeOffset(TimeSpan.FromHours(1)));
-            actual.IlrSubmissionDate.Should().Be(new DateTime(2020, 10, 10).ToDateTimeOffset(TimeSpan.FromHours(1)));
+            actual.StartDate.Date.Should().Be(new DateTime(2020, 10, 9));
+            actual.IlrSubmissionDate.Date.Should().Be(new DateTime(2020, 10, 10));
             actual.IlrSubmissionWindowPeriod.Should().Be(1);
             actual.AcademicYear.Should().Be(2021);
             actual.Ukprn.Should().Be(_ukprn);
@@ -111,7 +110,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             training.FrameworkCode.Should().Be(300);
             training.PathwayCode.Should().Be(400);
             training.FundingLineType.Should().BeNullOrEmpty();
-            training.StartDate.Should().Be(new DateTime(2020, 10, 9));
+            training.StartDate.Date.Should().Be(new DateTime(2020, 10, 9));
             training.PriceEpisodes.Should().HaveCount(2);
 
             var priceEpisode = training.PriceEpisodes.First();
@@ -119,12 +118,12 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             priceEpisode.AcademicYear.Should().Be(1920);
             priceEpisode.CollectionPeriod.Should().Be(14);
             priceEpisode.AgreedPrice.Should().Be(3000);
-            priceEpisode.StartDate.Should().Be(new DateTime(2019, 08, 01));
-            priceEpisode.EndDate.Should().Be(new DateTime(2020, 10, 12));
+            priceEpisode.StartDate.Date.Should().Be(new DateTime(2019, 08, 01));
+            priceEpisode.EndDate?.Date.Should().Be(new DateTime(2020, 10, 12));
             priceEpisode.NumberOfInstalments.Should().Be(12);
             priceEpisode.InstalmentAmount.Should().Be(50);
             priceEpisode.CompletionAmount.Should().Be(550);
-            priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
+            priceEpisode.TotalNegotiatedPriceStartDate?.Date.Should().Be(new DateTime(2021, 01, 01));
             priceEpisode.Periods.Should().HaveCount(3);
 
             priceEpisode.Periods.Should().ContainEquivalentOf(new
@@ -161,12 +160,12 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             priceEpisode2.AcademicYear.Should().Be(2021);
             priceEpisode2.CollectionPeriod.Should().Be(1);
             priceEpisode2.AgreedPrice.Should().Be(3000);
-            priceEpisode2.StartDate.Should().Be(new DateTime(2020, 08, 01));
-            priceEpisode2.EndDate.Should().Be(new DateTime(2020, 10, 12));
+            priceEpisode2.StartDate.Date.Should().Be(new DateTime(2020, 08, 01));
+            priceEpisode2.EndDate?.Date.Should().Be(new DateTime(2020, 10, 12));
             priceEpisode2.NumberOfInstalments.Should().Be(12);
             priceEpisode2.InstalmentAmount.Should().Be(50);
             priceEpisode2.CompletionAmount.Should().Be(550);
-            priceEpisode.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
+            priceEpisode.TotalNegotiatedPriceStartDate?.Date.Should().Be(new DateTime(2021, 01, 01));
             priceEpisode2.Periods.Should().HaveCount(7);
 
             priceEpisode2.Periods.Should().ContainEquivalentOf(new
