@@ -50,7 +50,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException($"unable to read or find release.settings.json from {Directory.GetCurrentDirectory()}");
+                throw new InvalidOperationException($"unable to read or find release.settings.json from {Directory.GetCurrentDirectory()}", e);
             }
 
             var isTemplateValue = config.GetValue<string>("MatchedLearner:TimeToWait");
