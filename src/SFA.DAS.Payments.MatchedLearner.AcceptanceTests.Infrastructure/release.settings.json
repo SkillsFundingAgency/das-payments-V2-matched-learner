@@ -12,11 +12,11 @@
     "TimeToPause": "__TimeToPause__",
     "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
 
-    "MatchedLearnerAcceptanceTestStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
+    "MatchedLearnerStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
 
     "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
 
-    "PaymentsConnectionString": "__PaymentsConnectionString__",
-    "MatchedLearnerAcceptanceTestConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__"
+    "PaymentsConnectionString": "__PaymentsAcceptanceTestConnectionString__",
+    "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__"
   }
 }

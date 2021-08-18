@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Net.Http.Headers;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
 {
@@ -11,54 +10,43 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
         {
             GetReleaseFileConfiguration();
 
-            //if (string.IsNullOrWhiteSpace(TestAzureAdClientSettings.ApiBaseUrl))
-            //{
-            //    GetLocalFileConfiguration();
-            //}
+            if (string.IsNullOrWhiteSpace(TestAzureAdClientSettings.ApiBaseUrl))
+            {
+                GetLocalFileConfiguration();
+            }
         }
 
         public static void GetLocalFileConfiguration()
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("local.settings.json", optional: true)
-                .Build();
+            try
+            {
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("local.settings.json", optional: true)
+                    .Build();
 
-            TestApplicationSettings = config
-                .GetSection("MatchedLearner")
-                .Get<TestApplicationSettings>();
-            
-            TestApplicationSettings.IsDevelopment = true;
+                TestApplicationSettings = config
+                    .GetSection("MatchedLearner")
+                    .Get<TestApplicationSettings>();
+
+                TestApplicationSettings.IsDevelopment = true;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Trying to read local.settings.json but file does not exists", e);
+            }
         }
 
         public static void GetReleaseFileConfiguration()
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "release.settings.json");
-            var exists = File.Exists(path);
-            if (!exists)
-            {
-                throw new InvalidOperationException($"relase.settings.json not found at {path}");
-            }
-
-            IConfigurationRoot config;
-            try
-            {
-                config = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("release.settings.json", optional: false)
-                    .Build();
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException($"unable to read or find release.settings.json from {Directory.GetCurrentDirectory()}", e);
-            }
+            var config = new ConfigurationBuilder()
+                 .SetBasePath(Directory.GetCurrentDirectory())
+                 .AddJsonFile("release.settings.json", optional: false)
+                 .Build();
 
             var isTemplateValue = config.GetValue<string>("MatchedLearner:TimeToWait");
-            if (string.Equals(isTemplateValue, string.Empty, StringComparison.InvariantCultureIgnoreCase))
-                throw new InvalidOperationException("release.settings.json is empty");
-
             if (string.Equals(isTemplateValue, "__TimeToWait__", StringComparison.InvariantCultureIgnoreCase))
-                throw new InvalidOperationException($"release.settings.json token's have not been replaced with real values, file path is {path}");
+                return;
 
             TestApplicationSettings = config
                 .GetSection("MatchedLearner")

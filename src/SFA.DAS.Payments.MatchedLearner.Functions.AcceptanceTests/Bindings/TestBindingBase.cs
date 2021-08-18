@@ -27,11 +27,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             //This is a Hack to check if the Tests are Running on Local Machine
             if (string.IsNullOrEmpty(TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl))
             {
-                Console.WriteLine($"Starting Functions Host");
+                Console.WriteLine("Starting Functions Host");
 
                 TestContext.TestFunctionHost = new TestFunctionHost();
                 await TestContext.TestFunctionHost.StartHost();
             }
+
+            Console.WriteLine("Starting Test Endpoint");
 
             TestContext.TestEndpointInstance = new TestEndpoint();
             await TestContext.TestEndpointInstance.Start();
@@ -40,7 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             stopwatch.Stop();
 
-            Console.WriteLine($"Time it took to spin up Azure Functions Host: {stopwatch.Elapsed.Milliseconds} milliseconds");
+            Console.WriteLine($"Time it took to Initialise TestContext: {stopwatch.Elapsed.Milliseconds} milliseconds");
         }
 
         [AfterScenario]
@@ -61,7 +63,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             if (TestContext.TestEndpointInstance != null) await TestContext.TestEndpointInstance.Stop();
 
             stopwatch.Stop();
-            Console.WriteLine($"Time it took to Cleanup  FunctionsHost: {stopwatch.Elapsed.Milliseconds} milliseconds");
+            Console.WriteLine($"Time it took to Cleanup  TestContext: {stopwatch.Elapsed.Milliseconds} milliseconds");
         }
     }
 }
