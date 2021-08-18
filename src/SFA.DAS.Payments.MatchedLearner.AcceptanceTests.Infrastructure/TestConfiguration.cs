@@ -58,7 +58,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure
                 throw new InvalidOperationException("release.settings.json is empty");
 
             if (string.Equals(isTemplateValue, "__TimeToWait__", StringComparison.InvariantCultureIgnoreCase))
-                return;
+                throw new InvalidOperationException("release.settings.json token's have not been replaced with real values");
 
             TestApplicationSettings = config
                 .GetSection("MatchedLearner")
