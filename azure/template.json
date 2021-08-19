@@ -209,7 +209,11 @@
                                     "name": "AzureWebJobsStorage",
                                     "value": "[parameters('sharedStorageAccountConnectionString')]"
                                 },
-                                {  
+                                { 
+                                  "name": "WEBSITE_RUN_FROM_PACKAGE",
+                                  "value": "1"
+                                },
+                                {
                                     "name": "ConfigurationStorageConnectionString",
                                     "value": "[parameters('configurationStorageConnectionString')]"
                                 },
