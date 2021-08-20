@@ -22,6 +22,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
         Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
         Task RemoveApprenticeships(List<long> apprenticeshipIds);
+        Task BeginTransactionAsync(CancellationToken cancellationToken);
+        Task CommitTransactionAsync(CancellationToken cancellationToken);
+        Task RollbackTransactionAsync(CancellationToken cancellationToken);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -29,11 +32,28 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         private readonly MatchedLearnerDataContext _dataContext;
         private readonly ILogger<MatchedLearnerRepository> _logger;
         private readonly IMatchedLearnerDataContextFactory _retryDataContextFactory;
+        private IDbContextTransaction _transaction;
+
         public MatchedLearnerRepository(MatchedLearnerDataContext dataContext, IMatchedLearnerDataContextFactory matchedLearnerDataContextFactory, ILogger<MatchedLearnerRepository> logger)
         {
             _dataContext = dataContext ?? throw new ArgumentNullException(nameof(dataContext));
             _retryDataContextFactory = matchedLearnerDataContextFactory ?? throw new ArgumentNullException(nameof(matchedLearnerDataContextFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+        {
+            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+        {
+            await _transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+        {
+            await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln)
@@ -117,6 +137,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             return result;
         }
 
+
+
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
             await _dataContext.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
@@ -136,13 +158,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
-            await using var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
-
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, SqlBulkCopyOptions = SqlBulkCopyOptions.KeepIdentity };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
 
             await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
-
-            await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task StoreApprenticeships(List<ApprenticeshipModel> models, CancellationToken cancellationToken)
@@ -204,8 +222,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         private async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
         {
-            await using var tx = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
-
             var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
 
             var priceEpisodes = dataLockEvents
@@ -232,8 +248,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .ConfigureAwait(false);
             await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
                 .ConfigureAwait(false);
-
-            await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
