@@ -5,7 +5,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 {
     public interface IMatchedLearnerDataContextFactory
     {
-        IMatchedLearnerDataContext Create(DbTransaction transaction = null);
+        MatchedLearnerDataContext Create(DbTransaction transaction = null);
     }
 
     public class MatchedLearnerDataContextFactory : IMatchedLearnerDataContextFactory
@@ -17,7 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             _options = optionsBuilder;
         }
 
-        public IMatchedLearnerDataContext Create(DbTransaction transaction = null)
+        public MatchedLearnerDataContext Create(DbTransaction transaction = null)
         {
             var context = new MatchedLearnerDataContext(_options);
             if (transaction != null)

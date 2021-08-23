@@ -23,10 +23,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
         public ApprenticeshipStatus Status { get; set; }
         public bool IsLevyPayer { get; set; }
 
-        // public List<ApprenticeshipPriceEpisodeModel> ApprenticeshipPriceEpisodes { get; set; }
         public byte ApprenticeshipEmployerType { get; set; }
-
-        // public List<ApprenticeshipPauseModel> ApprenticeshipPauses { get; set; }
 
         public DateTimeOffset CreationDate { get; set; }
     }

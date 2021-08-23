@@ -25,7 +25,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
         public async Task Import(long ukprn, byte collectionPeriod, short academicYear)
         {
-            //if current collection is 1 then only try remove current collection data otherwise remove current + previous collection data
             var collectionPeriods = new List<byte> { collectionPeriod };
 
             if (collectionPeriod != 1)
@@ -43,9 +42,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                 var apprenticeshipIds = dataLockEvents
                     .SelectMany(dle => dle.PayablePeriods)
-                    .Select(dlepp => dlepp.ApprenticeshipId.HasValue ? dlepp.ApprenticeshipId.Value : 0)
+                    .Select(dlepp => dlepp.ApprenticeshipId ?? 0)
                     .Union(dataLockEvents.SelectMany(dle => dle.NonPayablePeriods).SelectMany(dlenpp => dlenpp.Failures)
-                        .Select(dlenppf => dlenppf.ApprenticeshipId.HasValue ? dlenppf.ApprenticeshipId.Value : 0))
+                        .Select(dlenppf => dlenppf.ApprenticeshipId ?? 0))
                     .ToList();
 
                 var apprenticeships = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
