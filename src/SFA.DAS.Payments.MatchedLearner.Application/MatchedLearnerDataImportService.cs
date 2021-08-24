@@ -25,7 +25,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
         public async Task Import(long ukprn, byte collectionPeriod, short academicYear)
         {
-            //if current collection is 1 then only try remove current collection data otherwise remove current + previous collection data
             var collectionPeriods = new List<byte> { collectionPeriod };
 
             if (collectionPeriod != 1)
@@ -33,24 +32,38 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
                 collectionPeriods.Add((byte)(collectionPeriod - 1));
             }
 
-            await _matchedLearnerRepository.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriods);
+            try
+            {
+                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
 
-            var dataLockEvents = await _paymentsRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriod);
+                await _matchedLearnerRepository.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriods);
 
-            var apprenticeshipIds = dataLockEvents
-                .SelectMany(dle => dle.PayablePeriods)
-                .Select(dlepp => dlepp.ApprenticeshipId.HasValue ? dlepp.ApprenticeshipId.Value : 0)
-                .Union(dataLockEvents.SelectMany(dle => dle.NonPayablePeriods).SelectMany(dlenpp => dlenpp.Failures)
-                    .Select(dlenppf => dlenppf.ApprenticeshipId.HasValue ? dlenppf.ApprenticeshipId.Value : 0))
-                .ToList();
+                var dataLockEvents = await _paymentsRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriod);
 
-            var apprenticeships = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
+                var apprenticeshipIds = dataLockEvents
+                    .SelectMany(dle => dle.PayablePeriods)
+                    .Select(dlepp => dlepp.ApprenticeshipId ?? 0)
+                    .Union(dataLockEvents.SelectMany(dle => dle.NonPayablePeriods).SelectMany(dlenpp => dlenpp.Failures)
+                        .Select(dlenppf => dlenppf.ApprenticeshipId ?? 0))
+                    .ToList();
 
-            await _matchedLearnerRepository.RemoveApprenticeships(apprenticeshipIds);
+                var apprenticeships = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
 
-            await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
+                await _matchedLearnerRepository.RemoveApprenticeships(apprenticeshipIds);
 
-            await _matchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
+                await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
+
+                await _matchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
+            }
+            catch
+            {
+               await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
+               throw;
+            }
+            finally
+            {
+               await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+            }
         }
     }
 }

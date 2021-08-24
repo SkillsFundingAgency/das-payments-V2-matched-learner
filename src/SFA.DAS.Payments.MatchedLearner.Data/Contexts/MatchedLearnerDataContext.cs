@@ -13,7 +13,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
     {
         DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
         DbSet<DataLockEventModel> DataLockEvent { get; set; }
-        Task<int> SaveChanges(CancellationToken cancellationToken = default(CancellationToken));
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
         Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds);
     }
@@ -62,11 +61,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             modelBuilder.ApplyConfiguration(new DataLockEventNonPayablePeriodModelConfiguration());
             modelBuilder.ApplyConfiguration(new DataLockEventPayablePeriodModelConfiguration());
             modelBuilder.ApplyConfiguration(new DataLockEventPriceEpisodeModelConfiguration());
-        }
-
-        public async Task<int> SaveChanges(CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return await SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

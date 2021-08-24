@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
@@ -18,12 +17,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
     public class PaymentsRepository : IPaymentsRepository
     {
         private readonly IPaymentsDataContext _paymentsDataContext;
-        private readonly ILogger<PaymentsRepository> _logger;
 
-        public PaymentsRepository(IPaymentsDataContext paymentsDataContext, ILogger<PaymentsRepository> logger)
+        public PaymentsRepository(IPaymentsDataContext paymentsDataContext)
         {
             _paymentsDataContext = paymentsDataContext ?? throw new ArgumentNullException(nameof(paymentsDataContext));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<List<ApprenticeshipModel>> GetApprenticeships(List<long> ids)

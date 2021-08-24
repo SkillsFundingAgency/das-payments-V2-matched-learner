@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Azure.Services.AppAuthentication;
+﻿using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
