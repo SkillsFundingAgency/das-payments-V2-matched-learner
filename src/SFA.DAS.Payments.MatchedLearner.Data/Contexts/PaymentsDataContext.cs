@@ -4,13 +4,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 {
-    public interface IPaymentsDataContext
-    {
-        DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
-        DbSet<DataLockEventModel> DataLockEvent { get; set; }
-    }
-
-    public class PaymentsDataContext : DbContext, IPaymentsDataContext
+    public class PaymentsDataContext : DbContext
     {
         public PaymentsDataContext (DbContextOptions options) : base(options)
         { }
