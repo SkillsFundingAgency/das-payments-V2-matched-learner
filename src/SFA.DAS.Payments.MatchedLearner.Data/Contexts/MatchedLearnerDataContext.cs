@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +8,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 {
-    public interface IMatchedLearnerDataContext
-    {
-        DbSet<ApprenticeshipModel> Apprenticeship { get; set; }
-        DbSet<DataLockEventModel> DataLockEvent { get; set; }
-        Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds);
-    }
-
-    public class MatchedLearnerDataContext : DbContext, IMatchedLearnerDataContext
+    public class MatchedLearnerDataContext : DbContext
     {
         public MatchedLearnerDataContext(DbContextOptions options) : base(options)
         { }

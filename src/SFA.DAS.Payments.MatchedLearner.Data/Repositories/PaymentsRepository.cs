@@ -16,9 +16,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
     public class PaymentsRepository : IPaymentsRepository
     {
-        private readonly IPaymentsDataContext _paymentsDataContext;
+        private readonly PaymentsDataContext _paymentsDataContext;
 
-        public PaymentsRepository(IPaymentsDataContext paymentsDataContext)
+        public PaymentsRepository(PaymentsDataContext paymentsDataContext)
         {
             _paymentsDataContext = paymentsDataContext ?? throw new ArgumentNullException(nameof(paymentsDataContext));
         }

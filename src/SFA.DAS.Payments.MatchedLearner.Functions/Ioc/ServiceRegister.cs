@@ -1,8 +1,7 @@
-﻿using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.Payments.MatchedLearner.Application;
+using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
@@ -11,30 +10,37 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 {
     public static class ServiceRegister
     {
-        private static readonly AzureServiceTokenProvider AzureServiceTokenProvider = new AzureServiceTokenProvider();
-
         public static IServiceCollection AddAppDependencies(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            var connection = new SqlConnection
+            services.AddMemoryCache();
+
+            services.AddSingleton<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProvider>();
+
+            services.Decorate<ISqlAzureIdentityTokenProvider, CacheSqlAzureIdentityTokenProvider>();
+
+            services.AddSingleton<SqlAzureIdentityAuthenticationDbConnectionInterceptor>();
+
+            services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {
-                ConnectionString = applicationSettings.MatchedLearnerConnectionString,
-#if !DEBUG
-                AccessToken = AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/").GetAwaiter().GetResult()          
-#endif
-            };
+                var matchedLearnerOptions = new DbContextOptionsBuilder()
+                    .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                    .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
+                    .Options;
 
-            var matchedLearnerOptions = new DbContextOptionsBuilder()
-                .UseSqlServer(connection)
-                .Options;
+                return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
+            });
 
+            services.AddTransient(provider =>
+            {
+                var matchedLearnerOptions = new DbContextOptionsBuilder()
+                    .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                    .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
+                    .Options;
 
-            services.AddTransient<IMatchedLearnerDataContextFactory, MatchedLearnerDataContextFactory>(provider =>
-                new MatchedLearnerDataContextFactory(matchedLearnerOptions));
+                return new MatchedLearnerDataContext(matchedLearnerOptions);
+            });
 
-            services.AddTransient<MatchedLearnerDataContext, MatchedLearnerDataContext>(provider =>
-                new MatchedLearnerDataContext(matchedLearnerOptions));
-
-            services.AddTransient<IPaymentsDataContext, PaymentsDataContext>(provider =>
+            services.AddTransient(provider =>
             {
                 var options = new DbContextOptionsBuilder()
                     .UseSqlServer(applicationSettings.PaymentsConnectionString)
