@@ -5,24 +5,31 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data
 {
-    // Simple interface that represents a token acquisition abstraction
     public interface ISqlAzureIdentityTokenProvider
     {
         Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default);
         string GetAccessToken();
     }
 
-    // Core implementation that performs token acquisition with Azure Identity
     public class SqlAzureIdentityTokenProvider : ISqlAzureIdentityTokenProvider
     {
+        private readonly ILogger<SqlAzureIdentityTokenProvider> _logger;
         private static readonly Microsoft.Azure.Services.AppAuthentication.AzureServiceTokenProvider AzureServiceTokenProvider = new Microsoft.Azure.Services.AppAuthentication.AzureServiceTokenProvider();
+
+        public SqlAzureIdentityTokenProvider(ILogger<SqlAzureIdentityTokenProvider> logger)
+        {
+            _logger = logger;
+        }
 
         public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
         {
-           var token = await AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/", cancellationToken: cancellationToken);
+            var token = await AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/", cancellationToken: cancellationToken);
+
+            _logger.LogInformation("Generated SQL AccessToken");
 
             return token;
         }
@@ -30,34 +37,41 @@ namespace SFA.DAS.Payments.MatchedLearner.Data
         public string GetAccessToken()
         {
             var token = AzureServiceTokenProvider.GetAccessTokenAsync("https://database.windows.net/").GetAwaiter().GetResult();
+            
+            _logger.LogInformation("Generated SQL AccessToken");
 
             return token;
         }
     }
 
-    // Decorator that caches tokens in the in-memory cache
     public class CacheSqlAzureIdentityTokenProvider : ISqlAzureIdentityTokenProvider
     {
         private const string CacheKey = nameof(CacheSqlAzureIdentityTokenProvider);
         private readonly ISqlAzureIdentityTokenProvider _inner;
         private readonly IMemoryCache _cache;
+        private readonly ILogger<CacheSqlAzureIdentityTokenProvider> _logger;
 
         public CacheSqlAzureIdentityTokenProvider(
             ISqlAzureIdentityTokenProvider inner,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            ILogger<CacheSqlAzureIdentityTokenProvider> logger)
         {
             _inner = inner;
             _cache = cache;
+            _logger = logger;
         }
 
         public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
         {
             return await _cache.GetOrCreateAsync(CacheKey, async cacheEntry =>
             {
+                _logger.LogInformation("Cached AccessToken Expired");
+
                 var token = await _inner.GetAccessTokenAsync(cancellationToken);
 
-                // AAD access tokens have a default lifetime of 1 hour, so we take a small safety margin
-                cacheEntry.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddMinutes(50));
+                cacheEntry.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddHours(1));
+
+                _logger.LogInformation("Caching SQL Access Token for an hour");
 
                 return token;
             });
@@ -67,17 +81,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Data
         {
             return _cache.GetOrCreate(CacheKey, cacheEntry =>
             {
+                _logger.LogInformation("Cached AccessToken Expired, Generating new Token");
+
                 var token = _inner.GetAccessToken();
 
-                // AAD access tokens have a default lifetime of 1 hour, so we take a small safety margin
                 cacheEntry.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddMinutes(50));
+
+                _logger.LogInformation("New SQL Access Token Generated, Caching for an hour");
 
                 return token;
             });
         }
     }
 
-    // The interceptor is now using the token provider abstraction
     public class SqlAzureIdentityAuthenticationDbConnectionInterceptor : DbConnectionInterceptor
     {
         private readonly ISqlAzureIdentityTokenProvider _tokenProvider;

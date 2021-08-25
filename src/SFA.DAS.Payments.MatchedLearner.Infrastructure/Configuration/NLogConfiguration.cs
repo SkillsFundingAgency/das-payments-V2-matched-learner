@@ -67,6 +67,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "AppInsightsLog");
         }
 
-        private static LogLevel GetMinLogLevel() => LogLevel.FromString("Info");
+        private static LogLevel GetMinLogLevel() => LogLevel.FromString("Debug");
     }
 }

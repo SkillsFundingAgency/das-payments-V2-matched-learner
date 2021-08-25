@@ -76,7 +76,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 return new MatchedLearnerDataLockInfo();
             }
 
-            _logger.LogDebug($"Getting DataLock Event Data Uln: {uln}");
+            _logger.LogInformation($"Started Getting DataLock Event Data from database for Uln: {uln}");
 
             var eventIds = dataLockEvents.Select(d => d.EventId).ToList();
 
@@ -117,8 +117,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 apprenticeshipDetails = await _dataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
             }
 
-            _logger.LogInformation($"Finished getting DataLock Event Data Duration: {stopwatch.ElapsedMilliseconds} Uln: {uln}");
-
             var result = new MatchedLearnerDataLockInfo
             {
                 DataLockEvents = dataLockEvents,
@@ -131,7 +129,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             stopwatch.Stop();
 
-            _logger.LogInformation($"Finished getting DataLock Event Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
+            _logger.LogInformation($"Finished Getting DataLock Event Data from database for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
 
             return result;
         }

@@ -29,15 +29,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
         {
             try
             {
+                _logger.LogInformation($"Start GetMatchedLearner for Uln {uln}");
+
                 var dataLockEvents = await _matchedLearnerRepository.GetDataLockEvents(ukprn, uln);
 
                 var matchedLearnerResult = _matchedLearnerDtoMapper.Map(dataLockEvents);
+
+                _logger.LogInformation($"End GetMatchedLearner for Uln {uln}");
 
                 return matchedLearnerResult;
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, $"Error Getting MatchedLearner data for Uln {uln}");
+                _logger.LogError(exception, $"Error GetMatchedLearner for Uln {uln}");
                 throw;
             }
         }
