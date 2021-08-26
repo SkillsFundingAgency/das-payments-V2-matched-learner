@@ -1,0 +1,62 @@
+﻿using System;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+
+namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthentication
+{
+    public class SqlAzureIdentityAuthenticationDbConnectionInterceptor : DbConnectionInterceptor
+    {
+        private readonly ISqlAzureIdentityTokenProvider _tokenProvider;
+
+        public SqlAzureIdentityAuthenticationDbConnectionInterceptor(ISqlAzureIdentityTokenProvider tokenProvider)
+        {
+            _tokenProvider = tokenProvider;
+        }
+
+        public override InterceptionResult ConnectionOpening(
+            DbConnection connection,
+            ConnectionEventData eventData,
+            InterceptionResult result)
+        {
+            var sqlConnection = (SqlConnection)connection;
+            if (ConnectionNeedsAccessToken(sqlConnection))
+            {
+                var token = _tokenProvider.GetAccessToken();
+                sqlConnection.AccessToken = token;
+            }
+
+            return base.ConnectionOpening(connection, eventData, result);
+        }
+
+        public override async Task<InterceptionResult> ConnectionOpeningAsync(
+            DbConnection connection,
+            ConnectionEventData eventData,
+            InterceptionResult result,
+            CancellationToken cancellationToken = default)
+        {
+            var sqlConnection = (SqlConnection)connection;
+            if (ConnectionNeedsAccessToken(sqlConnection))
+            {
+                var token = await _tokenProvider.GetAccessTokenAsync(cancellationToken);
+                sqlConnection.AccessToken = token;
+            }
+
+            return await base.ConnectionOpeningAsync(connection, eventData, result, cancellationToken);
+        }
+
+        private static bool ConnectionNeedsAccessToken(SqlConnection connection)
+        {
+            //
+            // Only try to get a token from AAD if
+            //  - We connect to an Azure SQL instance; and
+            //  - The connection doesn't specify a username.
+            //
+            var connectionStringBuilder = new SqlConnectionStringBuilder(connection.ConnectionString);
+
+            return connectionStringBuilder.DataSource.Contains("database.windows.net", StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(connectionStringBuilder.UserID);
+        }
+    }
+}
