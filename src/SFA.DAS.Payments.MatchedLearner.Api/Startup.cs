@@ -34,10 +34,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             var applicationSettings = services.AddApplicationSettings(Configuration);
 
-            services
-                .AddAppDependencies(applicationSettings)
-                .AddApplicationInsightsTelemetry()
-                .AddHealthChecks();
+            services.AddAppDependencies(applicationSettings);
+            services.AddApplicationInsightsTelemetry();
+            services.AddHealthChecks();
 
             services.AddNLog(applicationSettings, "Api");
 

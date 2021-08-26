@@ -1,17 +1,64 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using SFA.DAS.Configuration.AzureTableStorage;
+using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthentication;
 
 namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
+        public static void AddPaymentsDataContext(this IServiceCollection services, ApplicationSettings applicationSettings)
+        {
+            services.AddTransient(provider =>
+            {
+                var options = new DbContextOptionsBuilder()
+                    .UseSqlServer(applicationSettings.PaymentsConnectionString)
+                    .Options;
+
+                return new PaymentsDataContext(options);
+            });
+        }
+
+        public static void AddMatchedLearnerDataContext(this IServiceCollection services, ApplicationSettings applicationSettings)
+        {
+            services.AddMemoryCache();
+
+            services.AddSingleton<AzureServiceTokenProvider>();
+
+            services.AddSingleton<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProvider>();
+
+            services.Decorate<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProviderCache>();
+
+            services.AddSingleton<SqlAzureIdentityAuthenticationDbConnectionInterceptor>();
+
+            services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
+            {
+                var matchedLearnerOptions = new DbContextOptionsBuilder()
+                    .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                    .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
+                    .Options;
+                return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
+            });
+
+            services.AddTransient(provider =>
+            {
+                var matchedLearnerOptions = new DbContextOptionsBuilder()
+                    .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                    .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
+                    .Options;
+                return new MatchedLearnerDataContext(matchedLearnerOptions);
+            });
+        }
+
+        public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
         {
             var nLogConfiguration = new NLogConfiguration();
 
@@ -28,8 +75,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
                 nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment);
             });
-
-            return serviceCollection;
         }
 
         public static ApplicationSettings AddApplicationSettings(this IServiceCollection services, IConfiguration configuration)
