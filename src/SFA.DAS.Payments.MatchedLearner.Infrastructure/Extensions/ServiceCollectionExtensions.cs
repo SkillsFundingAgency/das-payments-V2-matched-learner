@@ -31,7 +31,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
         {
             services.AddMemoryCache();
 
-            services.AddSingleton<AzureServiceTokenProvider>();
+            services.AddSingleton(new AzureServiceTokenProvider());
 
             services.AddSingleton<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProvider>();
 
