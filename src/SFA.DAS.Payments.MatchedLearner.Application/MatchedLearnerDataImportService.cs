@@ -54,15 +54,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
                 await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
 
                 await _matchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
+
+                await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
             catch
             {
                await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
                throw;
-            }
-            finally
-            {
-               await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
         }
     }
