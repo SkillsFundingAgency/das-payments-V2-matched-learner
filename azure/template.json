@@ -20,9 +20,8 @@
         "sharedBackEndSubnetResourceId": {
             "type": "string"
         },
-        "appServiceAllowedIPs": {
-            "type": "array",
-            "defaultValue": []
+        "backEndAccessRestrictions": {
+            "type": "array"
         },
         "apiCustomHostname": {
             "type": "string"
@@ -181,7 +180,7 @@
                         "value": "[reference('api-app-service-certificate').outputs.certificateThumbprint.value]"
                     },
                     "ipSecurityRestrictions": {
-                        "value": "[parameters('appServiceAllowedIPs')]"
+                        "value": "[parameters('backEndAccessRestrictions')]"
                     }
                 }
             }
