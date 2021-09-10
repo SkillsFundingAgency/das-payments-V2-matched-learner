@@ -26,7 +26,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 
             var firstSubmissionJob = matchedLearnerDataLockInfo.LatestSuccessfulJobs
                 .OrderByDescending(x => x.AcademicYear)
-                .ThenBy(x => x.CollectionPeriod)
+                .ThenByDescending(x => x.CollectionPeriod)
                 .First();
 
             return new MatchedLearnerDto
@@ -102,7 +102,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         Periods = MapPeriods(priceEpisode.Key.PriceEpisodeIdentifier, matchedLearnerDataLockInfo),
                         TotalNegotiatedPriceStartDate = priceEpisode.Key.EffectiveTotalNegotiatedPriceStartDate
                     };
-                }).ToList();
+                })
+                .OrderByDescending(x => x.AcademicYear)
+                .ThenByDescending(x => x.CollectionPeriod)
+                .ToList();
         }
 
         private static DateTime ExtractEpisodeStartDateFromPriceEpisodeIdentifier(string priceEpisodeIdentifier)
