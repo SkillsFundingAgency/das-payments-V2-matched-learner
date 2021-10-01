@@ -5,6 +5,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Data
 {
     public class MatchedLearnerDataLockInfo
     {
+        public List<LatestSuccessfulJobModel> LatestSuccessfulJobs { get; set; } = new List<LatestSuccessfulJobModel>();
         public List<DataLockEvent> DataLockEvents { get; set; } = new List<DataLockEvent>();
         public List<DataLockEventPriceEpisode> DataLockEventPriceEpisodes { get; set; } = new List<DataLockEventPriceEpisode>();
         public List<DataLockEventPayablePeriod> DataLockEventPayablePeriods { get; set; } = new List<DataLockEventPayablePeriod>();

@@ -32,7 +32,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 
             var latestSuccessfulJobs = await _context.LatestSuccessfulJobs
                 .Where(x => x.Ukprn == ukprn)
-                .Select(l => l.DcJobId)
                 .Distinct()
                 .ToListAsync();
             
@@ -46,13 +45,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
             _logger.LogDebug($"Getting DataLock Event Data for Uln: {uln}");
           
             var transactionTypes = new List<byte> { 1, 2, 3 };
-
+            var latestSuccessfulJobIds = latestSuccessfulJobs.Select(l => l.DcJobId).ToList();
             var dataLockEvents = await _context.DataLockEvent
                 .Where(x =>
                     x.LearningAimReference == "ZPROG001" &&
                     x.Ukprn == ukprn &&
                     x.LearnerUln == uln &&
-                    latestSuccessfulJobs.Contains(x.JobId))
+                    latestSuccessfulJobIds.Contains(x.JobId))
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
 
@@ -97,6 +96,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Repositories
 
             var result = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = latestSuccessfulJobs,
                 DataLockEvents = dataLockEvents,
                 DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
                 DataLockEventPayablePeriods = dataLockEventPayablePeriods,
