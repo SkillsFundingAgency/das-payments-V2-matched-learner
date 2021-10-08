@@ -44,6 +44,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
+                        AcademicYear = _expectedAcademicYear,
+                        IlrSubmissionTime = _expectedIlrSubmissionDate,
+                        Ukprn = _expectedUkprn,
+                        JobId = 1,
+                        DcJobId = 1,
+                    }
+                },
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel

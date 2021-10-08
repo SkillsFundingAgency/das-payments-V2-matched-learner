@@ -20,19 +20,8 @@
         "sharedBackEndSubnetResourceId": {
             "type": "string"
         },
-        "sharedEnvVirtualNetworkName": {
-            "type": "string"
-        },
-        "sharedStorageAccountConnectionString": {
-            "type": "securestring"
-        },
-        "functionsExtensionVersion": {
-            "type": "string",
-            "defaultValue": "~3"
-        },
-        "appServiceAllowedIPs": {
-            "type": "array",
-            "defaultValue": []
+        "backEndAccessRestrictions": {
+            "type": "array"
         },
         "apiCustomHostname": {
             "type": "string"
@@ -57,6 +46,9 @@
         },
         "logAnalyticsWorkspaceName": {
             "type": "string"
+        },
+        "configurationStorageConnectionString": {
+            "type": "securestring"
         },
         "tags": {
             "type": "object"
@@ -243,7 +235,7 @@
                         "value": "[reference('api-app-service-certificate').outputs.certificateThumbprint.value]"
                     },
                     "ipSecurityRestrictions": {
-                        "value": "[parameters('appServiceAllowedIPs')]"
+                        "value": "[parameters('backEndAccessRestrictions')]"
                     }
                 }
             }

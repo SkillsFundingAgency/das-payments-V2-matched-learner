@@ -20,6 +20,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var event2 = Guid.NewGuid();
 
+            _testInput.LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+            {
+                new LatestSuccessfulJobModel
+                {
+                    CollectionPeriod = 1,
+                    AcademicYear = 2021,
+                    IlrSubmissionTime = DateTime.Now,
+                    Ukprn = 1234,
+                    JobId = 2,
+                    DcJobId = 2,
+                }
+            };
+
             _testInput.DataLockEvents = new List<DataLockEventModel>
             {
                 new DataLockEventModel
@@ -222,6 +235,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+                
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -257,6 +283,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+                
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -292,6 +331,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+                
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -327,6 +379,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+                
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -362,6 +427,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -397,6 +475,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -433,6 +524,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
             //Arrange
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -477,6 +581,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var testInput = new MatchedLearnerDataLockInfo
             {
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
+                {
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = 1,
+                        AcademicYear = 2021,
+                        IlrSubmissionTime = DateTime.Now,
+                        Ukprn = 1234,
+                        JobId = 2,
+                        DcJobId = 2,
+                    }
+                },
+
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
