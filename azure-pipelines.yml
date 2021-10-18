@@ -31,7 +31,24 @@ pool:
 steps:
 - template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
 
-- template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    projects: 'src/**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    projects: 'src/**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-restore'
+
+- task: DotNetCoreCLI@2
+  displayName: Unit Tests
+  inputs:
+    command: test
+    projects: '**/*.Application.UnitTests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build'
 
 - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
 
