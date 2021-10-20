@@ -21,56 +21,53 @@ resources:
   - repository: das-platform-building-blocks
     type: github
     name: SkillsFundingAgency/das-platform-building-blocks
-    ref: refs/tags/0.3.29
-    endpoint: 'GitHub (SFA)'
+    ref: refs/tags/0.4.10
+    endpoint: SkillsFundingAgency
 
 pool:
-  name: 'DAS - Continuous Integration'
+  name: 'DAS - Continuous Integration Agents'
+  demands: LATEST_DOTNET_VERSION -equals 3.1
 
 steps:
-  - task: gittools.gitversion.gitversion-task.GitVersion@5
-    displayName: GitVersion
-    inputs:
-      configFilePath: GitVersion.yml    
-      updateAssemblyInfo: true
+- template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
 
-  - task: DotNetCoreCLI@2
-    displayName: Restore
-    inputs:
-      command: restore
-      projects: 'src/**/*.csproj'
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    projects: 'src/**/*.csproj'
 
-  - task: DotNetCoreCLI@2
-    displayName: Build
-    inputs:
-      projects: 'src/**/*.csproj'
-      arguments: '--configuration $(buildConfiguration) --no-restore'
-      
-  - task: DotNetCoreCLI@2
-    displayName: Unit Tests
-    inputs:
-      command: test
-      projects: '**/*.Application.UnitTests.csproj'
-      arguments: '--configuration $(buildConfiguration) --no-build'
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    projects: 'src/**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-restore'
 
-  - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
+- task: DotNetCoreCLI@2
+  displayName: Unit Tests
+  inputs:
+    command: test
+    projects: '**/*.Application.UnitTests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Publish API'
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: 'src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj'
-      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+- template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
 
-  - task: CopyFiles@2
-    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
-    inputs:
-      contents: |
-        azure/**
-      targetFolder: '$(build.artifactstagingdirectory)/publish'
+- task: DotNetCoreCLI@2
+  displayName: 'Publish API'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: 'src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj'
+    arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
-    inputs:
-      pathtoPublish: '$(build.artifactstagingdirectory)/publish'
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  inputs:
+    contents: |
+      azure/**
+    targetFolder: '$(build.artifactstagingdirectory)/publish'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    pathtoPublish: '$(build.artifactstagingdirectory)/publish'
