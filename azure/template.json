@@ -20,6 +20,16 @@
         "sharedBackEndSubnetResourceId": {
             "type": "string"
         },
+        "sharedEnvVirtualNetworkName": {
+            "type": "string"
+        },
+        "sharedStorageAccountConnectionString": {
+            "type": "securestring"
+        },
+         "functionsExtensionVersion": {
+            "type": "string",
+            "defaultValue": "~3"
+        },
         "backEndAccessRestrictions": {
             "type": "array"
         },
@@ -96,11 +106,7 @@
         },
         "paymentsServiceBusConnectionString": {
             "type": "string"
-        },
-        "configurationStorageConnectionString" : {
-            "type": "securestring"
         }
-
     },
     "variables": {
         "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
