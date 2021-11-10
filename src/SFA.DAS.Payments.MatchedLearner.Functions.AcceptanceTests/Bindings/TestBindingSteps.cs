@@ -149,7 +149,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actual.LearningAimFundingLineType.Should().Be("funding");
             actual.IlrSubmissionDateTime.Should().Be(new DateTime(2020, 10, 10));
             actual.IsPayable.Should().Be(false);
-            actual.DataLockSource.Should().Be(0);
             actual.JobId.Should().Be(123);
             actual.EventTime.Date.Should().Be(DateTimeOffset.Now.Date);
             actual.LearningStartDate.Should().Be(new DateTime(2020, 10, 09));
