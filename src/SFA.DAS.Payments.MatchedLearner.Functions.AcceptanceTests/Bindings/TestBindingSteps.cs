@@ -70,14 +70,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                     Thread.Sleep(_settings.TimeToWait - timer.Elapsed);
             }
 
-            try
+            var dataLockEventsForPeriod = dataLockEvents.Where(x =>
+                x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod).ToList();
+
+            if (dataLockEventsForPeriod.Count != 1)
             {
-                AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
+                Console.WriteLine($"Failed to Find matching dataLockEvents For Period {collectionPeriod} : {academicYear}, ukprn {_ukprn}, learnerUln {_learnerUln}");
             }
-            finally
-            {
-                await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);    
-            }
+
+            dataLockEventsForPeriod.Count.Should().Be(1);
+
+            AssertSingleDataLockEventForPeriod(dataLockEventsForPeriod.First(), collectionPeriod, academicYear);
+
+            await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
 
             timer.Stop();
         }
@@ -131,14 +136,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             existingMatchedLearnerDataLockEvents.Should().BeEmpty();
         }
 
-        public void AssertSingleDataLockEventForPeriod(List<DataLockEventModel> dataLockEvents, byte collectionPeriod, short academicYear)
+        public void AssertSingleDataLockEventForPeriod(DataLockEventModel actual, byte collectionPeriod, short academicYear)
         {
-            var dataLockEventsForPeriod = dataLockEvents.Where(x =>
-                x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod).ToList();
-
-            dataLockEventsForPeriod.Count.Should().Be(1);
-            var actual = dataLockEventsForPeriod.First();
-
             actual.Ukprn.Should().Be(_ukprn);
             actual.ContractType.Should().Be(ContractType.Act1);
             actual.CollectionPeriod.Should().Be(collectionPeriod);
