@@ -70,11 +70,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                     Thread.Sleep(_settings.TimeToWait - timer.Elapsed);
             }
 
-            AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
+            try
+            {
+                AssertSingleDataLockEventForPeriod(dataLockEvents, collectionPeriod, academicYear);
+            }
+            finally
+            {
+                await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);    
+            }
 
             timer.Stop();
-
-            await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
         }
 
         [Then("the existing matched Learners are NOT deleted")]
