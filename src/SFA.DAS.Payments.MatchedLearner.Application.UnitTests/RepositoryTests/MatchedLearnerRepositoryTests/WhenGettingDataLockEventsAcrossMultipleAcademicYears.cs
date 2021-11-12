@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +52,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
 
             var bsContextOption = new DbContextOptionsBuilder<MatchedLearnerDataContext>()
-                .UseInMemoryDatabase("TestDb", new InMemoryDatabaseRoot())
+                .UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}", new InMemoryDatabaseRoot())
                 .Options;
 
             _dataDataContext = new MatchedLearnerDataContext(bsContextOption);

@@ -48,7 +48,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventPriceEpisode.PriceEpisodeIdentifier = Guid.NewGuid().ToString();
 
             var dbOptions = new DbContextOptionsBuilder<MatchedLearnerDataContext>()
-                .UseInMemoryDatabase("TestDb", new InMemoryDatabaseRoot())
+                .UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}", new InMemoryDatabaseRoot())
                 .Options;
 
             _dataDataContext = new MatchedLearnerDataContext(dbOptions);
