@@ -15,3 +15,8 @@
     [TotalNegotiatedPriceStartDate] DATETIME2 NULL,
     [CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_PriceEpisode__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
 )
+GO
+
+Create Unique Index UX_PriceEpisode_LogicalDuplicates on dbo.PriceEpisode( [TrainingId], [Identifier], [AcademicYear], [CollectionPeriod], [AgreedPrice], [StartDate], [ActualEndDate],
+[PlannedEndDate], [NumberOfInstalments], [InstalmentAmount], [CompletionAmount], [TotalNegotiatedPriceStartDate] )
+GO
