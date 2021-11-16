@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[PriceEpisode]
 (
-	[Id] BIGINT NOT NULL PRIMARY KEY, 
+	[Id] BIGINT NOT NULL CONSTRAINT PK_PriceEpisode PRIMARY KEY CLUSTERED, 
     [TrainingId] BIGINT NOT NULL CONSTRAINT FK_PriceEpisode__Training FOREIGN KEY REFERENCES [dbo].[Training] (Id),
     [Identifier] NVARCHAR(50) NOT NULL, 
     [AcademicYear] SMALLINT NOT NULL, 
