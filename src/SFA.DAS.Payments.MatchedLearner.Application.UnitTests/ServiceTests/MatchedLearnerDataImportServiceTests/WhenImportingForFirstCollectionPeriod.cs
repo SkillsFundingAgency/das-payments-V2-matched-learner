@@ -4,15 +4,14 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.MatchedLearnerDataImportServiceTests
 {
     [TestFixture]
     public class WhenImportingForFirstCollectionPeriod
     {
-        private long _ukprn;
-        private byte _collectionPeriod;
-        private short _academicYear;
+        private SubmissionJobSucceeded _submissionSucceededEvent;
         private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
         private MatchedLearnerDataImportService _sut;
@@ -20,13 +19,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         [SetUp]
         public async Task SetUp()
         {
-            _ukprn = 173658;
-            _collectionPeriod = 1;
-            _academicYear = 2021;
+            _submissionSucceededEvent = new SubmissionJobSucceeded
+            {
+                Ukprn = 173658,
+                CollectionPeriod = 1,
+                AcademicYear = 2021,
+                JobId = 123,
+            };
+            
             _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
 
-            _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_ukprn, _academicYear, _collectionPeriod))
+            _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_submissionSucceededEvent))
                 .ReturnsAsync(new List<DataLockEventModel>());
 
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
@@ -34,13 +38,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
 
             _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object);
 
-            await _sut.Import(_ukprn, _collectionPeriod, _academicYear);
+            await _sut.Import(_submissionSucceededEvent);
         }
 
         [Test]
         public void ThenOnlyRemovesPreviousSubmissionDataForCurrentPeriod()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_ukprn, _academicYear, It.Is<IList<byte>>(y => y.Count == 1 && y.Contains(_collectionPeriod))));
+            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_submissionSucceededEvent.Ukprn, _submissionSucceededEvent.AcademicYear, It.Is<IList<byte>>(y => y.Count == 1 && y.Contains(_submissionSucceededEvent.CollectionPeriod))));
         }
     }
 }

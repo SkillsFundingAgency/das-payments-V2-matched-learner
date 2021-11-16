@@ -58,6 +58,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _sut = new MatchedLearnerRepository(_dataDataContext, contextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            _dataDataContext.Database.EnsureDeleted();
+            _dataDataContext.Dispose();
+        }
+
         [Test]
         public async Task ThenDoesNotRetrieveNonPayablePeriodsWithZeroAmount()
         {
@@ -68,7 +75,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachNonPayablePeriodToDataLock();
 
-            await AddLatestSuccessfulJobToDb();
+            //await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
@@ -89,7 +96,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachNonPayablePeriodToDataLock();
 
-            await AddLatestSuccessfulJobToDb();
+            //await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
@@ -110,7 +117,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachPayablePeriodToDataLock();
 
-            await AddLatestSuccessfulJobToDb();
+            //await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
@@ -131,7 +138,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachPayablePeriodToDataLock();
 
-            await AddLatestSuccessfulJobToDb();
+            //await AddLatestSuccessfulJobToDb();
             await AddDataLockToDb();
 
             //Act
@@ -142,10 +149,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             result.DataLockEventPayablePeriods.Count.Should().Be(1);
         }
 
-        private async Task AddLatestSuccessfulJobToDb()
-        {
-            await _dataDataContext.SaveChangesAsync();
-        }
+        //private async Task AddLatestSuccessfulJobToDb()
+        //{
+        //    await _dataDataContext.SaveChangesAsync();
+        //}
 
         private void AttachPriceEpisodeToDataLock()
         {
@@ -173,6 +180,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         {
             _dataLockEvent.LearnerUln = _uln;
             _dataLockEvent.Ukprn = _ukprn;
+            _dataLockEvent.EventId = Guid.NewGuid();
             _dataLockEvent.LearningAimReference = "ZPROG001";
             _dataLockEvent.CollectionPeriod = 11;
             _dataLockEvent.AcademicYear = 2021;

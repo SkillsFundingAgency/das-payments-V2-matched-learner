@@ -33,6 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         }
 
         [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
+        [When("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
         {
             await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
@@ -46,12 +47,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         }
 
         [When("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
+        [Given("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task WhenWeReceiveSubmissionSucceededEventForPeriod(byte collectionPeriod, short academicYear)
         {
             await _testContext.TestEndpointInstance.PublishSubmissionSucceededEvent(_ukprn, academicYear, collectionPeriod);
         }
 
         [Then("the matched Learners are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
+        [Given("the matched Learners are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task ThenTheMatchedLearnersAreOnlyImportedForCollectionPeriodAndAcademicYear(byte collectionPeriod, short academicYear)
         {
             var timer = new Stopwatch();

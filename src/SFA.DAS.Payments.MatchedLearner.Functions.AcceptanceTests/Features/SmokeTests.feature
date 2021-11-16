@@ -31,3 +31,12 @@ Scenario: Existing Date for previous Academic year latest collection then only n
 	When A SubmissionJobSucceeded message is received for CollectionPeriod 1 and AcademicYear 2122
 	Then the existing matched Learners are NOT deleted
 	And the matched Learners are only Imported for CollectionPeriod 1 and AcademicYear 2122
+
+Scenario: Function pulls the data from Payments DB and saves to matched learner DB for Same Collection Period
+	Given A Submission Job Succeeded for CollectionPeriod 1 and AcademicYear 2122
+	And A SubmissionJobSucceeded message is received for CollectionPeriod 1 and AcademicYear 2122
+	And the matched Learners are only Imported for CollectionPeriod 1 and AcademicYear 2122
+	When A Submission Job Succeeded for CollectionPeriod 1 and AcademicYear 2122
+	And A SubmissionJobSucceeded message is received for CollectionPeriod 1 and AcademicYear 2122
+	Then the existing matched Learners are deleted
+	And the matched Learners are only Imported for CollectionPeriod 1 and AcademicYear 2122

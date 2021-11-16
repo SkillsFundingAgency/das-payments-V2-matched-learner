@@ -28,7 +28,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
                 if (submissionSucceededEvent == null) throw new InvalidOperationException("Error parsing SubmissionJobSucceeded message");
 
-                await _matchedLearnerDataImportService.Import(submissionSucceededEvent.Ukprn, submissionSucceededEvent.CollectionPeriod, submissionSucceededEvent.AcademicYear);
+                await _matchedLearnerDataImportService.Import(submissionSucceededEvent);
             }
             catch (Exception e)
             {
