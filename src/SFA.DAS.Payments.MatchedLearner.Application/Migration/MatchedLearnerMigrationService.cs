@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
@@ -34,7 +32,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
             foreach (var provider in providers)
             {
-                //await endpointInstance.Send(new ProviderLevelMigrationRequest{ MigrationRunId = migrationRunId, Ukprn = provider }, new SendOptions(). ).ConfigureAwait(false); todo fix this
+                var options = new SendOptions();
+                options.SetDestination(_providerLevelMatchedLearnerMigration);
+                await endpointInstance.Send(new ProviderLevelMigrationRequest{ MigrationRunId = migrationRunId, Ukprn = provider }, options).ConfigureAwait(false);
             }
         }
     }
