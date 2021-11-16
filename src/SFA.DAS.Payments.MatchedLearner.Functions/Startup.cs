@@ -6,6 +6,7 @@ using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
@@ -33,27 +34,28 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            EnsureQueueAndSubscription(applicationSettings, typeof(SubmissionJobSucceeded));
+            EnsureQueueAndSubscription(applicationSettings.PaymentsServiceBusConnectionString, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
+            EnsureQueueAndSubscription(applicationSettings.PaymentsServiceBusConnectionString, applicationSettings.MigrationQueue, typeof(ProviderLevelMigrationRequest));
         }
 
-        private static void EnsureQueueAndSubscription(ApplicationSettings settings, Type messageType)
+        private static void EnsureQueueAndSubscription(string connection, string queue, Type messageType)
         {
             try
             {
                 const string topicPath = "bundle-1";
 
-                var manageClient = new ManagementClient(settings.PaymentsServiceBusConnectionString);
+                var manageClient = new ManagementClient(connection);
 
-                if (!manageClient.QueueExistsAsync(settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
+                if (!manageClient.QueueExistsAsync(queue, CancellationToken.None).GetAwaiter().GetResult())
                 {
-                    var queueDescription = new QueueDescription(settings.MatchedLearnerQueue)
+                    var queueDescription = new QueueDescription(queue)
                     {
                         DefaultMessageTimeToLive = TimeSpan.FromDays(7),
                         EnableDeadLetteringOnMessageExpiration = true,
                         LockDuration = TimeSpan.FromMinutes(5),
                         MaxDeliveryCount = 1,
                         MaxSizeInMB = 5120,
-                        Path = settings.MatchedLearnerQueue
+                        Path = queue
                     };
 
                     manageClient.CreateQueueAsync(queueDescription, CancellationToken.None).GetAwaiter().GetResult();
@@ -61,19 +63,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
                 var ruleDescription = new RuleDescription(messageType.Name, new SqlFilter($"[NServiceBus.EnclosedMessageTypes] LIKE '%{messageType.FullName}%'"));
 
-                if (manageClient.SubscriptionExistsAsync(topicPath, settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
+                if (manageClient.SubscriptionExistsAsync(topicPath, queue, CancellationToken.None).GetAwaiter().GetResult())
                 {
-                    manageClient.DeleteSubscriptionAsync(topicPath, settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult();
+                    manageClient.DeleteSubscriptionAsync(topicPath, queue, CancellationToken.None).GetAwaiter().GetResult();
                 }
 
-                var subscriptionDescription = new SubscriptionDescription(topicPath, settings.MatchedLearnerQueue)
+                var subscriptionDescription = new SubscriptionDescription(topicPath, queue)
                 {
                     DefaultMessageTimeToLive = TimeSpan.FromDays(7),
                     EnableDeadLetteringOnMessageExpiration = true,
                     LockDuration = TimeSpan.FromMinutes(5),
                     MaxDeliveryCount = 1,
-                    SubscriptionName = settings.MatchedLearnerQueue,
-                    ForwardTo = settings.MatchedLearnerQueue,
+                    SubscriptionName = queue,
+                    ForwardTo = queue,
                     EnableBatchedOperations = false,
                 };
 

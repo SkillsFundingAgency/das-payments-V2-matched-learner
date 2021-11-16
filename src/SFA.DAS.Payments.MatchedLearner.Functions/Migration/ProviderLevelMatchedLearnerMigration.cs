@@ -17,7 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Migration
         }
 
         [FunctionName("ProviderLevelMatchedLearnerMigration")]
-        public async Task RunProviderLevelMatchedLearnerMigration([ServiceBusTrigger("%MigrationQueue%", Connection = "ServiceBusConnectionString")] string message)
+        public async Task RunProviderLevelMatchedLearnerMigration([ServiceBusTrigger("%MigrationQueue%", Connection = "PaymentsServiceBusConnectionString")] string message)
         {
             var request = JsonConvert.DeserializeObject<ProviderLevelMigrationRequest>(message);
             await _providerLevelMatchedLearnerMigrationService.MigrateProviderScopedData(request.MigrationRunId, request.Ukprn);
