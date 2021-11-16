@@ -62,7 +62,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
         public static void AddEndpointInstanceFactory(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            services.AddTransient(provider => new EndpointInstanceFactory(new EndpointConfiguration(applicationSettings.MigrationEndpointName)));
+            services.AddTransient<IEndpointInstanceFactory>(provider => new EndpointInstanceFactory(new EndpointConfiguration(applicationSettings.MigrationQueue)));
         }
 
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)

@@ -7,6 +7,6 @@
         public string MatchedLearnerConnectionString { get; set; }
         public string PaymentsServiceBusConnectionString { get; set; }
         public bool IsDevelopment { get; set; }
-        public string MigrationEndpointName { get; set; }
+        public string MigrationQueue { get; set; }
     }
 }
