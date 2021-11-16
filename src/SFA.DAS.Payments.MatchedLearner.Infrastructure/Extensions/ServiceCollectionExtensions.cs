@@ -62,7 +62,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
         public static void AddEndpointInstanceFactory(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            services.AddTransient<IEndpointInstanceFactory>(provider => new EndpointInstanceFactory(new EndpointConfiguration(applicationSettings.MigrationQueue)));
+            var endpointConfiguration = new EndpointConfiguration(applicationSettings.MigrationQueue);
+            endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
+            services.AddTransient<IEndpointInstanceFactory>(provider => new EndpointInstanceFactory(endpointConfiguration));
         }
 
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
