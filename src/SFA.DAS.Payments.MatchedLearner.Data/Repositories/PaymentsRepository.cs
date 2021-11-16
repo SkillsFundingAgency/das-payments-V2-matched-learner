@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
     public interface IPaymentsRepository
     {
         Task<List<ApprenticeshipModel>> GetApprenticeships(List<long> ids);
-        Task<List<DataLockEventModel>> GetDataLockEvents(long ukprn, short academicYear, byte collectionPeriod);
+        Task<List<DataLockEventModel>> GetDataLockEvents(SubmissionJobSucceeded submissionSucceededEvent);
     }
 
     public class PaymentsRepository : IPaymentsRepository
@@ -41,7 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             return apprenticeshipModels;
         }
 
-        public async Task<List<DataLockEventModel>> GetDataLockEvents(long ukprn, short academicYear, byte collectionPeriod)
+        public async Task<List<DataLockEventModel>> GetDataLockEvents(SubmissionJobSucceeded submissionSucceededEvent)
         {
             return await _paymentsDataContext.DataLockEvent
                 .Include(d => d.NonPayablePeriods)
@@ -49,9 +50,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .Include(d => d.PayablePeriods)
                 .Include(d => d.PriceEpisodes)
                 .Where(d =>
-                    d.Ukprn == ukprn &&
-                    d.AcademicYear == academicYear &&
-                    d.CollectionPeriod == collectionPeriod)
+                    d.Ukprn == submissionSucceededEvent.Ukprn &&
+                    d.AcademicYear == submissionSucceededEvent.AcademicYear &&
+                    d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
+                    d.JobId == submissionSucceededEvent.JobId)
                 .ToListAsync();
         }
     }

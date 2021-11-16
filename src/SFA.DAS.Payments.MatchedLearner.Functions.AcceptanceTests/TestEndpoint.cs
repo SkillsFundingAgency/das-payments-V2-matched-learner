@@ -82,7 +82,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             {
                 Ukprn = ukprn,
                 CollectionPeriod = collectionPeriod,
-                AcademicYear = academicYear
+                AcademicYear = academicYear,
+                JobId = 123
             });
         }
     }

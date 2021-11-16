@@ -36,20 +36,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             _ukprn = fixture.Create<long>();
             _uln = fixture.Create<long>();
-
             _academicYear1 = fixture.Create<short>();
             _academicYear2 = fixture.Create<short>();
 
             _dataLockEventAy1 = fixture.Create<DataLockEventModel>();
-            _dataLockEventAy1.AcademicYear = _academicYear1;
             _dataLockEventAy2 = fixture.Create<DataLockEventModel>();
-            _dataLockEventAy2.AcademicYear = _academicYear2;
 
             _dataLockEventPayablePeriodAy1 = fixture.Create<DataLockEventPayablePeriodModel>();
             _dataLockEventPayablePeriodAy2 = fixture.Create<DataLockEventPayablePeriodModel>();
             _dataLockEventPriceEpisodeAy1 = fixture.Create<DataLockEventPriceEpisodeModel>();
             _dataLockEventPriceEpisodeAy2 = fixture.Create<DataLockEventPriceEpisodeModel>();
-
 
             var bsContextOption = new DbContextOptionsBuilder<MatchedLearnerDataContext>()
                 .UseInMemoryDatabase($"TestDb-{Guid.NewGuid()}", new InMemoryDatabaseRoot())
@@ -60,6 +56,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             var matchLearnerContextFactory = new MatchedLearnerDataContextFactory(bsContextOption);
 
             _sut = new MatchedLearnerRepository(_dataDataContext, matchLearnerContextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _dataDataContext.Database.EnsureDeleted();
+            _dataDataContext.Dispose();
         }
 
         [Test]
@@ -115,20 +118,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         {
             _dataLockEventAy1.LearnerUln = _uln;
             _dataLockEventAy1.Ukprn = _ukprn;
-            _dataLockEventAy1.JobId = 123;
             _dataLockEventAy1.LearningAimReference = "ZPROG001";
             _dataLockEventAy1.CollectionPeriod = 14;
-            _dataLockEventAy1.AcademicYear = 2021;
+            _dataLockEventAy1.AcademicYear = _academicYear1;
 
             _dataDataContext.DataLockEvent.Add(_dataLockEventAy1);
 
 
             _dataLockEventAy2.LearnerUln = _uln;
             _dataLockEventAy2.Ukprn = _ukprn;
-            _dataLockEventAy2.JobId = 456;
             _dataLockEventAy2.LearningAimReference = "ZPROG001";
             _dataLockEventAy2.CollectionPeriod = 1;
-            _dataLockEventAy2.AcademicYear = 2122;
+            _dataLockEventAy2.AcademicYear = _academicYear2;
 
             _dataDataContext.DataLockEvent.Add(_dataLockEventAy2);
 

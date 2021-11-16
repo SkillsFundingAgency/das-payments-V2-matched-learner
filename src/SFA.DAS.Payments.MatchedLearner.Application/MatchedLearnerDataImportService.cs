@@ -4,12 +4,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application
 {
     public interface IMatchedLearnerDataImportService
     {
-        Task Import(long ukprn, byte collectionPeriod, short academicYear);
+        Task Import(SubmissionJobSucceeded submissionSucceededEvent);
     }
 
     public class MatchedLearnerDataImportService : IMatchedLearnerDataImportService
@@ -23,22 +24,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
         }
 
-        public async Task Import(long ukprn, byte collectionPeriod, short academicYear)
+        public async Task Import(SubmissionJobSucceeded submissionSucceededEvent)
         {
-            var collectionPeriods = new List<byte> { collectionPeriod };
+            var collectionPeriods = new List<byte> { submissionSucceededEvent.CollectionPeriod };
 
-            if (collectionPeriod != 1)
+            if (submissionSucceededEvent.CollectionPeriod != 1)
             {
-                collectionPeriods.Add((byte)(collectionPeriod - 1));
+                collectionPeriods.Add((byte)(submissionSucceededEvent.CollectionPeriod - 1));
             }
 
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
 
-                await _matchedLearnerRepository.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriods);
+                await _matchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
 
-                var dataLockEvents = await _paymentsRepository.GetDataLockEvents(ukprn, academicYear, collectionPeriod);
+                var dataLockEvents = await _paymentsRepository.GetDataLockEvents(submissionSucceededEvent);
 
                 var apprenticeshipIds = dataLockEvents
                     .SelectMany(dle => dle.PayablePeriods)

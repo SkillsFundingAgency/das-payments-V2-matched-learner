@@ -37,7 +37,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.UnitTests
         public async Task ThenMatchedDataIsImported()
         {
             await _sut.Run(_message);
-            _mockMatchedLearnerDataImportService.Verify(x => x.Import(_submissionSucceededEvent.Ukprn, _submissionSucceededEvent.CollectionPeriod, _submissionSucceededEvent.AcademicYear));
+            _mockMatchedLearnerDataImportService.Verify(x => x.Import(It.Is<SubmissionJobSucceeded>(
+                messages =>  
+                    messages.JobId == _submissionSucceededEvent.JobId && 
+                    messages.Ukprn == _submissionSucceededEvent.Ukprn &&
+                    messages.CollectionPeriod == _submissionSucceededEvent.CollectionPeriod &&
+                    messages.AcademicYear == _submissionSucceededEvent.AcademicYear)));
         }
     }
 }
