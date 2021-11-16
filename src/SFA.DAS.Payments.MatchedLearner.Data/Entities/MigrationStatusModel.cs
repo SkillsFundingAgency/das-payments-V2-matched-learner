@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
 {
-    public class MigrationStatusModel
+    public class MigrationRunAttemptModel
     {
         public long Id { get; set; }
         public Guid? Identifier { get; set; }

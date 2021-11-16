@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,12 +15,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task BeginTransactionAsync(IsolationLevel isolationLevel);
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
-        Task CreateMigrationStatusModel(MigrationStatusModel model);
-        Task<MigrationStatusModel> GetProviderMigrationStatusModel(long ukprn);
-        Task<MigrationStatusModel> GetProviderMigrationStatusModel(Guid identifier);
-        Task UpdateStatus(Guid identifier, MigrationStatus newStatus);
-        Task UpdateStatus(long ukprn, MigrationStatus newStatus);
-        Task UpdateMigrationStatusModel(MigrationStatusModel model);
+        Task CreateMigrationAttempt(MigrationRunAttemptModel model);
+        Task<List<MigrationRunAttemptModel>> GetProviderMigrationAttempts(long ukprn);
+        Task<MigrationRunAttemptModel> GetProviderMigrationStatusModel(Guid identifier); //todo remove
+        Task UpdateStatus(Guid identifier, MigrationStatus newStatus); //todo remove
+        Task UpdateStatus(long ukprn, MigrationStatus newStatus); //todo remove
+        Task UpdateMigrationStatusModel(MigrationRunAttemptModel model); //todo remove
+        Task UpdateMigrationRunAttempt(long ukprn, Guid migrationRunId, MigrationStatus status);
     }
     public class MigrationStatusRepository : IMigrationStatusRepository
     {
@@ -46,21 +48,20 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await currentTransaction.RollbackAsync();
         }
 
-        public async Task CreateMigrationStatusModel(MigrationStatusModel model)
+        public async Task CreateMigrationAttempt(MigrationRunAttemptModel model)
         {
             _matchedLearnerDataContext.MigrationStatuses.Add(model);
 
             await _matchedLearnerDataContext.SaveChangesAsync();
         }
 
-        public async Task<MigrationStatusModel> GetProviderMigrationStatusModel(long ukprn)
+        public async Task<List<MigrationRunAttemptModel>> GetProviderMigrationAttempts(long ukprn)
         {
-            return await _matchedLearnerDataContext.MigrationStatuses
-                .Where(x => x.Ukprn == ukprn)
-                .FirstOrDefaultAsync();
+            return _matchedLearnerDataContext.MigrationStatuses
+                .Where(x => x.Ukprn == ukprn).ToList();
         }
 
-        public async Task<MigrationStatusModel> GetProviderMigrationStatusModel(Guid identifier)
+        public async Task<MigrationRunAttemptModel> GetProviderMigrationStatusModel(Guid identifier)
         {
             return await _matchedLearnerDataContext.MigrationStatuses
                 .Where(x => x.Identifier == identifier)
@@ -78,18 +79,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task UpdateStatus(long ukprn, MigrationStatus newStatus)
         {
-            var model = await GetProviderMigrationStatusModel(ukprn);
+            var model = await GetProviderMigrationAttempts(ukprn);
 
             model.Status = newStatus;
 
             await _matchedLearnerDataContext.SaveChangesAsync();
         }
 
-        public async Task UpdateMigrationStatusModel(MigrationStatusModel model)
+        public async Task UpdateMigrationStatusModel(MigrationRunAttemptModel model)
         {
             _matchedLearnerDataContext.MigrationStatuses.Update(model);
 
             await _matchedLearnerDataContext.SaveChangesAsync();
+        }
+
+        public Task UpdateMigrationRunAttempt(long ukprn, Guid migrationRunId, MigrationStatus status)
+        {
+            throw new NotImplementedException();
         }
     }
 }

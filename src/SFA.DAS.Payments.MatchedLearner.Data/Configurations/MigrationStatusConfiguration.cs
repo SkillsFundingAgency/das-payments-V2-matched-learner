@@ -8,9 +8,9 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
 {
-    public class MigrationStatusConfiguration : IEntityTypeConfiguration<MigrationStatusModel>
+    public class MigrationStatusConfiguration : IEntityTypeConfiguration<MigrationRunAttemptModel>
     {
-        public void Configure(EntityTypeBuilder<MigrationStatusModel> builder)
+        public void Configure(EntityTypeBuilder<MigrationRunAttemptModel> builder)
         {
             builder.ToTable("MigrationStatus", "Payments2");
             builder.HasKey(x => x.Id);

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
@@ -17,38 +19,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         {
             _migrationStatusRepository = migrationStatusRepository;
         }
-        
-
-        //first run - provider 1-5 succeeded, provider 6 failed, provider 7-10 never ran
-        //second run - providers 1-5 are ignored, provider 6
-
-        //provider 6
-        //first record - migration run aaaa-, ukprn 100006, status failed
-        //second record - migration run bbbb-, ukprn 100006, status inprogress
 
         public async Task MigrateProviderScopedData(Guid migrationRunId, long ukprn)
         {
-            var existingStatusModel = await _migrationStatusRepository.GetProviderMigrationStatusModel(ukprn);
+            var existingAttempts = await _migrationStatusRepository.GetProviderMigrationAttempts(ukprn);
 
-            if (existingStatusModel == null)
+            if(existingAttempts.Any(x => x.Status == MigrationStatus.Completed))
+                return;
+
+            var singleInsertMode = existingAttempts.Any(x => x.Status != MigrationStatus.Completed);
+
+            await _migrationStatusRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
             {
-                await _migrationStatusRepository.CreateMigrationStatusModel(new MigrationStatusModel
-                {
-                    Identifier = migrationRunId,
-                    Status = MigrationStatus.InProgress,
-                    Ukprn = ukprn
-                });
-            }
-            else switch (existingStatusModel.Status)
-            {
-                case MigrationStatus.Completed:
-                    //todo log already completed for this provider
-                    return;
-                case MigrationStatus.Failed:
-                case MigrationStatus.InProgress:
-                    //todo flag single insert mode
-                    break;
-            }
+                Identifier = migrationRunId,
+                Status = MigrationStatus.InProgress,
+                Ukprn = ukprn
+            });
 
             try
             {
@@ -61,11 +47,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                 //todo log error
                 //rollback transaction
                 //set the status to failed
-                await _migrationStatusRepository.UpdateStatus(ukprn, MigrationStatus.Failed);
+                await _migrationStatusRepository.UpdateMigrationRunAttempt(ukprn, migrationRunId, MigrationStatus.Failed);
                 throw;
             }
 
-            await _migrationStatusRepository.UpdateStatus(ukprn, MigrationStatus.Completed);
+            await _migrationStatusRepository.UpdateMigrationRunAttempt(ukprn, migrationRunId, MigrationStatus.Completed);
         }
     }
 }
