@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[Training]
 (
-	[Id] BIGINT NOT NULL PRIMARY KEY, 
+	[Id] BIGINT NOT NULL CONSTRAINT PK_Training PRIMARY KEY CLUSTERED, 
 	[EventTime] DATETIMEOFFSET NOT NULL,
 	[EventId] UNIQUEIDENTIFIER NOT NULL,
 	[IlrSubmissionDate] DATETIME2 NOT NULL, 
@@ -13,7 +13,7 @@
 	[StandardCode] INT NOT NULL,
 	[FrameworkCode] INT NOT NULL,
 	[PathwayCode] INT NOT NULL,
-	[FundingLineType] NVARCHAR(100) NOT NULL,
+	[FundingLineType] NVARCHAR(100) NULL,
 	[StartDate] DATETIME2 NOT NULL,
 	[CompletionStatus] INT NULL,
 	[CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_Training__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
