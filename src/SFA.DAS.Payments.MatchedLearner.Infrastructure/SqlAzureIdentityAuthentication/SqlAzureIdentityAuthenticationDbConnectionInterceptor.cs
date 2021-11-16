@@ -31,7 +31,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
             return base.ConnectionOpening(connection, eventData, result);
         }
 
-        public override async ValueTask<InterceptionResult> ConnectionOpeningAsync(
+        public override async Task<InterceptionResult> ConnectionOpeningAsync(
             DbConnection connection,
             ConnectionEventData eventData,
             InterceptionResult result,

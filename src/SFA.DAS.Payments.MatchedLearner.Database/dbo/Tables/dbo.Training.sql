@@ -18,3 +18,8 @@
 	[CompletionStatus] INT NULL,
 	[CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_Training__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
 )
+GO
+
+Create Unique Index UX_Training_LogicalDuplicates on dbo.Training( [EventTime], [EventTime], [EventId], [IlrSubmissionDate], [IlrSubmissionWindowPeriod], [AcademicYear], [Ukprn], [Uln], [Reference], 
+[ProgrammeType], [StandardCode], [FrameworkCode], [PathwayCode], [FundingLineType], [StartDate], [CompletionStatus] )
+GO
