@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.Payments.MatchedLearner.Application;
+using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
@@ -14,9 +15,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 
             services.AddPaymentsDataContext(applicationSettings);
 
+            services.AddEndpointInstanceFactory(applicationSettings);
+
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
             services.AddTransient<IPaymentsRepository, PaymentsRepository>();
             services.AddTransient<IMatchedLearnerDataImportService, MatchedLearnerDataImportService>();
+            services.AddTransient<IMatchedLearnerMigrationService, MatchedLearnerMigrationService>();
         }
     }
 }

@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using NServiceBus;
 using SFA.DAS.Configuration.AzureTableStorage;
+using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthentication;
@@ -56,6 +58,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
             });
+        }
+
+        public static void AddEndpointInstanceFactory(this IServiceCollection services, ApplicationSettings applicationSettings)
+        {
+            services.AddTransient(provider => new EndpointInstanceFactory(new EndpointConfiguration(applicationSettings.MigrationEndpointName)));
         }
 
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)

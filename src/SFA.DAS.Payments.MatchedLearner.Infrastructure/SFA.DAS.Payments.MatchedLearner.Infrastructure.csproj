@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Application\SFA.DAS.Payments.MatchedLearner.Application.csproj" />
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Data\SFA.DAS.Payments.MatchedLearner.Data.csproj" />
   </ItemGroup>
 
