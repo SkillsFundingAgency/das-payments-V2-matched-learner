@@ -30,6 +30,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
                     applicationSettings.MigrationQueue));
 
             services.AddTransient<IProviderLevelMatchedLearnerMigrationService, ProviderLevelMatchedLearnerMigrationService>();
+            services.AddTransient<IMigrationStatusRepository, MigrationStatusRepository>();
         }
     }
 }
