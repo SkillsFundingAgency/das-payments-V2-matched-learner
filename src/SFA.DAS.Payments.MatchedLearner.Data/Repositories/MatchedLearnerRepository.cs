@@ -150,7 +150,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
 
-        public async Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken)
+        public async Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken, bool skipToSingleInsertMode)
         {
             if (skipToSingleInsertMode)
             {
