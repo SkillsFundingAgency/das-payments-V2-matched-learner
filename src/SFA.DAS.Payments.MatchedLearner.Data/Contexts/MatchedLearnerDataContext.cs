@@ -19,7 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<DataLockEventNonPayablePeriodFailureModel> DataLockEventNonPayablePeriodFailures { get; set; }
         public DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
         public DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
-        public DbSet<MigrationRunAttemptModel> MigrationStatuses { get; set; }
+        public DbSet<MigrationRunAttemptModel> MigrationRunAttempts { get; set; }
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
@@ -53,7 +53,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             modelBuilder.ApplyConfiguration(new DataLockEventNonPayablePeriodModelConfiguration());
             modelBuilder.ApplyConfiguration(new DataLockEventPayablePeriodModelConfiguration());
             modelBuilder.ApplyConfiguration(new DataLockEventPriceEpisodeModelConfiguration());
-            modelBuilder.ApplyConfiguration(new MigrationStatusConfiguration());
+            modelBuilder.ApplyConfiguration(new MigrationRunAttemptConfiguration());
         }
     }
 }

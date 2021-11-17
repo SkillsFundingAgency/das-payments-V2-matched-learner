@@ -10,25 +10,21 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
-    public interface IMigrationStatusRepository
+    public interface IProviderMigrationRepository
     {
         Task BeginTransactionAsync(IsolationLevel isolationLevel);
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
         Task CreateMigrationAttempt(MigrationRunAttemptModel model);
         Task<List<MigrationRunAttemptModel>> GetProviderMigrationAttempts(long ukprn);
-        Task<MigrationRunAttemptModel> GetProviderMigrationStatusModel(Guid identifier); //todo remove
-        Task UpdateStatus(Guid identifier, MigrationStatus newStatus); //todo remove
-        Task UpdateStatus(long ukprn, MigrationStatus newStatus); //todo remove
-        Task UpdateMigrationStatusModel(MigrationRunAttemptModel model); //todo remove
-        Task UpdateMigrationRunAttempt(long ukprn, Guid migrationRunId, MigrationStatus status);
+        Task UpdateMigrationRunAttemptStatus(long ukprn, Guid migrationRunId, MigrationStatus status);
     }
-    public class MigrationStatusRepository : IMigrationStatusRepository
+    public class ProviderMigrationRepository : IProviderMigrationRepository
     {
         private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
         private IDbContextTransaction currentTransaction;
 
-        public MigrationStatusRepository(MatchedLearnerDataContext matchedLearnerDataContext)
+        public ProviderMigrationRepository(MatchedLearnerDataContext matchedLearnerDataContext)
         {
             _matchedLearnerDataContext = matchedLearnerDataContext;
         }
@@ -50,52 +46,28 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task CreateMigrationAttempt(MigrationRunAttemptModel model)
         {
-            _matchedLearnerDataContext.MigrationStatuses.Add(model);
+            _matchedLearnerDataContext.MigrationRunAttempts.Add(model);
 
             await _matchedLearnerDataContext.SaveChangesAsync();
         }
 
         public async Task<List<MigrationRunAttemptModel>> GetProviderMigrationAttempts(long ukprn)
         {
-            return _matchedLearnerDataContext.MigrationStatuses
-                .Where(x => x.Ukprn == ukprn).ToList();
+            return await _matchedLearnerDataContext.MigrationRunAttempts
+                .Where(x => x.Ukprn == ukprn)
+                .ToListAsync();
         }
 
-        public async Task<MigrationRunAttemptModel> GetProviderMigrationStatusModel(Guid identifier)
+        public async Task UpdateMigrationRunAttemptStatus(long ukprn, Guid migrationRunId, MigrationStatus status)
         {
-            return await _matchedLearnerDataContext.MigrationStatuses
-                .Where(x => x.Identifier == identifier)
-                .FirstOrDefaultAsync();
-        }
+            var model = await _matchedLearnerDataContext.MigrationRunAttempts
+                .SingleAsync(x =>
+                    x.Ukprn == ukprn &&
+                    x.MigrationRunId == migrationRunId);
 
-        public async Task UpdateStatus(Guid identifier, MigrationStatus newStatus)
-        {
-            var model = await GetProviderMigrationStatusModel(identifier);
-                
-            model.Status = newStatus;
+            model.Status = status;
 
             await _matchedLearnerDataContext.SaveChangesAsync();
-        }
-
-        public async Task UpdateStatus(long ukprn, MigrationStatus newStatus)
-        {
-            var model = await GetProviderMigrationAttempts(ukprn);
-
-            model.Status = newStatus;
-
-            await _matchedLearnerDataContext.SaveChangesAsync();
-        }
-
-        public async Task UpdateMigrationStatusModel(MigrationRunAttemptModel model)
-        {
-            _matchedLearnerDataContext.MigrationStatuses.Update(model);
-
-            await _matchedLearnerDataContext.SaveChangesAsync();
-        }
-
-        public Task UpdateMigrationRunAttempt(long ukprn, Guid migrationRunId, MigrationStatus status)
-        {
-            throw new NotImplementedException();
         }
     }
 }

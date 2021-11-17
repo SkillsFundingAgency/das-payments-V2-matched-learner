@@ -12,25 +12,25 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
     }
     public class ProviderLevelMatchedLearnerMigrationService : IProviderLevelMatchedLearnerMigrationService
     {
-        private readonly IMigrationStatusRepository _migrationStatusRepository;
+        private readonly IProviderMigrationRepository _providerMigrationRepository;
 
-        public ProviderLevelMatchedLearnerMigrationService(IMigrationStatusRepository migrationStatusRepository)
+        public ProviderLevelMatchedLearnerMigrationService(IProviderMigrationRepository providerMigrationRepository)
         {
-            _migrationStatusRepository = migrationStatusRepository;
+            _providerMigrationRepository = providerMigrationRepository;
         }
 
         public async Task MigrateProviderScopedData(Guid migrationRunId, long ukprn)
         {
-            var existingAttempts = await _migrationStatusRepository.GetProviderMigrationAttempts(ukprn);
+            var existingAttempts = await _providerMigrationRepository.GetProviderMigrationAttempts(ukprn);
 
             if(existingAttempts.Any(x => x.Status == MigrationStatus.Completed))
                 return;
 
             var singleInsertMode = existingAttempts.Any(x => x.Status != MigrationStatus.Completed);
 
-            await _migrationStatusRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
+            await _providerMigrationRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
             {
-                Identifier = migrationRunId,
+                MigrationRunId = migrationRunId,
                 Status = MigrationStatus.InProgress,
                 Ukprn = ukprn
             });
@@ -46,11 +46,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                 //todo log error
                 //rollback transaction
                 //set the status to failed
-                await _migrationStatusRepository.UpdateMigrationRunAttempt(ukprn, migrationRunId, MigrationStatus.Failed);
+                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Failed);
                 throw;
             }
 
-            await _migrationStatusRepository.UpdateMigrationRunAttempt(ukprn, migrationRunId, MigrationStatus.Completed);
+            await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Completed);
         }
     }
 }

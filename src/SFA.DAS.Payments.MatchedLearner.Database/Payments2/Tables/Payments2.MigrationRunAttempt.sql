@@ -1,0 +1,9 @@
+﻿CREATE TABLE Payments2.MigrationRunAttempt
+(
+	[Id] BIGINT NOT NULL PRIMARY KEY, 
+	[MigrationRunId] UNIQUEIDENTIFIER NOT NULL,
+	[Ukprn] BIGINT NOT NULL,
+	[Status] TINYINT NOT NULL,
+	[CreationDate] DATETIMEOFFSET NOT NULL
+)
+GO
