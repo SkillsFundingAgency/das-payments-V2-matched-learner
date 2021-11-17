@@ -17,6 +17,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
     public interface IMatchedLearnerRepository
     {
         Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
+        Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
+        Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
         Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
         Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
@@ -134,6 +136,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             return result;
         }
 
+        public Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds)
+        {
+            throw new NotImplementedException();
+        }
 
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
