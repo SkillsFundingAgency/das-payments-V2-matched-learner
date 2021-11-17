@@ -20,7 +20,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
         Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task StoreSubmissionsData(List<TrainingModel> models, CancellationToken cancellationToken);
+        Task StoreSubmissionsData(List<TrainingModel> models, CancellationToken cancellationToken, bool skipToSingleInsertMode = false);
         Task BeginTransactionAsync(CancellationToken cancellationToken);
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
@@ -150,8 +150,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
 
-        public async Task StoreSubmissionsData(List<TrainingModel> models, CancellationToken cancellationToken)
+        public async Task StoreSubmissionsData(List<TrainingModel> models, CancellationToken cancellationToken, bool skipToSingleInsertMode = false)
         {
+            if (skipToSingleInsertMode)
+            {
+                await SaveTrainingsIndividually(models, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
             try
             {
                 await SaveTrainings(models, cancellationToken);
