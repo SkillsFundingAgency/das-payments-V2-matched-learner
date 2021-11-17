@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
+﻿namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
 {
     public class PeriodModel
     {

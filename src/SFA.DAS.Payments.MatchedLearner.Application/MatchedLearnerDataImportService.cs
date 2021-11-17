@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
@@ -42,20 +43,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                 await _matchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
 
-                var apprenticeships = new List<ApprenticeshipModel>();
+                var apprenticeshipIds = dataLockEvents.SelectMany(d => d.PayablePeriods).Select(a => a.ApprenticeshipId ?? 0)
+                    .Union(dataLockEvents.SelectMany(d => d.NonPayablePeriods).SelectMany(d => d.Failures).Select(f => f.ApprenticeshipId ?? 0))
+                    .Distinct()
+                    .ToList();
 
-                //var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
-                //    .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
-                //    .Distinct()
-                //    .ToList();
+                var apprenticeshipDetails = new List<ApprenticeshipModel>();
+                if (apprenticeshipIds.Any())
+                {
+                    apprenticeshipDetails = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
+                }
 
-                //var apprenticeshipDetails = new List<ApprenticeshipModel>();
-                //if (apprenticeshipIds.Any())
-                //{
-                //    apprenticeshipDetails = await _dataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
-                //}
-
-                var trainings = _matchedLearnerDtoMapper.MapToModel(dataLockEvents, apprenticeships);
+                var trainings = _matchedLearnerDtoMapper.MapToModel(dataLockEvents, apprenticeshipDetails);
 
                 await _matchedLearnerRepository.StoreSubmissionsData(trainings, CancellationToken.None);
 
