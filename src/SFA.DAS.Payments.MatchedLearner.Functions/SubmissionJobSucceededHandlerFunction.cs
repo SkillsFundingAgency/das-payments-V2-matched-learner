@@ -10,12 +10,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 {
     public class SubmissionSucceededHandlerFunction
     {
-        private readonly IMatchedLearnerDataImportService _matchedLearnerDataImportService;
+        private readonly IMatchedLearnerDataImporter _matchedLearnerDataImporter;
         private readonly ILogger<SubmissionSucceededHandlerFunction> _logger;
 
-        public SubmissionSucceededHandlerFunction(IMatchedLearnerDataImportService matchedLearnerDataImportService,  ILogger<SubmissionSucceededHandlerFunction> logger)
+        public SubmissionSucceededHandlerFunction(IMatchedLearnerDataImporter matchedLearnerDataImporter,  ILogger<SubmissionSucceededHandlerFunction> logger)
         {
-            _matchedLearnerDataImportService = matchedLearnerDataImportService ?? throw new ArgumentNullException(nameof(matchedLearnerDataImportService));
+            _matchedLearnerDataImporter = matchedLearnerDataImporter ?? throw new ArgumentNullException(nameof(matchedLearnerDataImporter));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -28,7 +28,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
                 if (submissionSucceededEvent == null) throw new InvalidOperationException("Error parsing SubmissionJobSucceeded message");
 
-                await _matchedLearnerDataImportService.Import(submissionSucceededEvent);
+                await _matchedLearnerDataImporter.Import(submissionSucceededEvent);
             }
             catch (Exception e)
             {

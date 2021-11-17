@@ -22,6 +22,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
             services.AddTransient<IPaymentsRepository, PaymentsRepository>();
             services.AddTransient<IMatchedLearnerDataImportService, MatchedLearnerDataImportService>();
+            services.AddTransient<ILegacyMatchedLearnerDataImportService, LegacyMatchedLearnerDataImportService>();
 
             services.AddTransient<IMatchedLearnerMigrationService, MatchedLearnerMigrationService>(x => 
                 new MatchedLearnerMigrationService(
