@@ -15,13 +15,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
     public class MatchedLearnerService : IMatchedLearnerService
     {
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
-        private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
+        private readonly ILegacyMatchedLearnerDtoMapper _legacyMatchedLearnerDtoMapper;
         private readonly ILogger<MatchedLearnerService> _logger;
 
-        public MatchedLearnerService(IMatchedLearnerRepository matchedLearnerRepository, IMatchedLearnerDtoMapper matchedLearnerDtoMapper, ILogger<MatchedLearnerService> logger)
+        public MatchedLearnerService(IMatchedLearnerRepository matchedLearnerRepository, ILegacyMatchedLearnerDtoMapper legacyMatchedLearnerDtoMapper, ILogger<MatchedLearnerService> logger)
         {
             _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
-            _matchedLearnerDtoMapper = matchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(matchedLearnerDtoMapper));
+            _legacyMatchedLearnerDtoMapper = legacyMatchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(legacyMatchedLearnerDtoMapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -33,7 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                 var dataLockEvents = await _matchedLearnerRepository.GetDataLockEvents(ukprn, uln);
 
-                var matchedLearnerResult = _matchedLearnerDtoMapper.Map(dataLockEvents);
+                var matchedLearnerResult = _legacyMatchedLearnerDtoMapper.Map(dataLockEvents);
 
                 _logger.LogInformation($"End GetMatchedLearner for Uln {uln}");
 

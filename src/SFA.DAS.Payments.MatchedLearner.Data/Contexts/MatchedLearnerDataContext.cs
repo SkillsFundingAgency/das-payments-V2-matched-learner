@@ -20,6 +20,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
         public DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
         public DbSet<MigrationRunAttemptModel> MigrationRunAttempts { get; set; }
+        public DbSet<TrainingModel> Trainings { get; set; }
+        public DbSet<PriceEpisodeModel> PriceEpisodes { get; set; }
+        public DbSet<PeriodModel> Periods { get; set; }
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
@@ -30,7 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
             sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
 
-            await Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ({ sqlParamName })", sqlParameters);
+            await Database.ExecuteSqlRawAsync($"DELETE FROM dbo.Training WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND IlrSubmissionWindowPeriod IN ({ sqlParamName })", sqlParameters);
         }
 
         public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
@@ -43,8 +46,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("Payments2");
-
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new ApprenticeshipModelConfiguration());
@@ -54,6 +55,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             modelBuilder.ApplyConfiguration(new DataLockEventPayablePeriodModelConfiguration());
             modelBuilder.ApplyConfiguration(new DataLockEventPriceEpisodeModelConfiguration());
             modelBuilder.ApplyConfiguration(new MigrationRunAttemptConfiguration());
+            modelBuilder.ApplyConfiguration(new TrainingConfiguration());
+            modelBuilder.ApplyConfiguration(new PriceEpisodeConfiguration());
+            modelBuilder.ApplyConfiguration(new PeriodConfiguration());
         }
     }
 }

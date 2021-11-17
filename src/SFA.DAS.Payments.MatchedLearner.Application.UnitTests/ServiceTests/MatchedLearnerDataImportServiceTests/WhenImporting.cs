@@ -15,9 +15,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
     public class WhenImporting
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
-        private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
+        private Mock<ILegacyMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
-        private MatchedLearnerDataImportService _sut;
+        private LegacyMatchedLearnerDataImportService _sut;
         private List<DataLockEventModel> _dataLockEvents;
         private List<ApprenticeshipModel> _apprenticeships;
         private readonly Guid _dataLockEventId = Guid.NewGuid();
@@ -33,7 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
                 JobId = 123,
             };
             
-            _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
+            _mockMatchedLearnerRepository = new Mock<ILegacyMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
 
             _dataLockEvents = new List<DataLockEventModel>
@@ -84,9 +84,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(_apprenticeships);
 
-            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object);
+            _sut = new LegacyMatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object);
 
-            await _sut.Import(_submissionSucceededEvent);
+            await _sut.Import(_submissionSucceededEvent, _dataLockEvents);
         }
 
         [Test]

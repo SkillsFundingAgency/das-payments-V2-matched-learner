@@ -194,7 +194,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void InputWithPayablePeriod_Should_ProducePeriodWithIsPayableTrue()
         {
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training
@@ -206,7 +206,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void Training_Should_HaveTwoElements()
         {
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training.Should().HaveCount(2);
@@ -215,7 +215,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void Training_Should_HaveExpectedPriceEpisodes()
         {
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
             actual.Training.First().PriceEpisodes.Should().HaveCount(2);
@@ -230,7 +230,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void Training_Should_BeInOutput()
         {
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
 
@@ -241,7 +241,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void ThereShouldBe_NoMixingOfPeriodsBetweenPriceEpisodes()
         {
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             var actual = sut.Map(_testInput);
 

@@ -141,7 +141,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 }
             };
 
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             _actual = sut.Map(testInput);
         }

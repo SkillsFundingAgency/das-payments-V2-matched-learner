@@ -7,76 +7,14 @@ using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 {
-    public interface IMatchedLearnerDtoMapper
+    public interface ILegacyMatchedLearnerDtoMapper
     {
-        MatchedLearnerDto MapToDto(TrainingModel training);
-        List<TrainingModel> MapToModel(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels);
+        MatchedLearnerDto Map(MatchedLearnerDataLockInfo matchedLearnerDataLockInfo);
     }
 
-    public class MatchedLearnerDtoMapper : IMatchedLearnerDtoMapper
+    public class LegacyMatchedLearnerDtoMapper : ILegacyMatchedLearnerDtoMapper
     {
-        public MatchedLearnerDto MapToDto(TrainingModel training)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<TrainingModel> MapToModel(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels)
-        {
-            return new List<TrainingModel>();
-
-            //var transactionTypes = new List<byte> { 1, 2, 3 };
-
-            //var result = dataLockEvents
-            //    .GroupBy(grp => grp.LearnerUln)
-            //    .Select(groupedDataLocks =>
-            //    {
-            //        var dataLocks = groupedDataLocks.Where(x => x.LearningAimReference == "ZPROG001").ToList();
-
-            //        var eventIds = dataLocks.Select(dl => dl.EventId).ToList();
-
-            //        var dataLockEventPriceEpisodes = dataLocks.SelectMany(dl => dl.PriceEpisodes)
-            //            .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
-            //            .OrderBy(p => p.StartDate)
-            //            .ThenBy(p => p.PriceEpisodeIdentifier)
-            //            .ToList();
-
-            //        var dataLockEventPayablePeriods = dataLocks.SelectMany(dl => dl.PayablePeriods)
-            //            .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-            //            .OrderBy(p => p.DeliveryPeriod)
-            //            .ToList();
-
-            //        var dataLockEventNonPayablePeriods = dataLocks.SelectMany(dl => dl.NonPayablePeriods)
-            //            .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-            //            .OrderBy(p => p.DeliveryPeriod)
-            //            .ToList();
-
-            //        var dataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriods.SelectMany(d => d.Failures).ToList();
-
-            //        return new MatchedLearnerDataLockInfo
-            //        {
-            //            DataLockEvents = dataLocks.Select(i =>
-            //            {
-            //                i.NonPayablePeriods = null;
-            //                i.PayablePeriods = null;
-            //                i.PriceEpisodes = null;
-            //                return i;
-            //            }).ToList(),
-            //            DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
-            //            DataLockEventPayablePeriods = dataLockEventPayablePeriods,
-            //            DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods.Select(i =>
-            //            {
-            //                i.Failures = null;
-            //                return i;
-            //            }).ToList(),
-            //            DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures
-            //        };
-            //    })
-            //    .ToList();
-
-            //return result;
-        }
-
-        public MatchedLearnerDto MapToDto(MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
+        public MatchedLearnerDto Map(MatchedLearnerDataLockInfo matchedLearnerDataLockInfo)
         {
             if (matchedLearnerDataLockInfo == null || !matchedLearnerDataLockInfo.DataLockEvents.Any())
                 return null;

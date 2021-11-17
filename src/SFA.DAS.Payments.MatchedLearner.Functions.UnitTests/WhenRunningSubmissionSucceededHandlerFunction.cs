@@ -10,7 +10,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.UnitTests
 {
     public class WhenRunningSubmissionSucceededHandlerFunction
     {
-        private Mock<IMatchedLearnerDataImportService> _mockMatchedLearnerDataImportService;
+        private Mock<IMatchedLearnerDataImporter> _mockMatchedLearnerDataImporter;
         private Mock<ILogger<SubmissionSucceededHandlerFunction>> _mockLogger;
         private SubmissionSucceededHandlerFunction _sut;
         private SubmissionJobSucceeded _submissionSucceededEvent;
@@ -19,9 +19,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.UnitTests
         [SetUp]
         public void Setup()
         {
-            _mockMatchedLearnerDataImportService = new Mock<IMatchedLearnerDataImportService>();
+            _mockMatchedLearnerDataImporter = new Mock<IMatchedLearnerDataImporter>();
             _mockLogger = new Mock<ILogger<SubmissionSucceededHandlerFunction>>();
-            _sut = new SubmissionSucceededHandlerFunction(_mockMatchedLearnerDataImportService.Object, _mockLogger.Object);
+            _sut = new SubmissionSucceededHandlerFunction(_mockMatchedLearnerDataImporter.Object, _mockLogger.Object);
 
             _submissionSucceededEvent = new SubmissionJobSucceeded
             {
@@ -37,7 +37,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.UnitTests
         public async Task ThenMatchedDataIsImported()
         {
             await _sut.Run(_message);
-            _mockMatchedLearnerDataImportService.Verify(x => x.Import(It.Is<SubmissionJobSucceeded>(
+            _mockMatchedLearnerDataImporter.Verify(x => x.Import(It.Is<SubmissionJobSucceeded>(
                 messages =>  
                     messages.JobId == _submissionSucceededEvent.JobId && 
                     messages.Ukprn == _submissionSucceededEvent.Ukprn &&
