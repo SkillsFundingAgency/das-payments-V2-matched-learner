@@ -22,6 +22,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 { "AzureWebJobsStorage", TestConfiguration.TestApplicationSettings.MatchedLearnerStorageAccountConnectionString },
                 { "PaymentsServiceBusConnectionString", TestConfiguration.TestApplicationSettings.PaymentsServiceBusConnectionString },
                 { "MatchedLearnerQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerQueue },
+                { "MigrationQueue", TestConfiguration.TestApplicationSettings.MigrationQueue },
             };
 
             var directory = Directory.GetCurrentDirectory();
