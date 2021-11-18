@@ -10,6 +10,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
         {
             builder.ToTable("Training", "dbo");
             builder.HasKey(x => x.Id);
+
+            builder.HasMany(dle => dle.PriceEpisodes)
+                .WithOne()
+                .HasPrincipalKey(dle => dle.Id)
+                .HasForeignKey(npp => npp.TrainingId);
         }
     }
 }

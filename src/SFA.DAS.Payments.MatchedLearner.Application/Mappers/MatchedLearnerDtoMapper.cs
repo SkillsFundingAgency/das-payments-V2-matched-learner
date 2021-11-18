@@ -34,18 +34,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 
                     var dataLockEventPriceEpisodes = dataLocks.SelectMany(dl => dl.PriceEpisodes)
                         .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
-                        .OrderBy(p => p.StartDate)
-                        .ThenBy(p => p.PriceEpisodeIdentifier)
                         .ToList();
 
                     var dataLockEventPayablePeriods = dataLocks.SelectMany(dl => dl.PayablePeriods)
                         .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                        .OrderBy(p => p.DeliveryPeriod)
                         .ToList();
 
                     var dataLockEventNonPayablePeriods = dataLocks.SelectMany(dl => dl.NonPayablePeriods)
                         .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                        .OrderBy(p => p.DeliveryPeriod)
                         .ToList();
 
                     var dataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriods.SelectMany(d => d.Failures).ToList();
