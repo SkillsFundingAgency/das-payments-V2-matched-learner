@@ -39,12 +39,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             try
             {
-                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
-
-                await _matchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
-
-                var apprenticeshipIds = dataLockEvents.SelectMany(d => d.PayablePeriods).Select(a => a.ApprenticeshipId ?? 0)
-                    .Union(dataLockEvents.SelectMany(d => d.NonPayablePeriods).SelectMany(d => d.Failures).Select(f => f.ApprenticeshipId ?? 0))
+                var apprenticeshipIds = 
+                    dataLockEvents.SelectMany(d => d.PayablePeriods).Select(a => a.ApprenticeshipId ?? 0).Union(
+                    dataLockEvents.SelectMany(d => d.NonPayablePeriods)
+                        .SelectMany(d => d.Failures).Select(f => f.ApprenticeshipId ?? 0))
                     .Distinct()
                     .ToList();
 
@@ -53,6 +51,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
                 {
                     apprenticeshipDetails = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
                 }
+
+                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
+
+                await _matchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
 
                 var trainings = _matchedLearnerDtoMapper.MapToModel(dataLockEvents, apprenticeshipDetails);
 
