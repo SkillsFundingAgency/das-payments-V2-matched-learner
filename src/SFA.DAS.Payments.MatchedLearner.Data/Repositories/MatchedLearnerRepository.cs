@@ -20,7 +20,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
         Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task StoreSubmissionsData(List<TrainingModel> models, CancellationToken cancellationToken, bool skipToSingleInsertMode = false);
+        Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken);
         Task BeginTransactionAsync(CancellationToken cancellationToken);
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
@@ -169,17 +169,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
 
-        public async Task StoreSubmissionsData(List<TrainingModel> models, CancellationToken cancellationToken, bool skipToSingleInsertMode = false)
+        public async Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken, bool skipToSingleInsertMode)
         {
             if (skipToSingleInsertMode)
             {
-                await SaveTrainingsIndividually(models, cancellationToken).ConfigureAwait(false);
+                await SaveTrainingsIndividually(trainings, cancellationToken).ConfigureAwait(false);
                 return;
             }
 
             try
             {
-                await SaveTrainings(models, cancellationToken);
+                await SaveTrainings(trainings, cancellationToken);
             }
             catch (Exception e)
             {
@@ -187,28 +187,41 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
                 _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
 
-                await SaveTrainingsIndividually(models, cancellationToken).ConfigureAwait(false);
+                await SaveTrainingsIndividually(trainings, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task SaveTrainings(IList<TrainingModel> models, CancellationToken cancellationToken)
+        private async Task SaveTrainings(IList<TrainingModel> trainings, CancellationToken cancellationToken)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 60 };
 
-            var priceEpisodes = models
-                .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
+            await _dataContext.BulkInsertAsync(trainings, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            
+            var priceEpisodes = trainings
+                .SelectMany(training =>
+                {
+                    foreach (var priceEpisode in training.PriceEpisodes)
+                    {
+                        priceEpisode.TrainingId = training.Id;
+                    }
+                    return training.PriceEpisodes;
+                })
                 .ToList();
+
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken).ConfigureAwait(false);
 
             var periods = priceEpisodes
-                .SelectMany(priceEpisode => priceEpisode.Periods)
+                .SelectMany(priceEpisode =>
+                {
+                    foreach (var period in priceEpisode.Periods)
+                    {
+                        period.PriceEpisodeId = priceEpisode.Id;
+                    }
+                    return priceEpisode.Periods;
+                })
                 .ToList();
-            
-            await _dataContext.BulkInsertAsync(models, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(periods, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
+
+            await _dataContext.BulkInsertAsync(periods, bulkConfig, null, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken)
