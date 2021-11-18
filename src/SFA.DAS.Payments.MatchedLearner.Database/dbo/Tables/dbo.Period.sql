@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[Period]
 (
 	[Id] BIGINT NOT NULL IDENTITY(1,1) CONSTRAINT PK_Period PRIMARY KEY CLUSTERED, 
-    [PriceEpisodeId] BIGINT NOT NULL CONSTRAINT FK__Period_PriceEpisode FOREIGN KEY REFERENCES [dbo].[PriceEpisode] (Id),
+    [PriceEpisodeId] BIGINT NOT NULL CONSTRAINT FK__Period_PriceEpisode FOREIGN KEY REFERENCES [dbo].[PriceEpisode] (Id) ON DELETE CASCADE,
     [IsPayable] BIT NOT NULL,
     [TransactionType] TINYINT NOT NULL, 
     [Period] TINYINT NOT NULL, 
