@@ -14,13 +14,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
     public class MatchedLearnerService : IMatchedLearnerService
     {
-        private readonly IMatchedLearnerRepository _matchedLearnerRepository;
+        private readonly ILegacyMatchedLearnerRepository _legacyMatchedLearnerRepository;
         private readonly ILegacyMatchedLearnerDtoMapper _legacyMatchedLearnerDtoMapper;
         private readonly ILogger<MatchedLearnerService> _logger;
 
-        public MatchedLearnerService(IMatchedLearnerRepository matchedLearnerRepository, ILegacyMatchedLearnerDtoMapper legacyMatchedLearnerDtoMapper, ILogger<MatchedLearnerService> logger)
+        public MatchedLearnerService(ILegacyMatchedLearnerRepository legacyMatchedLearnerRepository, ILegacyMatchedLearnerDtoMapper legacyMatchedLearnerDtoMapper, ILogger<MatchedLearnerService> logger)
         {
-            _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
+            _legacyMatchedLearnerRepository = legacyMatchedLearnerRepository ?? throw new ArgumentNullException(nameof(legacyMatchedLearnerRepository));
             _legacyMatchedLearnerDtoMapper = legacyMatchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(legacyMatchedLearnerDtoMapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -31,9 +31,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             {
                 _logger.LogInformation($"Start GetMatchedLearner for Uln {uln}");
 
-                var dataLockEvents = await _matchedLearnerRepository.GetDataLockEvents(ukprn, uln);
+                var matchedLearnerTrainings = await _legacyMatchedLearnerRepository.GetDataLockEvents(ukprn, uln);
+                var matchedLearnerResult = _legacyMatchedLearnerDtoMapper.Map(matchedLearnerTrainings);
 
-                var matchedLearnerResult = _legacyMatchedLearnerDtoMapper.Map(dataLockEvents);
+                //TODO for Phase 3
+                //var matchedLearnerTrainings = await _matchedLearnerRepository.GetMatchedLearnerTrainings(ukprn, uln);
+                //var matchedLearnerResult = _MatchedLearnerDtoMapper.MapToDto(matchedLearnerTrainings);
 
                 _logger.LogInformation($"End GetMatchedLearner for Uln {uln}");
 

@@ -80,7 +80,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await AddDataLocksToDb();
 
             //Act
-            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
+            var result = await _sut.GetMatchedLearnerTrainings(_ukprn, _uln);
 
             //Assert
             result.DataLockEvents.Count.Should().Be(2);
