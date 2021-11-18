@@ -51,9 +51,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
             try
             {
-                //todo: do we need to call BeginTransaction() - yes here
+                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
+
                 var providerLevelData =  await _matchedLearnerRepository.GetDataLockEventsForMigration(ukprn);
-                var apprenticeships = await _matchedLearnerRepository.GetApprenticeshipsForMigration(new List<long>()); //todo these ids need to come from data lock events for the provider
+                
+
+                var apprenticeshipIds = providerLevelData
+                    .SelectMany(d => d.PayablePeriods)
+                    .Select(a => a.ApprenticeshipId ?? 0)
+                    .Union( providerLevelData
+                        .SelectMany(d => d.NonPayablePeriods)
+                        .SelectMany(d => d.Failures)
+                        .Select(f => f.ApprenticeshipId ?? 0))
+                    .Distinct()
+                    .ToList();
+
+                var apprenticeships = await _matchedLearnerRepository.GetApprenticeshipsForMigration(apprenticeshipIds);
 
                 var trainingData = _matchedLearnerDtoMapper.MapToModel(providerLevelData, apprenticeships);
 
