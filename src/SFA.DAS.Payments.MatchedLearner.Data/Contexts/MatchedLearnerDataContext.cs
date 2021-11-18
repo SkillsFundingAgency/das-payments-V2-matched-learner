@@ -24,26 +24,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<PriceEpisodeModel> PriceEpisodes { get; set; }
         public DbSet<PeriodModel> Periods { get; set; }
 
-        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
-        {
-
-            var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
-            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
-
-            sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
-            sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
-
-            await Database.ExecuteSqlRawAsync($"DELETE FROM dbo.Training WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND IlrSubmissionWindowPeriod IN ({ sqlParamName })", sqlParameters);
-        }
-
-        public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
-        {
-            var sqlParameters = apprenticeshipIds.Select((item, index) => new SqlParameter($"@Id{index}", item)).ToList();
-            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
-
-            await Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {sqlParamName} )", sqlParameters);
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

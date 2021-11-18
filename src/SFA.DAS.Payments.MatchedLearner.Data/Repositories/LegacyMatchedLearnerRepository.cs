@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -22,6 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task BeginTransactionAsync(CancellationToken cancellationToken);
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
+        Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
     }
 
     public class LegacyMatchedLearnerRepository : ILegacyMatchedLearnerRepository
@@ -53,10 +56,94 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        public async Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln)
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            var transactionTypes = new List<byte> { 1, 2, 3 };
+
+            var dataLockEvents = await _dataContext.DataLockEvent
+                .Where(x =>
+                    x.LearningAimReference == "ZPROG001" &&
+                    x.Ukprn == ukprn &&
+                    x.LearnerUln == uln)
+                .OrderBy(x => x.LearningStartDate)
+                .ToListAsync();
+
+            if (dataLockEvents == null)
+            {
+                stopwatch.Stop();
+                _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
+                return new MatchedLearnerDataLockInfo();
+            }
+
+            _logger.LogInformation($"Started Getting DataLock Event Data from database for Uln: {uln}");
+
+            var eventIds = dataLockEvents.Select(d => d.EventId).ToList();
+
+            var dataLockEventPriceEpisodes = await _dataContext.DataLockEventPriceEpisode
+                .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
+                .OrderBy(p => p.StartDate)
+                .ThenBy(p => p.PriceEpisodeIdentifier)
+                .ToListAsync();
+
+            var dataLockEventPayablePeriods = await _dataContext.DataLockEventPayablePeriod
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .OrderBy(p => p.DeliveryPeriod)
+                .ToListAsync();
+
+            var dataLockEventNonPayablePeriods = await _dataContext.DataLockEventNonPayablePeriod
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .OrderBy(p => p.DeliveryPeriod)
+                .ToListAsync();
+
+            var dataLockEventNonPayablePeriodIds = dataLockEventNonPayablePeriods.Select(d => d.DataLockEventNonPayablePeriodId).ToList();
+
+            var dataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>();
+            if (dataLockEventNonPayablePeriodIds.Any())
+            {
+                dataLockEventNonPayablePeriodFailures = await _dataContext.DataLockEventNonPayablePeriodFailures
+                .Where(d => dataLockEventNonPayablePeriodIds.Contains(d.DataLockEventNonPayablePeriodId))
+                .ToListAsync();
+            }
+
+            var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
+                 .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
+                 .Distinct()
+                 .ToList();
+
+            var apprenticeshipDetails = new List<ApprenticeshipModel>();
+            if (apprenticeshipIds.Any())
+            {
+                apprenticeshipDetails = await _dataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
+            }
+
+            var result = new MatchedLearnerDataLockInfo
+            {
+                DataLockEvents = dataLockEvents,
+                DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
+                DataLockEventPayablePeriods = dataLockEventPayablePeriods,
+                DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods,
+                DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
+                Apprenticeships = apprenticeshipDetails
+            };
+
+            stopwatch.Stop();
+
+            _logger.LogInformation($"Finished Getting DataLock Event Data from database for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
+
+            return result;
+        }
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
-            await _dataContext.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
+            var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
+            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
+
+            sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
+            sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
+
+            await _dataContext.Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ({ sqlParamName })", sqlParameters);
         }
 
         public async Task RemoveApprenticeships(List<long> apprenticeshipIds)
@@ -65,11 +152,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             foreach (var batch in apprenticeshipBatches)
             {
-                await _dataContext.RemoveApprenticeships(batch);
+                var sqlParameters = batch.Select((item, index) => new SqlParameter($"@Id{index}", item)).ToList();
+                var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
+
+                await _dataContext.Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {sqlParamName} )", sqlParameters);
             }
         }
-
-
 
         public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
