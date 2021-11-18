@@ -134,14 +134,33 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             return result;
         }
 
-        public Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn)
+        public async Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn)
         {
-            throw new NotImplementedException();
+            return await _dataContext.DataLockEvent
+                .Include(d => d.NonPayablePeriods)
+                .ThenInclude(npp => npp.Failures)
+                .Include(d => d.PayablePeriods)
+                .Include(d => d.PriceEpisodes)
+                .Where(d => d.Ukprn == ukprn)
+                .ToListAsync();
         }
 
-        public Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds)
+        public async Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds)
         {
-            throw new NotImplementedException();
+            var apprenticeshipModels = new List<ApprenticeshipModel>();
+
+            var apprenticeshipIdBatches = apprenticeshipIds.Batch(2000);
+
+            foreach (var batch in apprenticeshipIdBatches)
+            {
+                var apprenticeshipBatch = await _dataContext.Apprenticeship
+                    .Where(a => batch.Contains(a.Id))
+                    .ToListAsync();
+
+                apprenticeshipModels.AddRange(apprenticeshipBatch);
+            }
+
+            return apprenticeshipModels;
         }
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
