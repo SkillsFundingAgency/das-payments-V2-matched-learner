@@ -10,6 +10,5 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
         public Guid? MigrationRunId { get; set; }
         public long? Ukprn { get; set; }
         public MigrationStatus? Status { get; set; }
-        public DateTime? CreationDate { get; set; }
     }
 }

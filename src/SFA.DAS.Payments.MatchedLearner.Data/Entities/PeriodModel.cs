@@ -6,7 +6,7 @@
         public long PriceEpisodeId { get; set; }
         public bool IsPayable { get; set; }
         public short TransactionType { get; set; }
-        public int Period { get; set; }
+        public byte Period { get; set; }
         public decimal Amount { get; set; }
         public long? ApprenticeshipId { get; set; }
         public long? AccountId { get; set; }
