@@ -14,8 +14,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Api.Ioc
             services.AddMatchedLearnerDataContext(applicationSettings);
 
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
+
             services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
+
             services.AddTransient<IMatchedLearnerService, MatchedLearnerService>();
+
+            services.AddTransient<ILegacyMatchedLearnerRepository, LegacyMatchedLearnerRepository>();
+            services.AddTransient<ILegacyMatchedLearnerDtoMapper, LegacyMatchedLearnerDtoMapper>();
         }
     }
 }
