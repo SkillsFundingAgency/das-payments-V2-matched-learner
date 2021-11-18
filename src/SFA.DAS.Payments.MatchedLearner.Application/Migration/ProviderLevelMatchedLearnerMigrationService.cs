@@ -21,7 +21,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
         private readonly ILogger<ProviderLevelMatchedLearnerMigrationService> _logger;
 
-        public ProviderLevelMatchedLearnerMigrationService(IProviderMigrationRepository providerMigrationRepository, IMatchedLearnerRepository matchedLearnerRepository, IMatchedLearnerDtoMapper matchedLearnerDtoMapper, ILogger<ProviderLevelMatchedLearnerMigrationService> logger)
+        public ProviderLevelMatchedLearnerMigrationService(
+            IProviderMigrationRepository providerMigrationRepository,
+            IMatchedLearnerRepository matchedLearnerRepository, 
+            IMatchedLearnerDtoMapper matchedLearnerDtoMapper, 
+            ILogger<ProviderLevelMatchedLearnerMigrationService> logger)
         {
             _providerMigrationRepository = providerMigrationRepository;
             _matchedLearnerRepository = matchedLearnerRepository;
@@ -47,19 +51,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
             try
             {
-                //todo extract the datalock data for the given provider
+                //todo: do we need to call BeginTransaction() - yes here
                 var providerLevelData =  await _matchedLearnerRepository.GetDataLockEventsForMigration(ukprn);
                 var apprenticeships = await _matchedLearnerRepository.GetApprenticeshipsForMigration(new List<long>()); //todo these ids need to come from data lock events for the provider
 
-                //todo transform that data into the new schema/model set
                 var trainingData = _matchedLearnerDtoMapper.MapToModel(providerLevelData, apprenticeships);
 
 
-                //todo load that data into the new tables (either bulk or single insert mode)
-                //todo: do we need to call BeginTransaction()
-
                 await _matchedLearnerRepository.StoreSubmissionsData(trainingData, CancellationToken.None, areExistingFailedAttempts);
-
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
             catch
