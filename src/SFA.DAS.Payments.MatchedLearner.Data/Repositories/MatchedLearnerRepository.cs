@@ -20,10 +20,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
         Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken, bool skipToSingleInsertMode);
+        Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken);
         Task BeginTransactionAsync(CancellationToken cancellationToken);
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
+        Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -169,14 +170,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
 
-        public async Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken, bool skipToSingleInsertMode)
+        public async Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken)
         {
-            if (skipToSingleInsertMode)
-            {
-                await SaveTrainingsIndividually(trainings, cancellationToken).ConfigureAwait(false);
-                return;
-            }
-
             try
             {
                 await SaveTrainings(trainings, cancellationToken);
@@ -224,7 +219,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await _dataContext.BulkInsertAsync(periods, bulkConfig, null, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken)
+        public  async Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken)
         {
             var mainContext = _retryDataContextFactory.Create();
 

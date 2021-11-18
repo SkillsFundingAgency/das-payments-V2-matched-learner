@@ -56,7 +56,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                 var trainings = _matchedLearnerDtoMapper.MapToModel(dataLockEvents, apprenticeshipDetails);
 
-                await _matchedLearnerRepository.StoreSubmissionsData(trainings, CancellationToken.None, false);
+                await _matchedLearnerRepository.StoreSubmissionsData(trainings, CancellationToken.None);
 
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }

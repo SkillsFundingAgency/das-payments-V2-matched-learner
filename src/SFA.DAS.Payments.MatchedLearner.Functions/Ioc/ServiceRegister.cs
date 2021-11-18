@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.Payments.MatchedLearner.Application;
+using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
@@ -32,6 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 
             services.AddTransient<IProviderLevelMatchedLearnerMigrationService, ProviderLevelMatchedLearnerMigrationService>();
             services.AddTransient<IProviderMigrationRepository, ProviderMigrationRepository>();
+            services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
         }
     }
 }

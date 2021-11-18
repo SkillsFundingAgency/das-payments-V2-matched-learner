@@ -35,57 +35,74 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         public async Task MigrateProviderScopedData(Guid migrationRunId, long ukprn)
         {
-            var existingAttempts = await _providerMigrationRepository.GetProviderMigrationAttempts(ukprn);
-
-            if(existingAttempts.Any(x => x.Status == MigrationStatus.Completed))
-                return;
-
-            var areExistingFailedAttempts = existingAttempts.Any(x => x.Status != MigrationStatus.Completed);
-
-            await _providerMigrationRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
-            {
-                MigrationRunId = migrationRunId,
-                Status = MigrationStatus.InProgress,
-                Ukprn = ukprn
-            });
-
             try
             {
-                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
+                var existingAttempts = await _providerMigrationRepository.GetProviderMigrationAttempts(ukprn);
 
-                var providerLevelData =  await _matchedLearnerRepository.GetDataLockEventsForMigration(ukprn);
-                
+                if(existingAttempts.Any(x => x.Status == MigrationStatus.Completed))
+                    return;
 
-                var apprenticeshipIds = providerLevelData
-                    .SelectMany(d => d.PayablePeriods)
-                    .Select(a => a.ApprenticeshipId ?? 0)
-                    .Union( providerLevelData
-                        .SelectMany(d => d.NonPayablePeriods)
-                        .SelectMany(d => d.Failures)
-                        .Select(f => f.ApprenticeshipId ?? 0))
-                    .Distinct()
-                    .ToList();
+                var areExistingFailedAttempts = existingAttempts.Any(x => x.Status != MigrationStatus.Completed);
 
-                var apprenticeships = await _matchedLearnerRepository.GetApprenticeshipsForMigration(apprenticeshipIds);
+                await _providerMigrationRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
+                {
+                    MigrationRunId = migrationRunId,
+                    Status = MigrationStatus.InProgress,
+                    Ukprn = ukprn
+                });
 
-                var trainingData = _matchedLearnerDtoMapper.MapToModel(providerLevelData, apprenticeships);
+                try
+                {
+                    var providerLevelData =  await _matchedLearnerRepository.GetDataLockEventsForMigration(ukprn);
+                    
 
+                    var apprenticeshipIds = providerLevelData
+                        .SelectMany(d => d.PayablePeriods)
+                        .Select(a => a.ApprenticeshipId ?? 0)
+                        .Union( providerLevelData
+                            .SelectMany(d => d.NonPayablePeriods)
+                            .SelectMany(d => d.Failures)
+                            .Select(f => f.ApprenticeshipId ?? 0))
+                        .Distinct()
+                        .ToList();
 
-                await _matchedLearnerRepository.StoreSubmissionsData(trainingData, CancellationToken.None, areExistingFailedAttempts);
-                await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+                    var apprenticeships = await _matchedLearnerRepository.GetApprenticeshipsForMigration(apprenticeshipIds);
+
+                    var trainingData = _matchedLearnerDtoMapper.MapToModel(providerLevelData, apprenticeships);
+
+                    if (areExistingFailedAttempts)
+                    {
+                        await _matchedLearnerRepository.SaveTrainingsIndividually(trainingData, CancellationToken.None);
+                    }
+                    else
+                    {
+                        await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
+                        await _matchedLearnerRepository.StoreSubmissionsData(trainingData, CancellationToken.None);
+                        await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception,$"Error while attempting to migrate provider.");
+
+                    if (!areExistingFailedAttempts)
+                    {
+                        _logger.LogError($"Rolling back transaction.");
+                        await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
+                    }
+
+                    await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Failed);
+                    
+                    throw;
+                }
+
+                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Completed);
             }
-            catch
+            catch (Exception e)
             {
-                _logger.LogError($"Error while attempting to migrate provider. Rolling back transaction.");
-
-                await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
-                
-                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Failed);
-                
+                Console.WriteLine(e);
                 throw;
             }
-
-            await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Completed);
         }
     }
 }

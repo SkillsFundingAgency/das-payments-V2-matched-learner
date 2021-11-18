@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +45,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString))
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
@@ -53,7 +54,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(applicationSettings.MatchedLearnerConnectionString)
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString))
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
