@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
@@ -18,12 +19,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         private readonly IProviderMigrationRepository _providerMigrationRepository;
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
         private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
+        private readonly ILogger<ProviderLevelMatchedLearnerMigrationService> _logger;
 
-        public ProviderLevelMatchedLearnerMigrationService(IProviderMigrationRepository providerMigrationRepository, IMatchedLearnerRepository matchedLearnerRepository, IMatchedLearnerDtoMapper matchedLearnerDtoMapper)
+        public ProviderLevelMatchedLearnerMigrationService(IProviderMigrationRepository providerMigrationRepository, IMatchedLearnerRepository matchedLearnerRepository, IMatchedLearnerDtoMapper matchedLearnerDtoMapper, ILogger<ProviderLevelMatchedLearnerMigrationService> logger)
         {
             _providerMigrationRepository = providerMigrationRepository;
             _matchedLearnerRepository = matchedLearnerRepository;
             _matchedLearnerDtoMapper = matchedLearnerDtoMapper;
+            _logger = logger;
         }
 
         public async Task MigrateProviderScopedData(Guid migrationRunId, long ukprn)
@@ -53,16 +56,20 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
 
                 //todo load that data into the new tables (either bulk or single insert mode)
+                //todo: do we need to call BeginTransaction()
+
                 await _matchedLearnerRepository.StoreSubmissionsData(trainingData, CancellationToken.None, areExistingFailedAttempts);
 
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
-            catch (Exception e)
+            catch
             {
-                //todo log error
-                //rollback transaction
-                //set the status to failed
+                _logger.LogError($"Error while attempting to migrate provider. Rolling back transaction.");
+
+                await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
+                
                 await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Failed);
+                
                 throw;
             }
 
