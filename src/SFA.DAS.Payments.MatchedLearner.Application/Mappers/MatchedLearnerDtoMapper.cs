@@ -25,7 +25,20 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
             var result = dataLockEvents
-                .GroupBy(grp => grp.LearnerUln)
+                .GroupBy(x => new
+                {
+                    x.LearningAimReference,
+                    x.LearningAimStandardCode,
+                    x.LearningAimProgrammeType,
+                    x.LearningAimFrameworkCode,
+                    x.LearningAimPathwayCode,
+                    x.LearningAimFundingLineType,
+                    x.LearningStartDate,
+                    x.LearnerUln,
+                    x.Ukprn,
+                    x.AcademicYear,
+                    x.CollectionPeriod,
+                })
                 .Select(groupedDataLocks =>
                 {
                     var dataLocks = groupedDataLocks.Where(x => x.LearningAimReference == "ZPROG001").ToList();
@@ -44,7 +57,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
                         .ToList();
 
-                    var dataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriods.SelectMany(d => d.Failures).ToList();
+                    var dataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriods.SelectMany(d => d.Failures ?? new List<DataLockEventNonPayablePeriodFailureModel>());
 
                     var matchedLearnerInfo = new MatchedLearnerDataLockInfo
                     {
@@ -62,7 +75,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                             i.Failures = null;
                             return i;
                         }).ToList(),
-                        DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
+                        DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures.ToList(),
                         Apprenticeships = apprenticeshipModels
                     };
 
@@ -170,7 +183,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         .Where(f => f.DataLockEventNonPayablePeriodId ==
                                     nonPayablePeriod.DataLockEventNonPayablePeriodId).ToList();
 
-                    var apprenticeship = matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
+                    var apprenticeship = !failures.Any() ? null : matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
 
                     return new PeriodModel
                     {
