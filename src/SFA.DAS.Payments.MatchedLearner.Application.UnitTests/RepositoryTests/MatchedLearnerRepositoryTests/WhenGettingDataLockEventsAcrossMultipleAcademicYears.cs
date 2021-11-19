@@ -16,7 +16,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
     [TestFixture]
     public class WhenGettingDataLockEventsAcrossMultipleAcademicYears
     {
-        private IMatchedLearnerRepository _sut;
+        private ILegacyMatchedLearnerRepository _sut;
         private MatchedLearnerDataContext _dataDataContext;
         private DataLockEventModel _dataLockEventAy1;
         private DataLockEventPayablePeriodModel _dataLockEventPayablePeriodAy1;
@@ -55,7 +55,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             var matchLearnerContextFactory = new MatchedLearnerDataContextFactory(bsContextOption);
 
-            _sut = new MatchedLearnerRepository(_dataDataContext, matchLearnerContextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
+            _sut = new LegacyMatchedLearnerRepository(_dataDataContext, matchLearnerContextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
         }
 
         [TearDown]
@@ -80,7 +80,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await AddDataLocksToDb();
 
             //Act
-            var result = await _sut.GetMatchedLearnerTrainings(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
             result.DataLockEvents.Count.Should().Be(2);

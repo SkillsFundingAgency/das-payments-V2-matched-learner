@@ -17,7 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
     [TestFixture]
     public class WhenGettingDataLockEvents
     {
-        private IMatchedLearnerRepository _sut;
+        private ILegacyMatchedLearnerRepository _sut;
         private MatchedLearnerDataContext _dataDataContext;
         private DataLockEventModel _dataLockEvent;
         private DataLockEventNonPayablePeriodModel _dataLockEventNonPayablePeriod;
@@ -55,7 +55,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             var contextFactory = new MatchedLearnerDataContextFactory(dbOptions);
 
-            _sut = new MatchedLearnerRepository(_dataDataContext, contextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
+            _sut = new LegacyMatchedLearnerRepository(_dataDataContext, contextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
         }
 
         [TearDown]
@@ -79,7 +79,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetMatchedLearnerTrainings(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
             result.DataLockEvents.Count.Should().Be(1);
@@ -100,7 +100,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetMatchedLearnerTrainings(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
             result.DataLockEvents.Count.Should().Be(1);
@@ -121,7 +121,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetMatchedLearnerTrainings(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
             result.DataLockEvents.Count.Should().Be(1);
@@ -142,7 +142,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             await AddDataLockToDb();
 
             //Act
-            var result = await _sut.GetMatchedLearnerTrainings(_ukprn, _uln);
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
 
             //Assert
             result.DataLockEvents.Count.Should().Be(1);

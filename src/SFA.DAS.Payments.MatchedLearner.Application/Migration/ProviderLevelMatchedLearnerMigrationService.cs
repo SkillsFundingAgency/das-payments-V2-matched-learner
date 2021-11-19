@@ -104,7 +104,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e, $"Error while preparing to migrate provider.");
                 throw;
             }
         }
