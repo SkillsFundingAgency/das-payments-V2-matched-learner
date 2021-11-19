@@ -35,6 +35,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         public async Task MigrateProviderScopedData(Guid migrationRunId, long ukprn)
         {
+            //todo - batching
+            //todo - more data in metadata table: learnerCount, completionTime, whatever we need to make batching work
+            //todo - check endpoint configuration
+
             try
             {
                 var existingAttempts = await _providerMigrationRepository.GetProviderMigrationAttempts(ukprn);
