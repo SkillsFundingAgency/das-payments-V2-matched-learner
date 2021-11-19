@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
@@ -31,9 +29,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
         {
             var dataLockEvents = await _paymentsRepository.GetDataLockEvents(submissionSucceededEvent);
 
-            var legacyImportTask = _legacyMatchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEvents.Clone());
+            var dataLockEventSecondCopy = dataLockEvents.Clone();
 
-            var importTask = _matchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEvents.Clone());
+            var legacyImportTask = _legacyMatchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEvents);
+
+            var importTask = _matchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEventSecondCopy);
 
             await Task.WhenAll(legacyImportTask, importTask);
         }
