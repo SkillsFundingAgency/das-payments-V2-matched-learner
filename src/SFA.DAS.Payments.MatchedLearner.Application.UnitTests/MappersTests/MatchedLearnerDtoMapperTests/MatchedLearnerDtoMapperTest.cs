@@ -10,7 +10,7 @@ using SFA.DAS.Payments.MatchedLearner.Types;
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
 {
     [TestFixture]
-    public class MapTests
+    public class MatchedLearnerDtoMapperTest
     {
         private MatchedLearnerDto _actual;
 
