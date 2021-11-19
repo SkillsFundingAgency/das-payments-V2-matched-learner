@@ -10,20 +10,20 @@
   },
   "extensions": {
     "serviceBus": {
-      "prefetchCount": 5,
+      "prefetchCount": 1,
       "messageHandlerOptions": {
         "autoComplete": true,
-        "maxConcurrentCalls": 5,
+        "maxConcurrentCalls": 1,
         "maxAutoRenewDuration": "00:05:00"
       },
       "sessionHandlerOptions": {
         "autoComplete": false,
         "messageWaitTimeout": "00:00:30",
         "maxAutoRenewDuration": "00:55:00",
-        "maxConcurrentSessions": 5
+        "maxConcurrentSessions": 1
       },
       "batchOptions": {
-        "maxMessageCount": 5,
+        "maxMessageCount": 1,
         "operationTimeout": "00:05:00",
         "autoComplete": true
       }

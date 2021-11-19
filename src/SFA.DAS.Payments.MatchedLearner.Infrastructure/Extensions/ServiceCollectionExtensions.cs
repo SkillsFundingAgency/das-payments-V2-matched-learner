@@ -63,9 +63,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
         public static void AddEndpointInstanceFactory(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            var endpointConfiguration = new EndpointConfiguration(applicationSettings.MigrationQueue);
+            var endpointConfiguration = new EndpointConfiguration($"{applicationSettings.MigrationQueue}");
             endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
             endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+            endpointConfiguration.SendOnly();
             services.AddTransient<IEndpointInstanceFactory>(provider => new EndpointInstanceFactory(endpointConfiguration));
         }
 
