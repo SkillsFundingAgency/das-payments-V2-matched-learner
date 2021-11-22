@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
     public interface IMatchedLearnerRepository
     {
-        Task<MatchedLearnerDataLockInfo> GetMatchedLearnerTrainings(long ukprn, long uln);
+        Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln);
         Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
         Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
@@ -58,7 +57,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
         //TODO: implement this method from new table structure
-        public Task<MatchedLearnerDataLockInfo> GetMatchedLearnerTrainings(long ukprn, long uln)
+        public Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln)
         {
             throw new NotImplementedException();
         }
