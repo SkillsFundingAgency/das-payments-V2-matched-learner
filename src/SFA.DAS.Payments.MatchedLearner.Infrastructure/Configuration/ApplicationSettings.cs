@@ -8,5 +8,6 @@
         public string PaymentsServiceBusConnectionString { get; set; }
         public bool IsDevelopment { get; set; }
         public string MigrationQueue { get; set; }
+        public int MigrationBatchSize { get; set; }
     }
 }
