@@ -12,6 +12,7 @@ using TechTalk.SpecFlow;
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 {
     [Binding]
+    [Scope(Feature = "SmokeTests")]
     public class TestBindingSteps
     {
         private readonly TestContext _testContext;
@@ -36,6 +37,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [When("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
         {
+            await _testContext.TestRepository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
             await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
             await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, false);
         }

@@ -24,6 +24,7 @@
     <PackageReference Include="SpecFlow.NUnit" Version="3.9.40" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="3.0.84" />
+    <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.40" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure\SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure.csproj" />
@@ -31,14 +32,6 @@
     <ProjectReference Include="..\SFA.DAS.Payments.MatchedLearner.Infrastructure\SFA.DAS.Payments.MatchedLearner.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Features\SmokeTests.feature.cs">
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <SpecFlowFeatureFiles Update="Features\SmokeTests.feature">
-      <Generator>SpecFlowSingleFileGenerator</Generator>
-      <LastGenOutput>SmokeTests.feature.cs</LastGenOutput>
-    </SpecFlowFeatureFiles>
+    <Folder Include="Features\" />
   </ItemGroup>
 </Project>
