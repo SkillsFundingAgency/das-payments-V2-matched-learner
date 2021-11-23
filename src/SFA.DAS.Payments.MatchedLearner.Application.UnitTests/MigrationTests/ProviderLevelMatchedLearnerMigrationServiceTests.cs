@@ -65,7 +65,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
 
             _loggerMock = new Mock<ILogger<ProviderLevelMatchedLearnerMigrationService>>();
 
-            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object);
+            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 0);
         }
 
         [Test]

@@ -120,23 +120,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             {
                 _logger.LogError(exception, $"Rolling back transaction for batch.");
                 await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
-                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Failed);
                 throw;
             }
         }
 
         private async Task HandleTrainingDataIndividually(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
         {
-            try
-            {
-                await _matchedLearnerRepository.SaveTrainingsIndividually(trainingData, CancellationToken.None);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, $"Failed to save training data individually.");
-                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Failed);
-                throw;
-            }
+            await _matchedLearnerRepository.SaveTrainingsIndividually(trainingData, CancellationToken.None);
         }
     }
 }
