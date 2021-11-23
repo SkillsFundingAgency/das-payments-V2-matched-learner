@@ -14,6 +14,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
             builder.Property(x => x.MigrationRunId).HasColumnName("MigrationRunId").IsRequired();
             builder.Property(x => x.Status).HasColumnName("Status").IsRequired();
             builder.Property(x => x.Ukprn).HasColumnName("Ukprn").IsRequired();
+            builder.Property(x => x.LearnerCount).HasColumnName("LearnerCount").IsRequired();
+            builder.Property(x => x.CompletionTime).HasColumnName("CompletionTime");
         }
     }
 }

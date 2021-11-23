@@ -67,6 +67,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             model.Status = status;
 
+            if(status == MigrationStatus.Completed)
+                model.CompletionTime = DateTime.Now;
+
             await _matchedLearnerDataContext.SaveChangesAsync();
         }
     }

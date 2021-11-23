@@ -4,6 +4,8 @@
 	[MigrationRunId] UNIQUEIDENTIFIER NOT NULL,
 	[Ukprn] BIGINT NOT NULL,
 	[Status] TINYINT NOT NULL,
+	[LearnerCount] INT NOT NULL,
+	[CompletionTime] DATETIMEOFFSET NULL,
 	[CreationDate] DATETIMEOFFSET NOT NULL CONSTRAINT DF_MigrationRunAttempt__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
 )
 GO
