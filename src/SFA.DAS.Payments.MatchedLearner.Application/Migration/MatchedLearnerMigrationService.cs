@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 
@@ -26,7 +27,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         public async Task TriggerMigrationForAllProviders()
         {
             var migrationRunId = Guid.NewGuid();
-            var providers = _matchedLearnerDataContext.DataLockEvent.Select(x => x.Ukprn).Distinct();
+            var providers = await _matchedLearnerDataContext.DataLockEvent.Select(x => x.Ukprn).Distinct().ToListAsync();
 
             var endpointInstance = await _endpointInstanceFactory.GetEndpointInstance();
 

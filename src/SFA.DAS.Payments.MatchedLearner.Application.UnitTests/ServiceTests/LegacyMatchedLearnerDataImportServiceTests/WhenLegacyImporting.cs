@@ -9,10 +9,10 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
-namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.MatchedLearnerDataImportServiceTests
+namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.LegacyMatchedLearnerDataImportServiceTests
 {
     [TestFixture]
-    public class WhenImporting
+    public class WhenLegacyImporting
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
         private Mock<ILegacyMatchedLearnerRepository> _mockMatchedLearnerRepository;

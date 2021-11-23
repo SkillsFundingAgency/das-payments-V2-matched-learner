@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
@@ -12,9 +13,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
     public class WhenImportingForFirstCollectionPeriod
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
-        private Mock<ILegacyMatchedLearnerRepository> _mockMatchedLearnerRepository;
+        private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
-        private LegacyMatchedLearnerDataImportService _sut;
+        private MatchedLearnerDataImportService _sut;
 
         [SetUp]
         public async Task SetUp()
@@ -27,7 +28,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
                 JobId = 123,
             };
             
-            _mockMatchedLearnerRepository = new Mock<ILegacyMatchedLearnerRepository>();
+            _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
 
             _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_submissionSucceededEvent))
@@ -36,7 +37,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(new List<ApprenticeshipModel>());
 
-            _sut = new LegacyMatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object);
+            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper());
 
             await _sut.Import(_submissionSucceededEvent, new List<DataLockEventModel>());
         }

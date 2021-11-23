@@ -24,52 +24,45 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
         {
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var result = dataLockEvents
-                .GroupBy(grp => grp.LearnerUln)
-                .Select(groupedDataLocks =>
-                {
-                    var dataLocks = groupedDataLocks.Where(x => x.LearningAimReference == "ZPROG001").ToList();
+            var dataLocks = dataLockEvents.Where(x => x.LearningAimReference == "ZPROG001").ToList();
 
-                    var eventIds = dataLocks.Select(dl => dl.EventId).ToList();
+            var eventIds = dataLocks.Select(dl => dl.EventId).ToList();
 
-                    var dataLockEventPriceEpisodes = dataLocks.SelectMany(dl => dl.PriceEpisodes)
-                        .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
-                        .ToList();
-
-                    var dataLockEventPayablePeriods = dataLocks.SelectMany(dl => dl.PayablePeriods)
-                        .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                        .ToList();
-
-                    var dataLockEventNonPayablePeriods = dataLocks.SelectMany(dl => dl.NonPayablePeriods)
-                        .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                        .ToList();
-
-                    var dataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriods.SelectMany(d => d.Failures).ToList();
-
-                    var matchedLearnerInfo = new MatchedLearnerDataLockInfo
-                    {
-                        DataLockEvents = dataLocks.Select(i =>
-                        {
-                            i.NonPayablePeriods = null;
-                            i.PayablePeriods = null;
-                            i.PriceEpisodes = null;
-                            return i;
-                        }).ToList(),
-                        DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
-                        DataLockEventPayablePeriods = dataLockEventPayablePeriods,
-                        DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods.Select(i =>
-                        {
-                            i.Failures = null;
-                            return i;
-                        }).ToList(),
-                        DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
-                        Apprenticeships = apprenticeshipModels
-                    };
-
-                    return MapTraining(matchedLearnerInfo);
-                })
-                .SelectMany(tr => tr)
+            var dataLockEventPriceEpisodes = dataLocks.SelectMany(dl => dl.PriceEpisodes)
+                .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
                 .ToList();
+
+            var dataLockEventPayablePeriods = dataLocks.SelectMany(dl => dl.PayablePeriods)
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .ToList();
+
+            var dataLockEventNonPayablePeriods = dataLocks.SelectMany(dl => dl.NonPayablePeriods)
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .ToList();
+
+            var dataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriods.SelectMany(d => d.Failures ?? new List<DataLockEventNonPayablePeriodFailureModel>()).ToList();
+
+            var matchedLearnerInfo = new MatchedLearnerDataLockInfo
+            {
+                Apprenticeships = apprenticeshipModels,
+                DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
+                DataLockEventPayablePeriods = dataLockEventPayablePeriods,
+                DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
+                DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods.Select(i =>
+                {
+                    i.Failures = null;
+                    return i;
+                }).ToList(),
+                DataLockEvents = dataLocks.Select(i =>
+                {
+                    i.NonPayablePeriods = null;
+                    i.PayablePeriods = null;
+                    i.PriceEpisodes = null;
+                    return i;
+                }).ToList(),
+            };
+
+            var result = MapTraining(matchedLearnerInfo);
 
             return result;
         }
@@ -89,7 +82,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 x.Ukprn
             }).Select(dataLockEvent =>
             {
-                var firstDataLockEvent = dataLockEvent.First();
+                var firstDataLockEvent = dataLockEvent
+                                            .OrderByDescending(x => x.AcademicYear)
+                                            .ThenByDescending(x => x.CollectionPeriod)
+                                            .First();
                 return new TrainingModel
                 {
                     EventTime = firstDataLockEvent.EventTime,
@@ -147,8 +143,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         Periods = MapPeriods(priceEpisode.Key.PriceEpisodeIdentifier, matchedLearnerDataLockInfo)
                     };
                 })
-                .OrderByDescending(x => x.AcademicYear)
-                .ThenByDescending(x => x.CollectionPeriod)
                 .ToList();
         }
 
@@ -170,7 +164,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         .Where(f => f.DataLockEventNonPayablePeriodId ==
                                     nonPayablePeriod.DataLockEventNonPayablePeriodId).ToList();
 
-                    var apprenticeship = matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
+                    var apprenticeship = !failures.Any() ? null : matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
 
                     return new PeriodModel
                     {
@@ -213,9 +207,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         IsPayable = true,
 
                         TransactionType = payablePeriod.TransactionType,
-                        
+
                         Period = payablePeriod.DeliveryPeriod,
-                        
+
                         Amount = payablePeriod.Amount,
 
                         AccountId = apprenticeship?.AccountId ?? 0,
