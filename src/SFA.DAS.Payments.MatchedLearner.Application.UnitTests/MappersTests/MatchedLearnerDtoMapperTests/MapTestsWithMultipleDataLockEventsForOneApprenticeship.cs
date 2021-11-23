@@ -319,6 +319,95 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             actual.Should().HaveCount(2);
         }
+
+        [Test]
+        public void EventsFromDifferentApprenticeships_CollectionPeriod__Should_NotBeGrouped()
+        {
+            var dataLockEvents = new List<DataLockEventModel>
+            {
+                new DataLockEventModel
+                {
+                    AcademicYear = 2122,
+                    CollectionPeriod = 1,
+                    Ukprn = 1234,
+                    LearnerUln = 1234,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "ZPROG001",
+                    PriceEpisodes = new List<DataLockEventPriceEpisodeModel>(),
+                    PayablePeriods = new List<DataLockEventPayablePeriodModel>(),
+                    NonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>(),
+                },
+                new DataLockEventModel
+                {
+                    AcademicYear = 2122,
+                    CollectionPeriod = 2,
+                    Ukprn = 1234,
+                    LearnerUln = 1234,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "ZPROG001",
+                    PriceEpisodes = new List<DataLockEventPriceEpisodeModel>(),
+                    PayablePeriods = new List<DataLockEventPayablePeriodModel>(),
+                    NonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>(),
+                }
+            };
+
+            var sut = new MatchedLearnerDtoMapper();
+
+            var actual = sut.MapToModel(dataLockEvents, new List<ApprenticeshipModel>());
+
+            actual.Should().HaveCount(2);
+        }
+
+        [Test]
+        public void EventsFromDifferentApprenticeships_AcademicYear__Should_NotBeGrouped()
+        {
+            var dataLockEvents = new List<DataLockEventModel>
+            {
+                new DataLockEventModel
+                {
+                    AcademicYear = 2021,
+                    CollectionPeriod = 14,
+                    Ukprn = 1234,
+                    LearnerUln = 1234,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "ZPROG001",
+                    PriceEpisodes = new List<DataLockEventPriceEpisodeModel>(),
+                    PayablePeriods = new List<DataLockEventPayablePeriodModel>(),
+                    NonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>(),
+                },
+                new DataLockEventModel
+                {
+                    AcademicYear = 2122,
+                    CollectionPeriod = 1,
+                    Ukprn = 1234,
+                    LearnerUln = 1234,
+                    LearningAimPathwayCode = 1,
+                    LearningAimStandardCode = 2,
+                    LearningAimFrameworkCode = 3,
+                    LearningAimProgrammeType = 4,
+                    LearningAimReference = "ZPROG001",
+                    PriceEpisodes = new List<DataLockEventPriceEpisodeModel>(),
+                    PayablePeriods = new List<DataLockEventPayablePeriodModel>(),
+                    NonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>(),
+                }
+            };
+
+            var sut = new MatchedLearnerDtoMapper();
+
+            var actual = sut.MapToModel(dataLockEvents, new List<ApprenticeshipModel>());
+
+            actual.Should().HaveCount(2);
+        }
+
         [Test]
         public void EventsFromDifferentApprenticeships_Ukprn__Should_NotBeGrouped()
         {

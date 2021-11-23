@@ -79,7 +79,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 x.LearningAimFundingLineType,
                 x.LearningStartDate,
                 x.LearnerUln,
-                x.Ukprn
+                x.Ukprn,
+                x.AcademicYear,
+                x.CollectionPeriod
             }).Select(dataLockEvent =>
             {
                 var firstDataLockEvent = dataLockEvent
