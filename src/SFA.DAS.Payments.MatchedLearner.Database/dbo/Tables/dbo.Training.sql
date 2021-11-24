@@ -4,7 +4,7 @@
 	[EventTime] DATETIMEOFFSET NOT NULL,
 	[EventId] UNIQUEIDENTIFIER NOT NULL,
 	[IlrSubmissionDate] DATETIME2 NOT NULL, 
-    [IlrSubmissionWindowPeriod] TINYINT NOT NULL,
+	[IlrSubmissionWindowPeriod] TINYINT NOT NULL,
 	[AcademicYear] SMALLINT NOT NULL,
 	[Ukprn] BIGINT NOT NULL,
 	[Uln] BIGINT NOT NULL,

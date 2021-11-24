@@ -38,8 +38,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         public async Task MigrateProviderScopedData(Guid migrationRunId, long ukprn)
         {
-            //todo - batching
-            //todo - more data in metadata table: learnerCount, completionTime, whatever we need to make batching work
             //todo - check endpoint configuration
 
             try
@@ -77,15 +75,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
                 if (areExistingFailedAttempts)
                 {
-                    await HandleTrainingDataIndividually(trainingData, ukprn, migrationRunId);
+                    await HandleTrainingDataIndividually(trainingData);
                 }
                 else if (_batchSize != 0)
                 {
-                    await HandleBatches(trainingData, ukprn, migrationRunId);
+                    await HandleBatches(trainingData);
                 }
                 else
                 {
-                    await HandleSingleBatchAndTransaction(trainingData, ukprn, migrationRunId);
+                    await HandleSingleBatchAndTransaction(trainingData);
                 }
 
                 await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(ukprn, migrationRunId, MigrationStatus.Completed);
@@ -98,17 +96,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
         }
 
-        private async Task HandleBatches(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
+        private async Task HandleBatches(List<TrainingModel> trainingData)
         {
             while (trainingData.Any())
             {
                 var batch = trainingData.Take(_batchSize);
                 trainingData = trainingData.Skip(_batchSize).ToList();
-                await HandleSingleBatchAndTransaction(batch.ToList(), ukprn, migrationRunId);
+                await HandleSingleBatchAndTransaction(batch.ToList());
             }
         }
 
-        private async Task HandleSingleBatchAndTransaction(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
+        private async Task HandleSingleBatchAndTransaction(List<TrainingModel> trainingData)
         {
             try
             {
@@ -124,7 +122,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
         }
 
-        private async Task HandleTrainingDataIndividually(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
+        private async Task HandleTrainingDataIndividually(List<TrainingModel> trainingData)
         {
             await _matchedLearnerRepository.SaveTrainingsIndividually(trainingData, CancellationToken.None);
         }
