@@ -34,4 +34,10 @@
   <ItemGroup>
     <Folder Include="Features\" />
   </ItemGroup>
+  <ItemGroup>
+    <SpecFlowFeatureFiles Update="Features\MigrationTests.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>MigrationTests.feature.cs</LastGenOutput>
+    </SpecFlowFeatureFiles>
+  </ItemGroup>
 </Project>
