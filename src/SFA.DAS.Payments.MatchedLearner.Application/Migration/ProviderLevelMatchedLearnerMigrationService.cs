@@ -113,12 +113,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
-                await _matchedLearnerRepository.StoreSubmissionsData(trainingData, CancellationToken.None);
+                await _matchedLearnerRepository.SaveTrainings(trainingData, CancellationToken.None);
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, $"Rolling back transaction for batch.");
+                _logger.LogError(exception, $"Error saving batch, rolling back transaction for batch.");
                 await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
                 throw;
             }

@@ -25,6 +25,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
         Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken);
+        Task SaveTrainings(IList<TrainingModel> trainings, CancellationToken cancellationToken);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -119,7 +120,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
         }
 
-        private async Task SaveTrainings(IList<TrainingModel> trainings, CancellationToken cancellationToken)
+        public async Task SaveTrainings(IList<TrainingModel> trainings, CancellationToken cancellationToken)
         {
             var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 60 };
 
@@ -152,7 +153,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await _dataContext.BulkInsertAsync(periods, bulkConfig, null, cancellationToken).ConfigureAwait(false);
         }
 
-        public  async Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken)
+        public async Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken)
         {
             var mainContext = _retryDataContextFactory.Create();
 
