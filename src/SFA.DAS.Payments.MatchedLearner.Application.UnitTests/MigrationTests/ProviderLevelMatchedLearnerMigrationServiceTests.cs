@@ -148,7 +148,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
 
             //Assert
-            _matchedLearnerRepositoryMock.Verify(x => x.StoreSubmissionsData(_mappedTrainingModels, It.IsAny<CancellationToken>()));
+            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(_mappedTrainingModels, It.IsAny<CancellationToken>()));
         }
 
         [Test]
@@ -157,7 +157,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             //Arrange
             _existingMigrationAttempts.Clear();
             _matchedLearnerRepositoryMock
-                .Setup(x => x.StoreSubmissionsData(_mappedTrainingModels, It.IsAny<CancellationToken>()))
+                .Setup(x => x.SaveTrainings(_mappedTrainingModels, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException());
 
             //Act
