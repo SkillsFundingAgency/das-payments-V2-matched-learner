@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using TechTalk.SpecFlow;
@@ -34,10 +35,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [When(@"Migration is Run")]
         public async Task WhenMigrationIsRun()
         {
-            var url = "http://localhost:5000/api/HttpTriggerMatchedLearnerMigration";
+            //var url = "http://localhost:5000/api/HttpTriggerMatchedLearnerMigration";
 
-            var client = new HttpClient();
-            var result = await client.GetAsync(url);
+            //var client = new HttpClient();
+            //var result = await client.GetAsync(url);
+
+            await _testContext.TestEndpointInstance.PublishSubmissionSucceededEvent(_ukprn, 1, 1);
+            Thread.Sleep(30000);
         }
 
         [Then(@"learner Datalock events are migrated into the new format")]

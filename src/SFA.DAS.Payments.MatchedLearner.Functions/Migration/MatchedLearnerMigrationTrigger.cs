@@ -23,5 +23,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Migration
         {
             await _matchedLearnerMigrationService.TriggerMigrationForAllProviders();
         }
+
+        [FunctionName("ThrowawayEventTriggerMatchedLearnerMigration")]
+        public async Task Run(
+            [ServiceBusTrigger("%MatchedLearnerQueue%", Connection = "PaymentsServiceBusConnectionString")]
+            string message)
+        {
+            await _matchedLearnerMigrationService.TriggerMigrationForAllProviders();
+        }
     }
 }
