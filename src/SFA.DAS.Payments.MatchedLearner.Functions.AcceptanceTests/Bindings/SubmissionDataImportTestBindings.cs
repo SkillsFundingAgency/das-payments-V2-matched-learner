@@ -164,7 +164,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actualPriceEpisodes.TrainingId.Should().Be(actual.Id);
             actualPriceEpisodes.Identifier.Should().Be("25-104-01/08/2020");
             actualPriceEpisodes.AgreedPrice.Should().Be(3000);
-            actualPriceEpisodes.StartDate.Should().Be(new DateTime(2020, 10, 07));
+            actualPriceEpisodes.StartDate.Should().Be(new DateTime(2020, 08, 01));
             actualPriceEpisodes.TotalNegotiatedPriceStartDate.Should().Be(new DateTime(2021, 01, 01));
             actualPriceEpisodes.PlannedEndDate.Should().Be(new DateTime(2020, 10, 11));
             actualPriceEpisodes.ActualEndDate.Should().Be(new DateTime(2020, 10, 12));
@@ -173,99 +173,106 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actualPriceEpisodes.CompletionAmount.Should().Be(550);
 
             actualPriceEpisodes.Periods.Count.Should().Be(7);
+            
             actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                Period = 1,
+                Amount = 100,
+                IsPayable = true,
                 TransactionType = 1,
-                DeliveryPeriod = 1,
-                Amount = 100M,
-                ApprenticeshipId = _apprenticeshipId
+
+                ApprenticeshipId = _apprenticeshipId,
+                AccountId = 1000,
+                TransferSenderAccountId = 500,
+                ApprenticeshipEmployerType = 3,
             });
 
             actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                Period = 2,
+                Amount = 200,
+                IsPayable = true,
                 TransactionType = 1,
-                DeliveryPeriod = 2,
-                Amount = 200M,
-                ApprenticeshipId = _apprenticeshipId
+
+                ApprenticeshipId = _apprenticeshipId,
+                AccountId = 1000,
+                TransferSenderAccountId = 500,
+                ApprenticeshipEmployerType = 3,
             });
 
             actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                Period = 3,
+                Amount = 300,
+                IsPayable = true,
                 TransactionType = 1,
-                DeliveryPeriod = 3,
-                Amount = 300M,
-                ApprenticeshipId = _apprenticeshipId
+
+                ApprenticeshipId = _apprenticeshipId,
+                AccountId = 1000,
+                TransferSenderAccountId = 500,
+                ApprenticeshipEmployerType = 3,
             });
 
             actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
-                TransactionType = 1,
-                DeliveryPeriod = 3,
+                Period = 3,
                 Amount = 400,
-                FailedDataLock4 = true,
-                FailedDataLock5 = true,
-                ApprenticeshipId = 9876500
-            });
-
-            actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
-            {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                IsPayable = false,
                 TransactionType = 1,
-                DeliveryPeriod = 4,
-                Amount = 500,
+
+                ApprenticeshipId = _apprenticeshipId,
+                AccountId = 1000,
+                TransferSenderAccountId = 500,
+                ApprenticeshipEmployerType = 3,
+
                 FailedDataLock1 = true,
-                ApprenticeshipId = _apprenticeshipId
-            });
-
-            actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
-            {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
-                TransactionType = 1,
-                DeliveryPeriod = 5,
-                Amount = 600,
                 FailedDataLock2 = true,
-                ApprenticeshipId = _apprenticeshipId
+                FailedDataLock3 = true,
             });
 
             actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
-                DataLockEventId = actual.EventId,
-                PriceEpisodeIdentifier = "25-104-01/08/2020",
+                Period = 4,
+                Amount = 500,
+                IsPayable = false,
                 TransactionType = 1,
-                DeliveryPeriod = 6,
+
+                ApprenticeshipId = _apprenticeshipId,
+                AccountId = 1000,
+                TransferSenderAccountId = 500,
+                ApprenticeshipEmployerType = 3,
+
+                FailedDataLock7 = true,
+            });
+
+            actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
+            {
+                Period = 5,
                 Amount = 600,
-                FailedDataLock3 = true,
-                ApprenticeshipId = _apprenticeshipId
+                IsPayable = false,
+                TransactionType = 1,
+
+                ApprenticeshipId = _apprenticeshipId,
+                AccountId = 1000,
+                TransferSenderAccountId = 500,
+                ApprenticeshipEmployerType = 3,
+
+                FailedDataLock9 = true,
             });
 
-            var actualNonPayablePeriodFailures = actualPriceEpisodes.Periods.Where(np => !np.IsPayable).ToList();
-
-            actualNonPayablePeriodFailures.Count.Should().Be(4);
-
-            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
+            actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
-            });
+                Period = 6,
+                Amount = 600,
+                IsPayable = false,
+                TransactionType = 1,
 
-            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
-            {
-            });
+                //ApprenticeshipId = null,
+                AccountId = 0,
+                TransferSenderAccountId = 0,
+                ApprenticeshipEmployerType = 0,
 
-            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
-            {
-            });
-
-            actualNonPayablePeriodFailures.Should().ContainEquivalentOf(new
-            {
+                FailedDataLock1 = true,
             });
         }
     }
