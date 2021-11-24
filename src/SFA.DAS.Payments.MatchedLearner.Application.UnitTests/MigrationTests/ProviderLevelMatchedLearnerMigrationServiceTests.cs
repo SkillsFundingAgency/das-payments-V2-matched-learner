@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -44,6 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             _existingMigrationAttempts.ForEach(x => x.Ukprn = _ukprn);
 
             _dataLockEventsForMigration = fixture.Create<List<DataLockEventModel>>();
+            _mappedTrainingModels = fixture.Create<List<TrainingModel>>();
 
             _providerMigrationRepositoryMock = new Mock<IProviderMigrationRepository>();
             _providerMigrationRepositoryMock
@@ -179,6 +182,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
 
             //Assert
             _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.Completed), Times.Once);
+        }
+
+        [Test]
+        public async Task WhenMigratingProviderScopedData_AndIsLargeDataSetToBeBatched_ThenDoesBulkInsertInBatches()
+        {
+            //Arrange
+            _existingMigrationAttempts.Clear();
+            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 2);
+
+            //Act
+            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+
+            //Assert
+            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(It.Is<IList<TrainingModel>>(y => 
+                y.Count == 2), It.IsAny<CancellationToken>()), Times.Once);
+            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(It.Is<IList<TrainingModel>>(y =>
+                y.Count == 1), It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
