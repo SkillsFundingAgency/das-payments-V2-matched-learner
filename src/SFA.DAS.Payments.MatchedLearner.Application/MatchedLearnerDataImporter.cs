@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
@@ -36,16 +35,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             var importTask = _matchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEventSecondCopy);
 
             await Task.WhenAll(legacyImportTask, importTask);
-        }
-    }
-
-    //NOTE: Temp Code to allow both old and new Importers to work in parallel on same list
-    public static class ListExtensions
-    {
-        public static List<T> Clone<T>(this List<T> oldList)
-        {
-            var serializeObject = JsonConvert.SerializeObject(oldList);
-            return JsonConvert.DeserializeObject<List<T>>(serializeObject);
         }
     }
 }
