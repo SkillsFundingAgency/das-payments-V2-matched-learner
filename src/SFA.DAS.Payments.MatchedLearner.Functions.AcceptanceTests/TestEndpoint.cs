@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
+using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
@@ -84,6 +85,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 CollectionPeriod = collectionPeriod,
                 AcademicYear = academicYear,
                 JobId = 123
+            });
+        }
+        
+        public async Task PublishProviderLevelMigrationRequest(long ukprn)
+        {
+            await _endpointInstance.Publish(new ProviderLevelMigrationRequest
+            {
+                Ukprn = ukprn,
+                MigrationRunId = Guid.NewGuid(),
             });
         }
     }

@@ -19,6 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         private readonly long _ukprn;
         private readonly long _learnerUln;
         private readonly long _apprenticeshipId;
+
         private readonly TestApplicationSettings _settings;
 
         public SubmissionDataImportTestBindings(TestContext testContext)
@@ -45,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Given("there is existing Trainings data For CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenExistingTrainingsDataForPeriod(byte collectionPeriod, short academicYear)
         {
-            _testContext.ExistingMatchedLearnerTrainingId = await _testContext.TestRepository.AddMatchedLearnerTrainings(_ukprn, _learnerUln, collectionPeriod, academicYear, true);
+            _testContext.ExistingMatchedLearnerTrainingId = await _testContext.TestRepository.AddMatchedLearnerTrainings(_ukprn, _learnerUln, collectionPeriod, academicYear);
         }
 
         [Then("the matched Learners Trainings are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
@@ -173,7 +174,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             actualPriceEpisodes.CompletionAmount.Should().Be(550);
 
             actualPriceEpisodes.Periods.Count.Should().Be(7);
-            
+
             actualPriceEpisodes.Periods.Should().ContainEquivalentOf(new
             {
                 Period = 1,
