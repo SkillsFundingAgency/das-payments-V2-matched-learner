@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using NServiceBus;
 
@@ -14,38 +11,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
     public class EndpointInstanceFactory : IEndpointInstanceFactory
     {
-        private readonly EndpointConfiguration endpointConfiguration;
-        private static IEndpointInstance endpointInstance;
-        //private static readonly SemaphoreSlim LockObject = new SemaphoreSlim(1, 1);
-        private static readonly ReaderWriterLockSlim Locker = new ReaderWriterLockSlim();
+        private readonly EndpointConfiguration _endpointConfiguration;
+        private static IEndpointInstance _endpointInstance;
 
         public EndpointInstanceFactory(EndpointConfiguration endpointConfiguration)
         {
-            this.endpointConfiguration = endpointConfiguration ?? throw new ArgumentNullException(nameof(endpointConfiguration));
+            this._endpointConfiguration = endpointConfiguration ?? throw new ArgumentNullException(nameof(endpointConfiguration));
         }
 
         public async Task<IEndpointInstance> GetEndpointInstance()
         {
-            //Locker.EnterUpgradeableReadLock();
-            try
-            {
-                if (endpointInstance != null)
-                    return endpointInstance;
-                //Locker.EnterWriteLock();
-                try
-                {
-                    endpointInstance = await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
-                }
-                finally
-                {
-                    //Locker.ExitWriteLock();
-                }
-            }
-            finally
-            {
-                //Locker.ExitUpgradeableReadLock();
-            }
-            return endpointInstance;
+            if (_endpointInstance != null)
+                return _endpointInstance;
+
+            _endpointInstance = await Endpoint.Start(_endpointConfiguration).ConfigureAwait(false);
+            
+            return _endpointInstance;
         }
     }
 }

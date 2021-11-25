@@ -108,7 +108,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             try
             {
-                await SaveTrainings(trainings, cancellationToken);
+                await SaveTrainings(trainings.Clone(), cancellationToken);
             }
             catch (Exception e)
             {

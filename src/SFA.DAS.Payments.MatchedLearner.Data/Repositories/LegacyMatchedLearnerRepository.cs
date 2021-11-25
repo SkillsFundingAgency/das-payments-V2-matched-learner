@@ -186,7 +186,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             try
             {
-                await SaveDataLockEvents(models, cancellationToken);
+                await SaveDataLockEvents(models.Clone(), cancellationToken);
             }
             catch (Exception e)
             {

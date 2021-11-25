@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 
 // ReSharper disable RedundantNameQualifier
 
@@ -11,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data
     {
         public static bool IsUniqueKeyConstraintException(this Exception exception)
         {
-            var sqlException = exception.GetException<Microsoft.Data.SqlClient.SqlException>();
+            var sqlException = exception.GetException<SqlException>();
             if (sqlException != null)
                 return sqlException.Number == 2601 || sqlException.Number == 2627;
             var sqlEx = exception.GetException<SqlException>();
@@ -31,7 +32,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data
 
         public static bool IsDeadLockException(this Exception exception)
         {
-            var sqlException = exception.GetException<Microsoft.Data.SqlClient.SqlException>();
+            var sqlException = exception.GetException<SqlException>();
             if (sqlException != null)
                 return sqlException.Number == 1205;
             var sqlEx = exception.GetException<SqlException>();
@@ -44,6 +45,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Data
                 .Select((item, inx) => new { item, inx })
                 .GroupBy(x => x.inx / maxItems)
                 .Select(g => g.Select(x => x.item));
+        }
+
+        public static List<T> Clone<T>(this List<T> oldList)
+        {
+            var serializeObject = JsonConvert.SerializeObject(oldList);
+            return JsonConvert.DeserializeObject<List<T>>(serializeObject);
         }
     }
 }
