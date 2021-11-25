@@ -9,6 +9,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
         public long? Ukprn { get; set; }
         public MigrationStatus? Status { get; set; }
         public int LearnerCount { get; set; }
-        public DateTime? CompletionTime { get; set; }
+        public DateTimeOffset? CompletionTime { get; set; }
     }
 }
