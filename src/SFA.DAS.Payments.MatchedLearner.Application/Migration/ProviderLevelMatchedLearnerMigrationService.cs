@@ -111,7 +111,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
-                await _matchedLearnerRepository.SaveTrainings(trainingData, CancellationToken.None);
+                await _matchedLearnerRepository.StoreSubmissionsData(trainingData, CancellationToken.None);
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
             catch (Exception exception)
