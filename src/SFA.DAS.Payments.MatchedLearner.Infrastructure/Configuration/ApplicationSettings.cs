@@ -9,5 +9,6 @@
         public bool IsDevelopment { get; set; }
         public string MigrationQueue { get; set; }
         public int MigrationBatchSize { get; set; }
+        public bool UseV1Api { get; set; }
     }
 }

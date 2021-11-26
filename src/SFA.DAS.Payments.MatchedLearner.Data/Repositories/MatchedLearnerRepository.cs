@@ -55,10 +55,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await _transaction.RollbackAsync();
         }
 
-        //TODO: implement this method from new table structure
-        public Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln)
+        public async Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln)
         {
-            throw new NotImplementedException();
+           return await _dataContext.Trainings
+                .Include(t => t.PriceEpisodes)
+                .ThenInclude(p => p.Periods)
+                .Where(t => t.Ukprn == ukprn && t.Uln == uln)
+                .ToListAsync();
         }
 
         public async Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn)

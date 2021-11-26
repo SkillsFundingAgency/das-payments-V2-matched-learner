@@ -13,3 +13,8 @@ Scenario: Test Learner performance Test
 	Given we have created 5000 sample learners
 	When we call the API 5000 times with the sample learners details
 	Then the result should not be any exceptions
+
+Scenario: Test Learner Training
+	Given we have created a sample learner Training
+	When we call the V2 API with the sample learners details
+	Then the result matches the sample learner Training

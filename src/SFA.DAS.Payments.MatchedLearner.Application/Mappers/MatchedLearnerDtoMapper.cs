@@ -9,15 +9,120 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 {
     public interface IMatchedLearnerDtoMapper
     {
-        MatchedLearnerDto MapToDto(TrainingModel training);
+        MatchedLearnerDto MapToDto(List<TrainingModel> trainings);
         List<TrainingModel> MapToModel(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels);
     }
 
     public class MatchedLearnerDtoMapper : IMatchedLearnerDtoMapper
     {
-        public MatchedLearnerDto MapToDto(TrainingModel training)
+        public MatchedLearnerDto MapToDto(List<TrainingModel> trainings)
         {
-            throw new NotImplementedException();
+            var firstTraining = trainings
+                .OrderByDescending(t => t.AcademicYear)
+                .ThenByDescending(t => t.IlrSubmissionWindowPeriod)
+                .First();
+
+            var result = new MatchedLearnerDto
+            {
+                AcademicYear = firstTraining.AcademicYear,
+                IlrSubmissionWindowPeriod = firstTraining.IlrSubmissionWindowPeriod,
+                IlrSubmissionDate = firstTraining.IlrSubmissionDate,
+                Ukprn = firstTraining.Ukprn,
+                Uln = firstTraining.Uln,
+                EventTime = firstTraining.EventTime,
+                StartDate = firstTraining.StartDate,
+                Training = trainings.GroupBy(x => new
+                {
+                    x.Reference,
+                    x.StandardCode,
+                    x.ProgrammeType,
+                    x.FrameworkCode,
+                    x.PathwayCode,
+                    x.FundingLineType,
+                    x.StartDate,
+                    x.Uln,
+                    x.Ukprn,
+                }).Select(trainingGrp =>
+                {
+                    var currentTrainings = trainingGrp.ToList();
+                    return new TrainingDto
+                    {
+                        Reference = trainingGrp.Key.Reference,
+                        StandardCode = trainingGrp.Key.StandardCode,
+                        ProgrammeType = trainingGrp.Key.ProgrammeType,
+                        FrameworkCode = trainingGrp.Key.FrameworkCode,
+                        PathwayCode = trainingGrp.Key.PathwayCode,
+                        FundingLineType = null,
+                        StartDate = trainingGrp.Key.StartDate,
+                        PriceEpisodes = trainingGrp.SelectMany(tg => tg.PriceEpisodes).GroupBy(x => new
+                        {
+                            x.Identifier,
+                            x.AgreedPrice,
+                            x.StartDate,
+                            x.ActualEndDate,
+                            x.NumberOfInstalments,
+                            x.InstalmentAmount,
+                            x.CompletionAmount,
+                            x.TotalNegotiatedPriceStartDate
+                        }).Select(priceEpisode =>
+                        {
+                            var firstDataLockEvent = currentTrainings
+                                .OrderByDescending(t => t.AcademicYear)
+                                .ThenByDescending(t => t.IlrSubmissionWindowPeriod)
+                                .First();
+
+                            return new PriceEpisodeDto
+                            {
+                                AcademicYear = firstDataLockEvent.AcademicYear,
+                                CollectionPeriod = firstDataLockEvent.IlrSubmissionWindowPeriod,
+
+                                Identifier = priceEpisode.Key.Identifier,
+                                AgreedPrice = priceEpisode.Key.AgreedPrice,
+                                StartDate = priceEpisode.Key.StartDate,
+                                EndDate = priceEpisode.Key.ActualEndDate,
+                                NumberOfInstalments = priceEpisode.Key.NumberOfInstalments,
+                                InstalmentAmount = priceEpisode.Key.InstalmentAmount,
+                                CompletionAmount = priceEpisode.Key.CompletionAmount,
+                                TotalNegotiatedPriceStartDate = priceEpisode.Key.TotalNegotiatedPriceStartDate,
+
+                                Periods = priceEpisode.SelectMany(p => p.Periods).Select(pd =>
+                                {
+                                    var failures = new List<int>();
+
+                                    if (!pd.IsPayable)
+                                    {
+                                        if (pd.FailedDataLock1) failures.Add(1);
+                                        if (pd.FailedDataLock2) failures.Add(2);
+                                        if (pd.FailedDataLock3) failures.Add(3);
+                                        if (pd.FailedDataLock4) failures.Add(4);
+                                        if (pd.FailedDataLock5) failures.Add(5);
+                                        if (pd.FailedDataLock6) failures.Add(6);
+                                        if (pd.FailedDataLock7) failures.Add(7);
+                                        if (pd.FailedDataLock8) failures.Add(8);
+                                        if (pd.FailedDataLock9) failures.Add(9);
+                                        if (pd.FailedDataLock10) failures.Add(10);
+                                        if (pd.FailedDataLock11) failures.Add(11);
+                                        if (pd.FailedDataLock12) failures.Add(12);
+                                    }
+
+                                    return new PeriodDto
+                                    {
+                                        AccountId = pd.AccountId ?? 0,
+                                        ApprenticeshipId = pd.ApprenticeshipId ?? 0,
+                                        TransferSenderAccountId = pd.TransferSenderAccountId ?? 0,
+                                        ApprenticeshipEmployerType = pd.ApprenticeshipEmployerType ?? 0,
+                                        IsPayable = pd.IsPayable,
+                                        Period = pd.Period,
+                                        DataLockFailures = failures
+                                    };
+                                }).ToList()
+                            };
+                        }).ToList()
+                    };
+                }).ToList()
+            };
+
+            return result;
         }
 
         public List<TrainingModel> MapToModel(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels)

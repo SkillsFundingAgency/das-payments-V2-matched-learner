@@ -248,7 +248,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
 		public async Task ClearMatchedLearnerTrainings(long ukprn, long uln)
 		{
-			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(@"DELETE dbo.Training WHERE Uln = @uln AND Ukprn = @ukprn;", new SqlParameter("ukprn", ukprn), new SqlParameter("uln", uln));
+			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync("DELETE dbo.Training WHERE Uln = @uln AND Ukprn = @ukprn;", new SqlParameter("ukprn", ukprn), new SqlParameter("uln", uln));
 		}
 
 		const string ClearDataLockEventSql = @"
