@@ -20,6 +20,5 @@
 )
 GO
 
-Create Unique Index UX_Training_LogicalDuplicates on dbo.Training([IlrSubmissionDate], [IlrSubmissionWindowPeriod], [AcademicYear], [Ukprn], [Uln], [Reference], 
-[ProgrammeType], [StandardCode], [FrameworkCode], [PathwayCode], [FundingLineType], [StartDate], [CompletionStatus] )
+Create Unique Index UX_Training_LogicalDuplicates on dbo.Training([IlrSubmissionWindowPeriod], [AcademicYear], [Ukprn], [Uln], [Reference], [ProgrammeType], [StandardCode], [FrameworkCode], [PathwayCode], [FundingLineType], [StartDate], [CompletionStatus])
 GO
