@@ -82,7 +82,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             var authority = $"https://login.microsoftonline.com/{TestConfiguration.TestAzureAdClientSettings.Tenant}";
             var clientCredential = new ClientCredential(_configuration.ClientId, _configuration.ClientSecret);
             var context = new AuthenticationContext(authority, true);
-            var result = await context.AcquireTokenAsync(_configuration.IdentifierUri, clientCredential).ConfigureAwait(false);
+            var result = await context.AcquireTokenAsync(_configuration.IdentifierUri, clientCredential);
 
             return result.AccessToken;
         }

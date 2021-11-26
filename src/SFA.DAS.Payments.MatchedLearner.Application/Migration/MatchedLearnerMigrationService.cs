@@ -42,7 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                 
                 var options = new SendOptions();
                 options.SetDestination(_providerLevelMatchedLearnerMigration);
-                await endpointInstance.Send(new ProviderLevelMigrationRequest{ MigrationRunId = migrationRunId, Ukprn = provider }, options).ConfigureAwait(false);
+                await endpointInstance.Send(new ProviderLevelMigrationRequest{ MigrationRunId = migrationRunId, Ukprn = provider }, options);
             }
         }
 

@@ -42,17 +42,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task BeginTransactionAsync()
         {
-            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
+            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
         }
 
         public async Task CommitTransactionAsync()
         {
-            await _transaction.CommitAsync().ConfigureAwait(false);
+            await _transaction.CommitAsync();
         }
 
         public async Task RollbackTransactionAsync()
         {
-            await _transaction.RollbackAsync().ConfigureAwait(false);
+            await _transaction.RollbackAsync();
         }
 
         //TODO: implement this method from new table structure
@@ -109,7 +109,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 60 };
 
-            await _dataContext.BulkInsertAsync(trainings, bulkConfig).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(trainings, bulkConfig);
             
             var priceEpisodes = trainings
                 .SelectMany(training =>
@@ -122,7 +122,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 })
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig);
 
             var periods = priceEpisodes
                 .SelectMany(priceEpisode =>
@@ -135,7 +135,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 })
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(periods, bulkConfig).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(periods, bulkConfig);
         }
 
         public async Task SaveTrainingsIndividually(List<TrainingModel> trainings)
@@ -144,15 +144,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
 
             foreach (var training in trainings)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.Trainings.AddAsync(training).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync().ConfigureAwait(false);
+                    await retryDataContext.Trainings.AddAsync(training);
+                    await retryDataContext.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {

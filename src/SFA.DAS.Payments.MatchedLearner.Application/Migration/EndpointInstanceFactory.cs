@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             if (_endpointInstance != null)
                 return _endpointInstance;
 
-            _endpointInstance = await Endpoint.Start(_endpointConfiguration).ConfigureAwait(false);
+            _endpointInstance = await Endpoint.Start(_endpointConfiguration);
             
             return _endpointInstance;
         }

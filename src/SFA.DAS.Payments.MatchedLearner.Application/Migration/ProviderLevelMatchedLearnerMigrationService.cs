@@ -143,7 +143,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                         BatchNumber = g.Key,
                         TotalBatches = g.Count(),
                         MigrationRunId = migrationRunId
-                    }, options).ConfigureAwait(false);
+                    }, options);
                 });
             Task.WaitAll(tasks.ToArray());
         }

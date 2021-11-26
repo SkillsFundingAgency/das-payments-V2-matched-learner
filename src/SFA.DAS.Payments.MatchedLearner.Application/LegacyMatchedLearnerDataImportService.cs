@@ -66,7 +66,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                     _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
 
-                    await _legacyMatchedLearnerRepository.SaveDataLocksIndividually(dataLockEvents).ConfigureAwait(false);
+                    await _legacyMatchedLearnerRepository.SaveDataLocksIndividually(dataLockEvents);
                 }
 
                 await _legacyMatchedLearnerRepository.CommitTransactionAsync();

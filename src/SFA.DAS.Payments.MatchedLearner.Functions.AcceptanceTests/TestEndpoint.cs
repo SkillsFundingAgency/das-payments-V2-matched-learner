@@ -25,7 +25,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var endpointConfiguration = CreateEndpointConfiguration();
 
-            _endpointInstance = await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
+            _endpointInstance = await Endpoint.Start(endpointConfiguration);
 
             return _endpointInstance;
         }

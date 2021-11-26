@@ -73,7 +73,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                     _logger.LogWarning($"Batch contained a duplicate DataLock.  Will store each individually and discard duplicate. Inner exception {e}");
 
-                    await _matchedLearnerRepository.SaveTrainingsIndividually(trainings).ConfigureAwait(false);
+                    await _matchedLearnerRepository.SaveTrainingsIndividually(trainings);
                 }
 
                 await _matchedLearnerRepository.CommitTransactionAsync();
@@ -82,7 +82,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             {
                 await _matchedLearnerRepository.RollbackTransactionAsync();
 
-                _logger.LogError(exception,$"Error Importing Training Data. JobId: {submissionSucceededEvent.JobId}, AcademicYear: {submissionSucceededEvent.AcademicYear}, CollectionPeriod: {submissionSucceededEvent.CollectionPeriod} ");
+                _logger.LogError(exception,$"Error Importing Training Data. JobId: {submissionSucceededEvent.JobId}, AcademicYear: {submissionSucceededEvent.AcademicYear}, CollectionPeriod: {submissionSucceededEvent.CollectionPeriod}");
 
                 throw;
             }

@@ -43,17 +43,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task BeginTransactionAsync()
         {
-            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
+            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
         }
 
         public async Task CommitTransactionAsync()
         {
-            await _transaction.CommitAsync().ConfigureAwait(false);
+            await _transaction.CommitAsync();
         }
 
         public async Task RollbackTransactionAsync()
         {
-            await _transaction.RollbackAsync().ConfigureAwait(false);
+            await _transaction.RollbackAsync();
         }
 
         public async Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln)
@@ -163,7 +163,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
 
-            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig);
         }
 
         public async Task StoreApprenticeships(List<ApprenticeshipModel> models)
@@ -178,7 +178,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
                 _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
 
-                await SaveApprenticeshipsIndividually(models).ConfigureAwait(false);
+                await SaveApprenticeshipsIndividually(models);
             }
         }
 
@@ -186,15 +186,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
 
             foreach (var apprenticeship in apprenticeships)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.Apprenticeship.AddAsync(apprenticeship).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync().ConfigureAwait(false);
+                    await retryDataContext.Apprenticeship.AddAsync(apprenticeship);
+                    await retryDataContext.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
@@ -225,31 +225,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .SelectMany(npp => npp.Failures))
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(failures, bulkConfig)
-                .ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig);
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig);
+            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig);
+            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig);
+            await _dataContext.BulkInsertAsync(failures, bulkConfig);
         }
 
         public async Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents)
         {
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
 
             foreach (var dataLockEvent in dataLockEvents)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.DataLockEvent.AddAsync(dataLockEvent).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync().ConfigureAwait(false);
+                    await retryDataContext.DataLockEvent.AddAsync(dataLockEvent);
+                    await retryDataContext.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
