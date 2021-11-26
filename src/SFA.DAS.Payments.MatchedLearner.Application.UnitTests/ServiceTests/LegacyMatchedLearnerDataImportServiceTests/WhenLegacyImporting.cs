@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
@@ -15,12 +16,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
     public class WhenLegacyImporting
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
-        private Mock<ILegacyMatchedLearnerRepository> _mockMatchedLearnerRepository;
-        private Mock<IPaymentsRepository> _mockPaymentsRepository;
         private LegacyMatchedLearnerDataImportService _sut;
         private List<DataLockEventModel> _dataLockEvents;
         private List<ApprenticeshipModel> _apprenticeships;
         private readonly Guid _dataLockEventId = Guid.NewGuid();
+
+        private Mock<ILegacyMatchedLearnerRepository> _mockMatchedLearnerRepository;
+        private Mock<IPaymentsRepository> _mockPaymentsRepository;
+        private Mock<ILogger<LegacyMatchedLearnerDataImportService>> _mockLogger;
 
         [SetUp]
         public async Task SetUp()
@@ -35,6 +38,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
             
             _mockMatchedLearnerRepository = new Mock<ILegacyMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
+            _mockLogger = new Mock<ILogger<LegacyMatchedLearnerDataImportService>>();
 
             _dataLockEvents = new List<DataLockEventModel>
             {
@@ -84,7 +88,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(_apprenticeships);
 
-            _sut = new LegacyMatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object);
+            _sut = new LegacyMatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, _mockLogger.Object);
 
             await _sut.Import(_submissionSucceededEvent, _dataLockEvents);
         }
@@ -115,9 +119,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
         {
             _mockMatchedLearnerRepository.Verify(x => x.StoreApprenticeships(It.Is<List<ApprenticeshipModel>>(
                 y => y.Count == 2
-                && y.Any(z => z.Id == 112 && z.Uln == 1000112)
-                && y.Any(z => z.Id == 114 && z.Uln == 1000114)
-                ), It.IsAny<CancellationToken>()));
+                     && y.Any(z => z.Id == 112 && z.Uln == 1000112)
+                     && y.Any(z => z.Id == 114 && z.Uln == 1000114)
+            )));
         }
 
         [Test]

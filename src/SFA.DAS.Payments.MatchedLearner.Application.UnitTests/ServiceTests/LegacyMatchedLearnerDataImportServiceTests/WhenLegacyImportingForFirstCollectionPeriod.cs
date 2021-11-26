@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
@@ -12,9 +13,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
     public class WhenLegacyImportingForFirstCollectionPeriod
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
+        private LegacyMatchedLearnerDataImportService _sut;
+
         private Mock<ILegacyMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
-        private LegacyMatchedLearnerDataImportService _sut;
+        private Mock<ILogger<LegacyMatchedLearnerDataImportService>> _mockLogger;
 
         [SetUp]
         public async Task SetUp()
@@ -29,6 +32,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
             
             _mockMatchedLearnerRepository = new Mock<ILegacyMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
+            _mockLogger = new Mock<ILogger<LegacyMatchedLearnerDataImportService>>();
 
             _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_submissionSucceededEvent))
                 .ReturnsAsync(new List<DataLockEventModel>());
@@ -36,7 +40,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(new List<ApprenticeshipModel>());
 
-            _sut = new LegacyMatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object);
+            _sut = new LegacyMatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, _mockLogger.Object);
 
             await _sut.Import(_submissionSucceededEvent, new List<DataLockEventModel>());
         }

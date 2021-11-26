@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
@@ -17,13 +17,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
     public class WhenImporting
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
-        private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
-        private Mock<IPaymentsRepository> _mockPaymentsRepository;
         private MatchedLearnerDataImportService _sut;
         private List<DataLockEventModel> _dataLockEvents;
         private List<ApprenticeshipModel> _apprenticeships;
         private readonly Guid _dataLockEventId = Guid.NewGuid();
         private readonly Guid _nonPayableEventId1 = Guid.NewGuid();
+
+        private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
+        private Mock<IPaymentsRepository> _mockPaymentsRepository;
+        private Mock<ILogger<MatchedLearnerDataImportService>> _mockLogger;
 
         [SetUp]
         public async Task SetUp()
@@ -38,6 +40,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             
             _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
+            _mockLogger = new Mock<ILogger<MatchedLearnerDataImportService>>();
 
             _dataLockEvents = new List<DataLockEventModel>
             {
@@ -142,7 +145,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(_apprenticeships);
 
-            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper());
+            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper(), _mockLogger.Object);
 
             await _sut.Import(_submissionSucceededEvent, _dataLockEvents);
         }
@@ -162,21 +165,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         [Test]
         public void ThenStoresDataLocks()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.StoreSubmissionsData(
-                It.Is<List<TrainingModel>>(y => y.Count == 1 && y.Any(z => z.EventId == _dataLockEventId)), 
-                It.IsAny<CancellationToken>()));
+            _mockMatchedLearnerRepository.Verify(x => x.SaveTrainings(
+                It.Is<List<TrainingModel>>(y => y.Count == 1 && y.Any(z => z.EventId == _dataLockEventId))));
         }
 
         [Test]
         public void ThenStoresApprenticeshipDetails()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.StoreSubmissionsData(
+            _mockMatchedLearnerRepository.Verify(x => x.SaveTrainings(
                 It.Is<List<TrainingModel>>(y => y.Count == 1 && 
                                                 y.SelectMany(z => z.PriceEpisodes)
                                                     .SelectMany(p => p.Periods)
                                                     .Select(a => a.ApprenticeshipId)
-                                                    .Distinct().Count() == 2), 
-                It.IsAny<CancellationToken>()));
+                                                    .Distinct().Count() == 2)));
         }
     }
 }

@@ -126,7 +126,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 				PathwayCode = 400,
 				FundingLineType = "funding",
 				CompletionStatus = 0,
-				IlrSubmissionDate = DateTime.Now,
+				IlrSubmissionDate = new DateTime(2020, 10, 10),
 				StartDate = new DateTime(2020, 10, 09),
 				PriceEpisodes = new List<PriceEpisodeModel>
 				{

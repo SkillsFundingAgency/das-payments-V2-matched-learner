@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
@@ -13,9 +14,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
     public class WhenImportingForFirstCollectionPeriod
     {
         private SubmissionJobSucceeded _submissionSucceededEvent;
+        private MatchedLearnerDataImportService _sut;
+        
         private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
-        private MatchedLearnerDataImportService _sut;
+        private Mock<ILogger<MatchedLearnerDataImportService>> _mockLogger;
 
         [SetUp]
         public async Task SetUp()
@@ -30,6 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             
             _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
+            _mockLogger = new Mock<ILogger<MatchedLearnerDataImportService>>();
 
             _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_submissionSucceededEvent))
                 .ReturnsAsync(new List<DataLockEventModel>());
@@ -37,7 +41,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(new List<ApprenticeshipModel>());
 
-            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper());
+            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper(), _mockLogger.Object);
 
             await _sut.Import(_submissionSucceededEvent, new List<DataLockEventModel>());
         }
