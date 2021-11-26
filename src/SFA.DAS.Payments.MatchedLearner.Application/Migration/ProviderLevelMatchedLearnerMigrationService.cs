@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NServiceBus;
@@ -153,15 +152,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         {
             try
             {
-                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
-                await _matchedLearnerRepository.SaveTrainings(trainingData, CancellationToken.None);
-                await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+                await _matchedLearnerRepository.BeginTransactionAsync();
+                await _matchedLearnerRepository.SaveTrainings(trainingData);
+                await _matchedLearnerRepository.CommitTransactionAsync();
                 return true;
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, $"Error saving batch/provider, rolling back transaction and saving training items individually.");
-                await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
+                await _matchedLearnerRepository.RollbackTransactionAsync();
                 return await HandleSavingTrainingDataIndividually(trainingData);
             }
         }
@@ -170,7 +169,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         {
             try
             {
-                await _matchedLearnerRepository.SaveTrainingsIndividually(trainingData, CancellationToken.None);
+                await _matchedLearnerRepository.SaveTrainingsIndividually(trainingData);
                 return true;
             }
             catch (Exception exception)
