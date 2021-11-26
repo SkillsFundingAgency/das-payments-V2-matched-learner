@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -127,10 +126,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Leg
         [Test]
         public void ThenStoresDataLocks()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.StoreDataLocks(It.Is<List<DataLockEventModel>>(
+            _mockMatchedLearnerRepository.Verify(x => x.SaveDataLockEvents(It.Is<List<DataLockEventModel>>(
                 y => y.Count == 1
                      && y.Any(z => z.EventId == _dataLockEventId)
-            ), It.IsAny<CancellationToken>()));
+            )));
         }
     }
 }
