@@ -105,7 +105,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 			await ClearMatchedLearnerDataLockEvent(ukprn, uln);
 		}
 
-		public async Task<long> AddMatchedLearnerTrainings(long ukprn, long uln, byte collectionPeriod, short academicYear, bool useMatchedLearnerContext)
+		public async Task<long> AddMatchedLearnerTrainings(long ukprn, long uln, byte collectionPeriod, short academicYear)
 		{
 			var dataLockEventId = Guid.NewGuid();
 
