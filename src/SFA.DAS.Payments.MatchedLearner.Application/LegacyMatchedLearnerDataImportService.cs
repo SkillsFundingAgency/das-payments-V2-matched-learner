@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
@@ -18,11 +19,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
     {
         private readonly ILegacyMatchedLearnerRepository _legacyMatchedLearnerRepository;
         private readonly IPaymentsRepository _paymentsRepository;
+        private readonly ILogger<LegacyMatchedLearnerDataImportService> _logger;
 
-        public LegacyMatchedLearnerDataImportService(ILegacyMatchedLearnerRepository legacyMatchedLearnerRepository, IPaymentsRepository paymentsRepository)
+        public LegacyMatchedLearnerDataImportService(ILegacyMatchedLearnerRepository legacyMatchedLearnerRepository, IPaymentsRepository paymentsRepository, ILogger<LegacyMatchedLearnerDataImportService> logger)
         {
             _legacyMatchedLearnerRepository = legacyMatchedLearnerRepository ?? throw new ArgumentNullException(nameof(legacyMatchedLearnerRepository));
             _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Import(SubmissionJobSucceeded submissionSucceededEvent, List<DataLockEventModel> dataLockEvents)
@@ -36,7 +39,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             try
             {
-                await _legacyMatchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
+                await _legacyMatchedLearnerRepository.BeginTransactionAsync();
 
                 await _legacyMatchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
 
@@ -51,15 +54,29 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                 await _legacyMatchedLearnerRepository.RemoveApprenticeships(apprenticeshipIds);
 
-                await _legacyMatchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
+                await _legacyMatchedLearnerRepository.StoreApprenticeships(apprenticeships);
 
-                await _legacyMatchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
+                try
+                {
+                    await _legacyMatchedLearnerRepository.SaveDataLockEvents(dataLockEvents.Clone());
+                }
+                catch (Exception e)
+                {
+                    if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
 
-                await _legacyMatchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+                    _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
+
+                    await _legacyMatchedLearnerRepository.SaveDataLocksIndividually(dataLockEvents).ConfigureAwait(false);
+                }
+
+                await _legacyMatchedLearnerRepository.CommitTransactionAsync();
             }
-            catch
+            catch(Exception exception)
             {
-               await _legacyMatchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
+               await _legacyMatchedLearnerRepository.RollbackTransactionAsync();
+
+               _logger.LogError(exception,$"Error Importing Training Data. JobId: {submissionSucceededEvent.JobId}, AcademicYear: {submissionSucceededEvent.AcademicYear}, CollectionPeriod: {submissionSucceededEvent.CollectionPeriod} ");
+
                throw;
             }
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.Data.SqlClient;
@@ -18,13 +17,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
     public interface ILegacyMatchedLearnerRepository
     {
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
-        Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
+        Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships);
         Task RemoveApprenticeships(List<long> apprenticeshipIds);
-        Task BeginTransactionAsync(CancellationToken cancellationToken);
-        Task CommitTransactionAsync(CancellationToken cancellationToken);
-        Task RollbackTransactionAsync(CancellationToken cancellationToken);
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
         Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
+        Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents);
+        Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents);
     }
 
     public class LegacyMatchedLearnerRepository : ILegacyMatchedLearnerRepository
@@ -41,19 +41,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+        public async Task BeginTransactionAsync()
         {
-            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
         }
 
-        public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+        public async Task CommitTransactionAsync()
         {
-            await _transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.CommitAsync().ConfigureAwait(false);
         }
 
-        public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+        public async Task RollbackTransactionAsync()
         {
-            await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.RollbackAsync().ConfigureAwait(false);
         }
 
         public async Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln)
@@ -159,18 +159,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
         }
 
-        public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
+        public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships)
         {
             var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
 
-            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig).ConfigureAwait(false);
         }
 
-        public async Task StoreApprenticeships(List<ApprenticeshipModel> models, CancellationToken cancellationToken)
+        public async Task StoreApprenticeships(List<ApprenticeshipModel> models)
         {
             try
             {
-                await SaveApprenticeships(models, cancellationToken);
+                await SaveApprenticeships(models);
             }
             catch (Exception e)
             {
@@ -178,39 +178,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
                 _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
 
-                await SaveApprenticeshipsIndividually(models, cancellationToken).ConfigureAwait(false);
+                await SaveApprenticeshipsIndividually(models).ConfigureAwait(false);
             }
         }
 
-        public async Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await SaveDataLockEvents(models.Clone(), cancellationToken);
-            }
-            catch (Exception e)
-            {
-                if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
-
-                _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
-
-                await SaveDataLocksIndividually(models, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        private async Task SaveApprenticeshipsIndividually(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
+        private async Task SaveApprenticeshipsIndividually(List<ApprenticeshipModel> apprenticeships)
         {
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
 
             foreach (var apprenticeship in apprenticeships)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.Apprenticeship.AddAsync(apprenticeship, cancellationToken).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await retryDataContext.Apprenticeship.AddAsync(apprenticeship).ConfigureAwait(false);
+                    await retryDataContext.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -220,10 +204,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 }
             }
 
-            await tx.CommitAsync(cancellationToken);
+            await tx.CommitAsync();
         }
 
-        private async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
+        public async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents)
         {
             var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
 
@@ -241,31 +225,31 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .SelectMany(npp => npp.Failures))
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(failures, bulkConfig)
                 .ConfigureAwait(false);
         }
 
-        private async Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
+        public async Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents)
         {
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
 
             foreach (var dataLockEvent in dataLockEvents)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.DataLockEvent.AddAsync(dataLockEvent, cancellationToken).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await retryDataContext.DataLockEvent.AddAsync(dataLockEvent).ConfigureAwait(false);
+                    await retryDataContext.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -278,7 +262,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 }
             }
 
-            await tx.CommitAsync(cancellationToken);
+            await tx.CommitAsync();
         }
     }
 }

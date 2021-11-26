@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.Data.SqlClient;
@@ -20,12 +19,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
         Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken);
-        Task BeginTransactionAsync(CancellationToken cancellationToken);
-        Task CommitTransactionAsync(CancellationToken cancellationToken);
-        Task RollbackTransactionAsync(CancellationToken cancellationToken);
-        Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken);
-        Task SaveTrainings(IList<TrainingModel> trainings, CancellationToken cancellationToken);
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+        Task SaveTrainingsIndividually(List<TrainingModel> trainings);
+        Task SaveTrainings(IList<TrainingModel> trainings);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -42,19 +40,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+        public async Task BeginTransactionAsync()
         {
-            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
         }
 
-        public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+        public async Task CommitTransactionAsync()
         {
-            await _transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.CommitAsync().ConfigureAwait(false);
         }
 
-        public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+        public async Task RollbackTransactionAsync()
         {
-            await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.RollbackAsync().ConfigureAwait(false);
         }
 
         //TODO: implement this method from new table structure
@@ -94,6 +92,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
+            _logger.LogInformation($"Removed Previous Submissions Training Data. Ukprn: {ukprn}, AcademicYear: {academicYear}, CollectionPeriods: {string.Join(", ", collectionPeriod)} ");
+
             var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
             var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
 
@@ -103,28 +103,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await _dataContext.Database.ExecuteSqlRawAsync($"DELETE FROM dbo.Training WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND IlrSubmissionWindowPeriod IN ({ sqlParamName })", sqlParameters);
         }
 
-
-        public async Task StoreSubmissionsData(List<TrainingModel> trainings, CancellationToken cancellationToken)
+        public async Task SaveTrainings(IList<TrainingModel> trainings)
         {
-            try
-            {
-                await SaveTrainings(trainings.Clone(), cancellationToken);
-            }
-            catch (Exception e)
-            {
-                if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
+            _logger.LogInformation($"Saving Submissions Training Data in Bulk. TrainingCount {trainings.Count}");
 
-                _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
-
-                await SaveTrainingsIndividually(trainings, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        public async Task SaveTrainings(IList<TrainingModel> trainings, CancellationToken cancellationToken)
-        {
             var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 60 };
 
-            await _dataContext.BulkInsertAsync(trainings, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(trainings, bulkConfig).ConfigureAwait(false);
             
             var priceEpisodes = trainings
                 .SelectMany(training =>
@@ -137,7 +122,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 })
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig).ConfigureAwait(false);
 
             var periods = priceEpisodes
                 .SelectMany(priceEpisode =>
@@ -150,22 +135,24 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 })
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(periods, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(periods, bulkConfig).ConfigureAwait(false);
         }
 
-        public async Task SaveTrainingsIndividually(List<TrainingModel> models, CancellationToken cancellationToken)
+        public async Task SaveTrainingsIndividually(List<TrainingModel> trainings)
         {
+            _logger.LogInformation($"Saving Submissions Training Data Individually. TrainingCount {trainings.Count}");
+
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted).ConfigureAwait(false);
 
-            foreach (var training in models)
+            foreach (var training in trainings)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.Trainings.AddAsync(training, cancellationToken).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await retryDataContext.Trainings.AddAsync(training).ConfigureAwait(false);
+                    await retryDataContext.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -178,7 +165,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 }
             }
 
-            await tx.CommitAsync(cancellationToken);
+            await tx.CommitAsync();
         }
     }
 }
