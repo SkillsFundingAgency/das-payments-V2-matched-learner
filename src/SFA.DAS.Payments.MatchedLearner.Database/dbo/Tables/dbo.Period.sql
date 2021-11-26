@@ -25,7 +25,3 @@
     [CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_Period__CreationDate DEFAULT (SYSDATETIMEOFFSET()), 
 )
 GO
-
-Create Unique Index UX_Period_LogicalDuplicates on dbo.Period( [PriceEpisodeId], [IsPayable], [TransactionType], [Period], [Amount], [ApprenticeshipId], [AccountId], [TransferSenderAccountId], [ApprenticeshipEmployerType], 
-[FailedDataLock1] , [FailedDataLock2] ,[FailedDataLock3] , [FailedDataLock4] , [FailedDataLock5] , [FailedDataLock6] , [FailedDataLock7] , [FailedDataLock8] , [FailedDataLock9] , [FailedDataLock10], [FailedDataLock11], [FailedDataLock12] )
-GO

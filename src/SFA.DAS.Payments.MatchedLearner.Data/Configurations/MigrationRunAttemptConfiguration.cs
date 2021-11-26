@@ -10,12 +10,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
         {
             builder.ToTable("MigrationRunAttempt", "Payments2");
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id).HasColumnName("Id").IsRequired();
-            builder.Property(x => x.MigrationRunId).HasColumnName("MigrationRunId").IsRequired();
-            builder.Property(x => x.Status).HasColumnName("Status").IsRequired();
-            builder.Property(x => x.Ukprn).HasColumnName("Ukprn").IsRequired();
-            builder.Property(x => x.LearnerCount).HasColumnName("LearnerCount").IsRequired();
-            builder.Property(x => x.CompletionTime).HasColumnName("CompletionTime");
         }
     }
 }

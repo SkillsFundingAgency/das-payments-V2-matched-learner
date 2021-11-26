@@ -32,7 +32,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
                 new MatchedLearnerMigrationService(
                     x.GetService<MatchedLearnerDataContext>(), 
                     x.GetService<IEndpointInstanceFactory>(), 
-                    applicationSettings.MigrationQueue));
+                    applicationSettings.MigrationQueue,
+                    x.GetService<IProviderMigrationRepository>()));
 
             services.AddTransient<IProviderLevelMatchedLearnerMigrationService, ProviderLevelMatchedLearnerMigrationService>(x =>
                 new ProviderLevelMatchedLearnerMigrationService(
@@ -40,7 +41,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
                     x.GetService<IMatchedLearnerRepository>(),
                     x.GetService<IMatchedLearnerDtoMapper>(),
                     x.GetService<ILogger<ProviderLevelMatchedLearnerMigrationService>>(),
-                    applicationSettings.MigrationBatchSize));
+                    applicationSettings.MigrationBatchSize,
+                    x.GetService<IEndpointInstanceFactory>(),
+                    applicationSettings.MigrationQueue));
             services.AddTransient<IProviderMigrationRepository, ProviderMigrationRepository>();
             services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
         }
