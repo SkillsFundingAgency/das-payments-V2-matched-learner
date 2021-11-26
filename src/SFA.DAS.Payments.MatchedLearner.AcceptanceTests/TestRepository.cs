@@ -183,7 +183,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 			return training;
 		}
 
-		public List<PriceEpisodeModel> CreatePriceEpisodes(byte collectionPeriod, short academicYear, List<PeriodModel> periods)
+		public List<PriceEpisodeModel> CreatePriceEpisodes(byte collectionPeriod, short academicYear, long apprenticeshipId)
 		{
 			return new List<PriceEpisodeModel>
 			{
@@ -200,26 +200,21 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 					CompletionAmount = 550,
 					InstalmentAmount = 50,
 					NumberOfInstalments = 12,
-					Periods = periods
-				}
-			};
-		}
+					Periods = new List<PeriodModel>
+					{
+						new PeriodModel
+						{
+							Period = 1,
+							Amount = 100,
+							IsPayable = true,
+							TransactionType = 1,
 
-		public List<PeriodModel> CreatePeriods(long apprenticeshipId)
-		{
-			return new List<PeriodModel>
-			{
-				new PeriodModel
-				{
-					Period = 1,
-					Amount = 100,
-					IsPayable = true,
-					TransactionType = 1,
-
-					ApprenticeshipId = apprenticeshipId,
-					AccountId = 1000,
-					TransferSenderAccountId = 500,
-					ApprenticeshipEmployerType = 3
+							ApprenticeshipId = apprenticeshipId,
+							AccountId = 1000,
+							TransferSenderAccountId = 500,
+							ApprenticeshipEmployerType = 3
+						}
+					}
 				}
 			};
 		}

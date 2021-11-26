@@ -37,14 +37,15 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             await repository.AddDataLockEvent(_ukprn, _learnerUln);
         }
 
-        [Given("we have created a sample learner Training")]
-        public async Task GivenWeHaveCreatedASampleLearnerTraining()
+        [Given("we have created a sample learner with (.*) Training Records with (.*) Price Episode across (.*) academic Year")]
+        public async Task GivenWeHaveCreatedASampleLearnerTraining(int numberOfTraining, int numberOfPriceEpisode, int numberOfAcademicYear)
         {
+            //TODO: create number of training based on input param
+
             var repository = new TestRepository();
             await repository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
 
-            var periods = repository.CreatePeriods(_apprenticeshipId);
-            var priceEpisodes = repository.CreatePriceEpisodes(1, 2122, periods);
+            var priceEpisodes = repository.CreatePriceEpisodes(1, 2122, _apprenticeshipId);
             _expectedTraining = await repository.AddMatchedLearnerTrainings(_ukprn, _learnerUln, 1, 2122, priceEpisodes);
         }
 
@@ -254,8 +255,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             });
         }
 
-        [Then("the result matches the sample learner Training")]
-        public void ThenTheResultMatchesTheSampleLearnerTraining()
+        [Then("the result should contain (.*) Training with (.*) price episode")]
+        public void ThenTheResultMatchesTheSampleLearnerTraining(int numberOfTraining, int numberOfPriceEpisode)
         {
             var actual = _context.MatchedLearnerDto;
 
