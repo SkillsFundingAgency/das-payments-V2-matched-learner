@@ -27,7 +27,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
 
         private List<MigrationRunAttemptModel> _existingMigrationAttempts;
         private List<DataLockEventModel> _dataLockEventsForMigration;
-        private List<ApprenticeshipModel> _apprenticeshipsForMigration;
         private List<TrainingModel> _mappedTrainingModels;
 
 
@@ -56,11 +55,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
                 .ReturnsAsync(_dataLockEventsForMigration);
             _matchedLearnerRepositoryMock
                 .Setup(x => x.GetApprenticeshipsForMigration(It.IsAny<List<long>>()))
-                .ReturnsAsync(_apprenticeshipsForMigration);
+                .ReturnsAsync((List<ApprenticeshipModel>)null);
 
             _matchedLearnerDtoMapperMock = new Mock<IMatchedLearnerDtoMapper>();
             _matchedLearnerDtoMapperMock
-                .Setup(x => x.MapToModel(_dataLockEventsForMigration, _apprenticeshipsForMigration))
+                .Setup(x => x.MapToModel(_dataLockEventsForMigration, null))
                 .Returns(_mappedTrainingModels);
 
             _loggerMock = new Mock<ILogger<ProviderLevelMatchedLearnerMigrationService>>();
