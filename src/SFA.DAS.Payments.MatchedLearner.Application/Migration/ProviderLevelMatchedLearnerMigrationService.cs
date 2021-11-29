@@ -87,7 +87,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                     if (request.IsFirstBatch && _batchSize > 0)
                     {
                         await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.CompletedWithErrors);
-                        await ConvertToBatchesAndSend(currentBatch.ToList(), request.Ukprn, request.MigrationRunId);
+                        ConvertToBatchesAndSend(currentBatch.ToList(), request.Ukprn, request.MigrationRunId);
                     }
 
                     //if subsequent run requeue - todo consider splitting?
@@ -121,7 +121,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             return _matchedLearnerDtoMapper.MapToModel(providerLevelData, apprenticeships);
         }
 
-        private async Task ConvertToBatchesAndSend(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
+        private void ConvertToBatchesAndSend(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
         {
             var tasks = trainingData
                 .GroupBy(x => x.Uln)
@@ -152,7 +152,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, $"Error saving batch/provider, rolling back transaction and saving training items individually.");
+                _logger.LogError(exception, "Error saving batch/provider, rolling back transaction and saving training items individually.");
                 await _matchedLearnerRepository.RollbackTransactionAsync();
                 return await HandleSavingTrainingDataIndividually(trainingData);
             }
@@ -167,7 +167,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, $"Error saving training items individually.");
+                _logger.LogError(exception, "Error saving training items individually.");
                 return false;
             }
         }

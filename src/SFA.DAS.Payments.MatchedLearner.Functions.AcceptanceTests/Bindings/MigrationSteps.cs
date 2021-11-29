@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
@@ -33,12 +34,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         {
             _learnerCount = learnerCount;
 
-            for (var i = 1; i < learnerCount; i++)
+            for (var i = 0; i < learnerCount; i++)
             {
                 _listOfUln.Add(_learnerUln++);
                 await _testContext.TestRepository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
                 await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
-                await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, false);
+                await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, true);
             }
         }
 
@@ -47,7 +48,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         {
             var random = new Random();
 
-            for (var i = 1; i < learnerCount; i++)
+            for (var i = 0; i < learnerCount; i++)
             {
                 var index = random.Next(_learnerCount);
                 var learnerUln = _listOfUln[index];
@@ -65,18 +66,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Then("Matched Learners Trainings are only Imported for (.*) Learners")]
         public async Task ThenLearnerDataLockEventsAreMigratedIntoTheNewFormat(int learnerCount)
         {
+            var trainingRecords = new List<TrainingModel>();
             await WaitForIt(async () =>
             {
-                var trainingRecordsWaitFor = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
-                return trainingRecordsWaitFor.Any();
+                trainingRecords = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
+                return trainingRecords.Any();
             }, "Failed to find any training records.");
+
+            trainingRecords.Count(uln => _listOfUln.Contains(uln.Uln)).Should().Be(learnerCount);
+
+            //NOTE: because all the dataLock evens have been setup using same UKPRN and training details
+            //we are only interested in count as the only difference here is LearnerUln
+            //also mapping logic has been tested elsewhere therefor we only need to assert single record
 
             var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
             var expectedDle = dataLockEvents.First();
-
-            var trainingRecords = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
-
-            trainingRecords.Count.Should().Be(1);
 
             var training = trainingRecords.First();
 
