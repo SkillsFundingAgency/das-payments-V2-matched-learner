@@ -20,7 +20,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         private static HttpClient _client = new HttpClient();
         private readonly string _url;
 
-        public TestClient()
+        public TestClient(bool useV1Api)
         {
             _url = TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl;
             if (!string.IsNullOrEmpty(_url))
@@ -43,7 +43,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                 {
                     configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
                     {
-                        {"EnvironmentName", "Development"},
+                        { "EnvironmentName", "Development" },
+                        { "UseV1Api", useV1Api ? "True" : "False" },
                     });
                 });
             });

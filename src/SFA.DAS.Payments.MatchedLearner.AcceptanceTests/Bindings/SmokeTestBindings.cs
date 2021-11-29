@@ -16,8 +16,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         private readonly long _ukprn;
         private readonly long _learnerUln;
         private readonly long _apprenticeshipId;
-        private TrainingModel _expectedTraining;
-
+        private readonly List<TrainingModel> _expectedTrainings = new List<TrainingModel>();
+        private bool _useV1Api;
         public SmokeTestBindings(SmokeTestContext context)
         {
             _context = context;
@@ -29,75 +29,60 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             _apprenticeshipId = _ukprn + _learnerUln;
         }
 
-        [Given("we have created a sample learner")]
-        public async Task GivenWeHaveCreatedASampleLearner()
-        {
-            var repository = new TestRepository();
-            await repository.ClearLearner(_ukprn, _learnerUln);
-            await repository.AddDataLockEvent(_ukprn, _learnerUln);
-        }
-
-        [Given("we have created a sample learner with (.*) Training Records with (.*) Price Episode across (.*) academic Year")]
-        public async Task GivenWeHaveCreatedASampleLearnerTraining(int numberOfTraining, int numberOfPriceEpisode, int numberOfAcademicYear)
-        {
-            //TODO: create number of training based on input param
-
-            var repository = new TestRepository();
-            await repository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
-
-            var priceEpisodes = repository.CreatePriceEpisodes(1, 2122, _apprenticeshipId);
-            _expectedTraining = await repository.AddMatchedLearnerTrainings(_ukprn, _learnerUln, 1, 2122, priceEpisodes);
-        }
-
-        [Given("we have created (.*) sample learners")]
+        [Given("we have created (.*) sample learners in Legacy Schema")]
         public async Task GivenWeHaveCreatedASampleLearner(int learnerCount)
         {
+            _useV1Api = true;
             var repository = new TestRepository();
+            var ukprn = _ukprn;
+            var learnerUln = _learnerUln;
             for (var index = 1; index < learnerCount + 1; index++)
             {
-                await repository.ClearLearner(index, index);
-                await repository.AddDataLockEvent(index, index);
+                
+                await repository.ClearLearner(ukprn, learnerUln);
+                await repository.AddDataLockEvent(ukprn, learnerUln);
+
+                ukprn += index;
+                learnerUln += index;
             }
         }
 
+        [When("we call the API (.*) times with the sample learners details in Legacy Schema")]
+        public void WhenWeCallTheApiTimesWithTheSampleLearnersDetails(int learnerCount)
+        {
+            _useV1Api = true;
+            var request = new TestClient(_useV1Api);
+            var ukprn = _ukprn;
+            var learnerUln = _learnerUln;
 
+            for (var index = 1; index < learnerCount + 1; index++)
+            {
+                var currentUkprn = ukprn;
+                var currentUln = learnerUln;
+                _context.Requests.Add(request.Awaiting(client => client.Handle(currentUkprn, currentUln)));
+                ukprn += index;
+                learnerUln += index;
+            }
+        }
 
-        [When("we call the API with a learner that does not exist")]
+        [When("we call the API with a learner that does not exist in Legacy Schema")]
         public void WhenWeCallTheApiWithALearnerThatDoesNotExist()
         {
-            var request = new TestClient();
+            _useV1Api = true;
+            var request = new TestClient(_useV1Api);
             var act = request.Awaiting(client => client.Handle(0, 0));
             _context.FailedRequest = act;
         }
 
-        [When("we call the API with the sample learners details")]
+        [When("we call the API with the sample learners details in Legacy Schema")]
         public async Task WhenWeCallTheApiWithTheSampleLearnersDetails()
         {
-            var request = new TestClient();
+            _useV1Api = true;
+
+            var request = new TestClient(_useV1Api);
 
             _context.MatchedLearnerDto = await request.Handle(_ukprn, _learnerUln);
         }
-
-        [When("we call the V2 API with the sample learners details")]
-        public async Task WhenWeCallTheV2ApiWithTheSampleLearnersDetails()
-        {
-            var request = new TestClient();
-
-            _context.MatchedLearnerDto = await request.Handle(_ukprn, _learnerUln);
-        }
-
-        [When("we call the API (.*) times with the sample learners details")]
-        public void WhenWeCallTheApiTimesWithTheSampleLearnersDetails(int learnerCount)
-        {
-            var request = new TestClient();
-            for (var index = 1; index < learnerCount + 1; index++)
-            {
-                var currentIndex = index;
-                _context.Requests.Add(request.Awaiting(client => client.Handle(currentIndex, currentIndex)));
-            }
-        }
-
-
 
         [Then("the result should be a (.*)")]
         public void ThenTheResultShouldBeA(int p0)
@@ -255,60 +240,129 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             });
         }
 
-        [Then("the result should contain (.*) Training with (.*) price episode")]
-        public void ThenTheResultMatchesTheSampleLearnerTraining(int numberOfTraining, int numberOfPriceEpisode)
+
+
+
+
+
+        [Given("we have created a sample learner with (.*) Training Records with (.*) Price Episode across (.*) academic Year")]
+        public async Task GivenWeHaveCreatedASampleLearnerTraining(int numberOfTraining, int numberOfPriceEpisode, int numberOfAcademicYear)
         {
+            var repository = new TestRepository();
+            await repository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
+
+            var singleTrainingMultiYear = numberOfAcademicYear > 1 && numberOfTraining == 1;
+            var singlePriceEpisodeMultiYear = numberOfPriceEpisode == 1 && singleTrainingMultiYear;
+
+            var course = 100;
+            var agreedPrice = 3000;
+            short academicYear = 2122;
+            byte collectionPeriod = 1;
+
+            for (var i = 0; i < numberOfAcademicYear; i++)
+            {
+                course = singleTrainingMultiYear ? course : course + 1;
+                var priceEpisodes = new List<PriceEpisodeModel>();
+                for (var j = 0; j < numberOfPriceEpisode; j++)
+                {
+                    agreedPrice = singlePriceEpisodeMultiYear ? agreedPrice : agreedPrice+1;
+                    priceEpisodes.Add(repository.CreatePriceEpisodes(agreedPrice, collectionPeriod, academicYear, _apprenticeshipId));
+                    collectionPeriod++;
+                }
+
+                var training = await repository.AddMatchedLearnerTrainings(course, _ukprn, _learnerUln, 1, academicYear, priceEpisodes);
+
+                academicYear = (short)(academicYear + 101);
+
+                _expectedTrainings.Add(training);
+            }
+        }
+
+        [When("we call the V2 API with the sample learners details")]
+        public async Task WhenWeCallTheV2ApiWithTheSampleLearnersDetails()
+        {
+            var request = new TestClient(_useV1Api);
+
+            _context.MatchedLearnerDto = await request.Handle(_ukprn, _learnerUln);
+        }
+
+        [Then("the result should contain (.*) Training with (.*) price episode and (.*) Periods")]
+        public void ThenTheResultMatchesTheSampleLearnerTraining(int numberOfTraining, int numberOfPriceEpisode, int numberOfPeriod)
+        {
+            var expectedTrainings = _expectedTrainings
+                .OrderByDescending(t => t.AcademicYear)
+                .ThenByDescending(t => t.IlrSubmissionWindowPeriod)
+                .ToList();
+
+            var expectedHeader = expectedTrainings.First();
+
             var actual = _context.MatchedLearnerDto;
 
             actual.Should().NotBeNull();
 
-            actual.StartDate.Date.Should().Be(_expectedTraining.StartDate);
-            actual.IlrSubmissionDate.Date.Should().Be(_expectedTraining.IlrSubmissionDate);
-            actual.IlrSubmissionWindowPeriod.Should().Be(_expectedTraining.IlrSubmissionWindowPeriod);
-            actual.AcademicYear.Should().Be(_expectedTraining.AcademicYear);
+            actual.StartDate.Date.Should().Be(expectedHeader.StartDate);
+            actual.IlrSubmissionDate.Date.Should().Be(expectedHeader.IlrSubmissionDate);
+            actual.IlrSubmissionWindowPeriod.Should().Be(expectedHeader.IlrSubmissionWindowPeriod);
+            actual.AcademicYear.Should().Be(expectedHeader.AcademicYear);
             actual.Ukprn.Should().Be(_ukprn);
             actual.Uln.Should().Be(_learnerUln);
-            actual.Training.Should().HaveCount(1);
-            
-            var actualTraining = actual.Training.First();
+            actual.Training.Should().HaveCount(numberOfTraining);
 
-            actualTraining.StartDate.Should().Be(_expectedTraining.StartDate);
-            actualTraining.FrameworkCode.Should().Be(_expectedTraining.FrameworkCode);
-            actualTraining.FundingLineType.Should().BeNullOrEmpty();
-            actualTraining.PathwayCode.Should().Be(_expectedTraining.PathwayCode);
-            actualTraining.ProgrammeType.Should().Be(_expectedTraining.ProgrammeType);
-            actualTraining.Reference.Should().Be(_expectedTraining.Reference);
-            actualTraining.StandardCode.Should().Be(_expectedTraining.StandardCode);
-            actualTraining.PriceEpisodes.Should().HaveCount(1);
-            
-            
-            var actualPriceEpisode = actualTraining.PriceEpisodes.First();
-            var expectedPriceEpisode = _expectedTraining.PriceEpisodes.First();
+            for (var i = 0; i < numberOfTraining; i++)
+            {
+                var expectedTraining = expectedTrainings.ElementAt(i);
+                var actualTraining = actual.Training.ElementAt(i);
 
-            actualPriceEpisode.Identifier.Should().Be(expectedPriceEpisode.Identifier);
-            actualPriceEpisode.AcademicYear.Should().Be(expectedPriceEpisode.AcademicYear);
-            actualPriceEpisode.CollectionPeriod.Should().Be(expectedPriceEpisode.CollectionPeriod);
-            actualPriceEpisode.AgreedPrice.Should().Be(expectedPriceEpisode.AgreedPrice);
-            actualPriceEpisode.StartDate.Should().Be(expectedPriceEpisode.StartDate);
-            actualPriceEpisode.EndDate.Should().Be(expectedPriceEpisode.ActualEndDate);
-            actualPriceEpisode.NumberOfInstalments.Should().Be(expectedPriceEpisode.NumberOfInstalments);
-            actualPriceEpisode.InstalmentAmount.Should().Be(expectedPriceEpisode.InstalmentAmount);
-            actualPriceEpisode.CompletionAmount.Should().Be(expectedPriceEpisode.CompletionAmount);
-            actualPriceEpisode.TotalNegotiatedPriceStartDate.Should().Be(expectedPriceEpisode.TotalNegotiatedPriceStartDate);
-            actualPriceEpisode.Periods.Should().HaveCount(1);
-            
-            
-            var actualPeriod = actualPriceEpisode.Periods.First();
-            var expectedPeriod = expectedPriceEpisode.Periods.First();
+                actualTraining.StartDate.Should().Be(expectedTraining.StartDate);
+                actualTraining.FrameworkCode.Should().Be(expectedTraining.FrameworkCode);
+                actualTraining.FundingLineType.Should().BeNullOrEmpty();
+                actualTraining.PathwayCode.Should().Be(expectedTraining.PathwayCode);
+                actualTraining.ProgrammeType.Should().Be(expectedTraining.ProgrammeType);
+                actualTraining.Reference.Should().Be(expectedTraining.Reference);
+                actualTraining.StandardCode.Should().Be(expectedTraining.StandardCode);
+                actualTraining.PriceEpisodes.Should().HaveCount(numberOfPriceEpisode);
 
-            actualPeriod.Period.Should().Be(expectedPeriod.Period);
-            actualPeriod.IsPayable.Should().Be(expectedPeriod.IsPayable);
-            actualPeriod.AccountId.Should().Be(expectedPeriod.AccountId);
-            actualPeriod.ApprenticeshipId.Should().Be(expectedPeriod.ApprenticeshipId);
-            actualPeriod.ApprenticeshipEmployerType.Should().Be(expectedPeriod.ApprenticeshipEmployerType);
-            actualPeriod.TransferSenderAccountId.Should().Be(expectedPeriod.TransferSenderAccountId);
-            
-            actualPeriod.DataLockFailures.Should().BeEmpty();
+                var expectedPriceEpisodes = expectedTrainings
+                    .SelectMany(t => t.PriceEpisodes)
+                    .OrderByDescending(t => t.AcademicYear)
+                    .ThenByDescending(t => t.CollectionPeriod)
+                    .ToList();
+
+                for (var j = 0; j < numberOfPriceEpisode; j++)
+                {
+                    var actualPriceEpisode = actualTraining.PriceEpisodes.ElementAt(j);
+                    var expectedPriceEpisode = expectedPriceEpisodes.ElementAt(j);
+
+                    actualPriceEpisode.Identifier.Should().Be(expectedPriceEpisode.Identifier);
+                    actualPriceEpisode.AcademicYear.Should().Be(expectedPriceEpisode.AcademicYear);
+                    actualPriceEpisode.CollectionPeriod.Should().Be(expectedPriceEpisode.CollectionPeriod);
+                    actualPriceEpisode.AgreedPrice.Should().Be(expectedPriceEpisode.AgreedPrice);
+                    actualPriceEpisode.StartDate.Should().Be(expectedPriceEpisode.StartDate);
+                    actualPriceEpisode.EndDate.Should().Be(expectedPriceEpisode.ActualEndDate);
+                    actualPriceEpisode.NumberOfInstalments.Should().Be(expectedPriceEpisode.NumberOfInstalments);
+                    actualPriceEpisode.InstalmentAmount.Should().Be(expectedPriceEpisode.InstalmentAmount);
+                    actualPriceEpisode.CompletionAmount.Should().Be(expectedPriceEpisode.CompletionAmount);
+                    actualPriceEpisode.TotalNegotiatedPriceStartDate.Should().Be(expectedPriceEpisode.TotalNegotiatedPriceStartDate);
+                    actualPriceEpisode.Periods.Should().HaveCount(numberOfPeriod);
+
+                    var expectedPeriods = expectedTrainings.SelectMany(t => t.PriceEpisodes).SelectMany(p => p.Periods).ToList();
+
+                    for (var k = 0; k < numberOfPeriod; k++)
+                    {
+                        var actualPeriod = actualPriceEpisode.Periods.ElementAt(k);
+                        var expectedPeriod = expectedPeriods.First(pd => pd.AccountId == actualPeriod.AccountId);
+
+                        actualPeriod.Period.Should().Be(expectedPeriod.Period);
+                        actualPeriod.IsPayable.Should().Be(expectedPeriod.IsPayable);
+                        actualPeriod.AccountId.Should().Be(expectedPeriod.AccountId);
+                        actualPeriod.ApprenticeshipId.Should().Be(expectedPeriod.ApprenticeshipId);
+                        actualPeriod.ApprenticeshipEmployerType.Should().Be(expectedPeriod.ApprenticeshipEmployerType);
+                        actualPeriod.TransferSenderAccountId.Should().Be(expectedPeriod.TransferSenderAccountId);
+
+                        actualPeriod.DataLockFailures.Should().BeEmpty();
+                    }
+                }
+            }
         }
     }
 }

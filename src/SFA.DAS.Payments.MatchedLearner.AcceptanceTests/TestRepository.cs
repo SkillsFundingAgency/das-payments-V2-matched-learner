@@ -152,7 +152,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 				new SqlParameter("uln", uln));
 		}
 
-		public async Task<TrainingModel> AddMatchedLearnerTrainings(long ukprn, long uln, byte collectionPeriod, short academicYear, List<PriceEpisodeModel> priceEpisodes)
+		public async Task<TrainingModel> AddMatchedLearnerTrainings(int isNewCourse, long ukprn, long uln, byte collectionPeriod, short academicYear, List<PriceEpisodeModel> priceEpisodes)
 		{
 			var dataLockEventId = Guid.NewGuid();
 
@@ -165,7 +165,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 				Ukprn = ukprn,
 				Uln = uln,
 				Reference = "ZPROG001",
-				ProgrammeType = 100,
+				ProgrammeType = isNewCourse,
 				StandardCode = 200,
 				FrameworkCode = 300,
 				PathwayCode = 400,
@@ -183,37 +183,35 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 			return training;
 		}
 
-		public List<PriceEpisodeModel> CreatePriceEpisodes(byte collectionPeriod, short academicYear, long apprenticeshipId)
+		public PriceEpisodeModel CreatePriceEpisodes(decimal agreedPrice, byte collectionPeriod, short academicYear, long apprenticeshipId)
 		{
-			return new List<PriceEpisodeModel>
+			var pId = 25 + (agreedPrice - 3000);
+			return  new PriceEpisodeModel
 			{
-				new PriceEpisodeModel
+				Identifier = $"{pId}-104-01/08/2020",
+				AgreedPrice = agreedPrice,
+				StartDate = new DateTime(2020, 10, 07),
+				TotalNegotiatedPriceStartDate = new DateTime(2021, 01, 01),
+				PlannedEndDate = new DateTime(2021, 10, 11),
+				ActualEndDate = new DateTime(2021, 10, 12),
+				AcademicYear = academicYear,
+				CollectionPeriod = collectionPeriod,
+				CompletionAmount = 550,
+				InstalmentAmount = 50,
+				NumberOfInstalments = 12,
+				Periods = new List<PeriodModel>
 				{
-					Identifier = "25-104-01/08/2020",
-					AgreedPrice = 3000,
-					StartDate = new DateTime(2020, 10, 07),
-					TotalNegotiatedPriceStartDate = new DateTime(2021, 01, 01),
-					PlannedEndDate = new DateTime(2021, 10, 11),
-					ActualEndDate = new DateTime(2021, 10, 12),
-					AcademicYear = academicYear,
-					CollectionPeriod = collectionPeriod,
-					CompletionAmount = 550,
-					InstalmentAmount = 50,
-					NumberOfInstalments = 12,
-					Periods = new List<PeriodModel>
+					new PeriodModel
 					{
-						new PeriodModel
-						{
-							Period = 1,
-							Amount = 100,
-							IsPayable = true,
-							TransactionType = 1,
+						Period = 1,
+						Amount = 100,
+						IsPayable = true,
+						TransactionType = 1,
 
-							ApprenticeshipId = apprenticeshipId,
-							AccountId = 1000,
-							TransferSenderAccountId = 500,
-							ApprenticeshipEmployerType = 3
-						}
+						ApprenticeshipId = apprenticeshipId,
+						AccountId = (long)agreedPrice,
+						TransferSenderAccountId = 500,
+						ApprenticeshipEmployerType = 3
 					}
 				}
 			};
