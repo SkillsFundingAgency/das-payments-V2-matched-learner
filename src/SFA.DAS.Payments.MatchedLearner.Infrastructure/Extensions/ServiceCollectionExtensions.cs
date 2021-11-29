@@ -95,6 +95,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 .GetSection(ApplicationSettingsKeys.MatchedLearnerConfigKey)
                 .Get<ApplicationSettings>();
 
+            applicationSettings.UseV1Api = configuration.GetValue<bool>("UseV1Api");
+
             if (applicationSettings == null)
                 throw new InvalidOperationException("invalid Configuration, unable find 'MatchedLearner' Configuration section");
 

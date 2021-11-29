@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
+﻿using System;
+
+namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 {
     public class ApplicationSettings
     {
