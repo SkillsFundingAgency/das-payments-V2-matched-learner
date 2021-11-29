@@ -39,17 +39,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 EnvironmentName = "Development"
             };
 
-            _host = new HostBuilder()
-                .ConfigureAppConfiguration(a =>
-                {
-                    a.AddInMemoryCollection(appConfig);
-                })
-                .ConfigureWebJobs(builder => builder
-                    .AddAzureStorageCoreServices()
-                    .AddServiceBus()
-                    .AddHttp()
-                    .UseWebJobsStartup(typeof(Startup), context, NullLoggerFactory.Instance))
-                .Build();
+            try
+            {
+                _host = new HostBuilder()
+                    .ConfigureAppConfiguration(a =>
+                    {
+                        a.AddInMemoryCollection(appConfig);
+                    })
+                    .ConfigureWebJobs(builder => builder
+                        .AddAzureStorageCoreServices()
+                        .AddServiceBus()
+                        .AddHttp()
+                        .UseWebJobsStartup(typeof(Startup), context, NullLoggerFactory.Instance))
+                    .Build();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
         }
 
         public async Task StartHost()

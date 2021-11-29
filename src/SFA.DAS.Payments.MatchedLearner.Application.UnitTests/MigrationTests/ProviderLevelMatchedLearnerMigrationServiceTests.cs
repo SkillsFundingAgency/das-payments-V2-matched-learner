@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -23,6 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
         private Mock<IMatchedLearnerRepository> _matchedLearnerRepositoryMock;
         private Mock<IMatchedLearnerDtoMapper> _matchedLearnerDtoMapperMock;
         private Mock<ILogger<ProviderLevelMatchedLearnerMigrationService>> _loggerMock;
+        private Mock<IProviderLevelMigrationRequestSendWrapper> _providerLevelMigrationRequestSendWrapperMock;
         private ProviderLevelMatchedLearnerMigrationService _sut;
 
         private Guid _migrationRunId;
@@ -67,22 +64,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
                 .Returns(_mappedTrainingModels);
 
             _loggerMock = new Mock<ILogger<ProviderLevelMatchedLearnerMigrationService>>();
+            _providerLevelMigrationRequestSendWrapperMock = new Mock<IProviderLevelMigrationRequestSendWrapper>();
 
-            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 0);
-        }
 
-        [Test]
-        public async Task WhenMigratingProviderScopedData_AndMigrationIsCompleted_ThenReturns()
-        {
-            //Arrange
-            _existingMigrationAttempts.ForEach(x => x.Status = MigrationStatus.Completed);
-
-            //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
-
-            //Assert
-            _providerMigrationRepositoryMock
-                .Verify(x => x.CreateMigrationAttempt(It.IsAny<MigrationRunAttemptModel>()), Times.Never);
+            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 0, _providerLevelMigrationRequestSendWrapperMock.Object);
         }
 
         [Test]
@@ -92,7 +77,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             _existingMigrationAttempts.Clear();
 
             //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
             _providerMigrationRepositoryMock
@@ -107,7 +92,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             _existingMigrationAttempts.ForEach(x => x.Status = status);
 
             //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
             _providerMigrationRepositoryMock
@@ -121,24 +106,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             _existingMigrationAttempts.ForEach(x => x.Status = MigrationStatus.InProgress);
 
             //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
             _providerMigrationRepositoryMock
                 .Verify(x => x.CreateMigrationAttempt(It.IsAny<MigrationRunAttemptModel>()), Times.Once);
-        }
-
-        [Test]
-        public async Task WhenMigratingProviderScopedData_AndMigrationFailedPreviously_ThenSavesIndividually()
-        {
-            //Arrange
-            _existingMigrationAttempts.ForEach(x => x.Status = MigrationStatus.Failed);
-
-            //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
-
-            //Assert
-            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainingsIndividually(_mappedTrainingModels, It.IsAny<CancellationToken>()));
         }
 
         [Test]
@@ -148,27 +120,42 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             _existingMigrationAttempts.Clear();
 
             //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(_mappedTrainingModels, It.IsAny<CancellationToken>()));
+            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(_mappedTrainingModels));
         }
 
         [Test]
-        public void WhenMigratingProviderScopedData_AndExceptionThrownWhileStoring_ThenTransactionRolledBack()
+        public async Task WhenMigratingProviderScopedData_AndExceptionThrownWhileStoring_ThenTransactionRolledBack()
         {
             //Arrange
             _existingMigrationAttempts.Clear();
             _matchedLearnerRepositoryMock
-                .Setup(x => x.SaveTrainings(_mappedTrainingModels, It.IsAny<CancellationToken>()))
+                .Setup(x => x.SaveTrainings(_mappedTrainingModels))
                 .ThrowsAsync(new InvalidOperationException());
 
             //Act
-            Assert.ThrowsAsync<InvalidOperationException>(() => _sut.MigrateProviderScopedData(_migrationRunId, _ukprn));
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _matchedLearnerRepositoryMock.Verify(x => x.RollbackTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
-            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.Failed), Times.Once);
+            _matchedLearnerRepositoryMock.Verify(x => x.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Test]
+        public async Task WhenMigratingProviderScopedData_AndExceptionThrownWhileStoring_ThenTrainingItemsAreSavedIndividually()
+        {
+            //Arrange
+            _existingMigrationAttempts.Clear();
+            _matchedLearnerRepositoryMock
+                .Setup(x => x.SaveTrainings(_mappedTrainingModels))
+                .ThrowsAsync(new InvalidOperationException());
+
+            //Act
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
+
+            //Assert
+            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainingsIndividually(_mappedTrainingModels), Times.Once);
         }
 
         [Test]
@@ -178,27 +165,66 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             _existingMigrationAttempts.Clear();
 
             //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.Completed), Times.Once);
+            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.Completed, null), Times.Once);
         }
 
         [Test]
-        public async Task WhenMigratingProviderScopedData_AndIsLargeDataSetToBeBatched_ThenDoesBulkInsertInBatches()
+        public async Task WhenMigratingProviderScopedData_AndBothBulkAndIndividualSaveFails_ThenBatchesAreCreated()
         {
             //Arrange
             _existingMigrationAttempts.Clear();
-            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 2);
+            _matchedLearnerRepositoryMock
+                .Setup(x => x.SaveTrainings(_mappedTrainingModels))
+                .ThrowsAsync(new InvalidOperationException());
+            _matchedLearnerRepositoryMock
+                .Setup(x => x.SaveTrainingsIndividually(_mappedTrainingModels))
+                .ThrowsAsync(new InvalidOperationException());
+
+            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 2, _providerLevelMigrationRequestSendWrapperMock.Object);
 
             //Act
-            await _sut.MigrateProviderScopedData(_migrationRunId, _ukprn);
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(It.Is<IList<TrainingModel>>(y => 
-                y.Count == 2), It.IsAny<CancellationToken>()), Times.Once);
-            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainings(It.Is<IList<TrainingModel>>(y =>
-                y.Count == 1), It.IsAny<CancellationToken>()), Times.Once);
+            _providerLevelMigrationRequestSendWrapperMock.Verify(x => x.Send(It.Is<ProviderLevelMigrationRequest>(request => 
+                request.TrainingData.Length == 2
+                && request.Ukprn == _ukprn
+                && request.BatchNumber == 0
+                && request.TotalBatches == 2
+                && request.MigrationRunId == _migrationRunId
+                )), Times.Once);
+
+            _providerLevelMigrationRequestSendWrapperMock.Verify(x => x.Send(It.Is<ProviderLevelMigrationRequest>(request =>
+                request.TrainingData.Length == 1
+                && request.Ukprn == _ukprn
+                && request.BatchNumber == 1
+                && request.TotalBatches == 2
+                && request.MigrationRunId == _migrationRunId
+            )), Times.Once);
+        }
+
+        [Test]
+        public async Task WhenMigratingProviderScopedData_AndBothBulkAndIndividualSaveFails_ThenFirstRunIsSetToCompletedWithErrors()
+        {
+            //Arrange
+            _existingMigrationAttempts.Clear();
+            _matchedLearnerRepositoryMock
+                .Setup(x => x.SaveTrainings(_mappedTrainingModels))
+                .ThrowsAsync(new InvalidOperationException());
+            _matchedLearnerRepositoryMock
+                .Setup(x => x.SaveTrainingsIndividually(_mappedTrainingModels))
+                .ThrowsAsync(new InvalidOperationException());
+
+            _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 2, _providerLevelMigrationRequestSendWrapperMock.Object);
+
+            //Act
+            await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
+
+            //Assert
+            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.CompletedWithErrors, null), Times.Once);
         }
     }
 }

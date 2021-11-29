@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
@@ -21,8 +20,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
         private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
         private readonly ILogger<ProviderLevelMatchedLearnerMigrationService> _logger;
         private readonly int _batchSize;
-        private readonly IEndpointInstanceFactory _endpointInstanceFactory;
-        private readonly string _providerLevelMatchedLearnerMigration;
+        private readonly IProviderLevelMigrationRequestSendWrapper _providerLevelMigrationRequestSendWrapper;
 
         public ProviderLevelMatchedLearnerMigrationService(
             IProviderMigrationRepository providerMigrationRepository,
@@ -30,16 +28,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             IMatchedLearnerDtoMapper matchedLearnerDtoMapper, 
             ILogger<ProviderLevelMatchedLearnerMigrationService> logger,
             int batchSize,
-            IEndpointInstanceFactory endpointInstanceFactory,
-            string providerLevelMatchedLearnerMigration)
+            IProviderLevelMigrationRequestSendWrapper providerLevelMigrationRequestSendWrapper)
         {
             _providerMigrationRepository = providerMigrationRepository;
             _matchedLearnerRepository = matchedLearnerRepository;
             _matchedLearnerDtoMapper = matchedLearnerDtoMapper;
             _logger = logger;
             _batchSize = batchSize;
-            _endpointInstanceFactory = endpointInstanceFactory;
-            _providerLevelMatchedLearnerMigration = providerLevelMatchedLearnerMigration;
+            _providerLevelMigrationRequestSendWrapper = providerLevelMigrationRequestSendWrapper;
         }
 
         public async Task MigrateProviderScopedData(ProviderLevelMigrationRequest request)
@@ -88,13 +84,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                     _logger.LogInformation(request.IsFirstBatch ?
                         $"Failed migrating data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Splitting into batches for reprocessing." :
                         $"Failed migrating batch of data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Batch {request.BatchNumber} of {request.TotalBatches}.");
-                    if (request.IsFirstBatch)
+                    if (request.IsFirstBatch && _batchSize > 0)
                     {
                         await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.CompletedWithErrors);
                         await ConvertToBatchesAndSend(currentBatch.ToList(), request.Ukprn, request.MigrationRunId);
                     }
 
                     //if subsequent run requeue - todo consider splitting?
+                    _logger.LogInformation("Batches not queued either because this is a subsequent run of data already batched or a non zero batch size has not been configured.");
                 }
 
             }
@@ -126,24 +123,20 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         private async Task ConvertToBatchesAndSend(List<TrainingModel> trainingData, long ukprn, Guid migrationRunId)
         {
-            var endpointInstance = await _endpointInstanceFactory.GetEndpointInstance();
-
             var tasks = trainingData
                 .GroupBy(x => x.Uln)
                 .Select((trainingItems, index) => new { trainingItems, index })
                 .GroupBy(x => x.index / _batchSize)
                 .Select(async g =>
                 {
-                    var options = new SendOptions();
-                    options.SetDestination(_providerLevelMatchedLearnerMigration);
-                    await endpointInstance.Send(new ProviderLevelMigrationRequest
+                    await _providerLevelMigrationRequestSendWrapper.Send(new ProviderLevelMigrationRequest
                     {
                         TrainingData = g.SelectMany(batch => batch.trainingItems).ToArray(),
                         Ukprn = ukprn,
                         BatchNumber = g.Key,
-                        TotalBatches = g.Count(),
+                        TotalBatches = (int)Math.Ceiling((decimal)trainingData.Count/_batchSize),
                         MigrationRunId = migrationRunId
-                    }, options);
+                    }).ConfigureAwait(false);
                 });
             Task.WaitAll(tasks.ToArray());
         }

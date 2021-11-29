@@ -35,6 +35,11 @@
     <Folder Include="Features\" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <SpecFlowFeatureFiles Update="Features\MigrationTests.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>MigrationTests.feature.cs</LastGenOutput>

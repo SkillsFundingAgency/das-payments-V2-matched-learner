@@ -90,11 +90,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         
         public async Task PublishProviderLevelMigrationRequest(long ukprn)
         {
-            await _endpointInstance.Publish(new ProviderLevelMigrationRequest
+            var options = new SendOptions();
+            options.SetDestination(_testConfiguration.MigrationQueue);
+            await _endpointInstance.Send(new ProviderLevelMigrationRequest
             {
                 Ukprn = ukprn,
                 MigrationRunId = Guid.NewGuid(),
-            });
+            }, options);
         }
     }
 }

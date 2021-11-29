@@ -39,7 +39,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         {
             await _testContext.TestRepository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
             await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
-            await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, false);
+            await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, true);
         }
 
         [Given("there is existing data For CollectionPeriod (.*) and AcademicYear (.*)")]

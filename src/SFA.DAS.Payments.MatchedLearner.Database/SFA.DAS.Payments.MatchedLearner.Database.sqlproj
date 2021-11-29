@@ -100,4 +100,7 @@
       <Value>$(SqlCmdVar__3)</Value>
     </SqlCmdVariable>
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="SFA.DAS.Payments.MatchedLearner.Database.refactorlog" />
+  </ItemGroup>
 </Project>
