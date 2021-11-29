@@ -17,10 +17,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
     {
         public MatchedLearnerDto MapToDto(List<TrainingModel> trainings)
         {
-            var firstTraining = trainings
+            trainings = trainings
                 .OrderByDescending(t => t.AcademicYear)
                 .ThenByDescending(t => t.IlrSubmissionWindowPeriod)
-                .First();
+                .ToList();
+
+             var firstTraining =   trainings.First();
 
             var result = new MatchedLearnerDto
             {
@@ -44,7 +46,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                     x.Ukprn,
                 }).Select(trainingGrp =>
                 {
-                    var currentTrainings = trainingGrp.ToList();
+                    var priceEpisodes = trainingGrp.SelectMany(tg => tg.PriceEpisodes)
+                        .OrderByDescending(t => t.AcademicYear)
+                        .ThenByDescending(t => t.CollectionPeriod)
+                        .ToList();
+
                     return new TrainingDto
                     {
                         Reference = trainingGrp.Key.Reference,
@@ -54,7 +60,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         PathwayCode = trainingGrp.Key.PathwayCode,
                         FundingLineType = null,
                         StartDate = trainingGrp.Key.StartDate,
-                        PriceEpisodes = trainingGrp.SelectMany(tg => tg.PriceEpisodes).GroupBy(x => new
+                        PriceEpisodes = priceEpisodes.GroupBy(x => new
                         {
                             x.Identifier,
                             x.AgreedPrice,
@@ -66,15 +72,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                             x.TotalNegotiatedPriceStartDate
                         }).Select(priceEpisode =>
                         {
-                            var firstDataLockEvent = currentTrainings
-                                .OrderByDescending(t => t.AcademicYear)
-                                .ThenByDescending(t => t.IlrSubmissionWindowPeriod)
-                                .First();
-
+                            var firstPriceEpisode = priceEpisodes.First();
                             return new PriceEpisodeDto
                             {
-                                AcademicYear = firstDataLockEvent.AcademicYear,
-                                CollectionPeriod = firstDataLockEvent.IlrSubmissionWindowPeriod,
+                                AcademicYear = firstPriceEpisode.AcademicYear,
+                                CollectionPeriod = firstPriceEpisode.CollectionPeriod,
 
                                 Identifier = priceEpisode.Key.Identifier,
                                 AgreedPrice = priceEpisode.Key.AgreedPrice,
