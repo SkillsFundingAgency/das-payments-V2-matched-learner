@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using NUnit.Framework;
-using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 {
     [Binding]
-    public class MigrationSteps
+    public class MigrationSteps : TestBindingBase
     {
         private readonly TestContext _testContext;
         private readonly long _ukprn;
@@ -20,7 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
         private readonly List<long> _listOfUln = new List<long>();
 
-        public MigrationSteps(TestContext testContext)
+        public MigrationSteps(TestContext testContext) : base(testContext)
         {
             var random = new Random();
             _ukprn = random.Next(100000);
@@ -36,10 +34,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
             for (var i = 0; i < learnerCount; i++)
             {
-                _listOfUln.Add(_learnerUln++);
+                _listOfUln.Add(_learnerUln);
                 await _testContext.TestRepository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
                 await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
                 await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, true);
+                _learnerUln++;
             }
         }
 
@@ -95,28 +94,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             training.StartDate.Should().Be(expectedDle.LearningStartDate);
             training.CompletionStatus.Should().Be(expectedDle.CompletionStatus);
             training.Reference.Should().Be(expectedDle.LearningAimReference);
-        }
-
-        public async Task WaitForIt(Func<Task<bool>> lookForIt, string failText)
-        {
-            var endTime = DateTime.Now.Add(TestConfiguration.TestApplicationSettings.TimeToWait);
-            var lastRun = false;
-
-            while (DateTime.Now < endTime || lastRun)
-            {
-                if (await lookForIt())
-                {
-                    if (lastRun) return;
-                    lastRun = true;
-                }
-                else
-                {
-                    if (lastRun) break;
-                }
-
-                await Task.Delay(TestConfiguration.TestApplicationSettings.TimeToPause);
-            }
-            Assert.Fail($"{failText}  Time: {DateTime.Now:G}.  Ukprn: {_testContext.Ukprn}.");
         }
     }
 }

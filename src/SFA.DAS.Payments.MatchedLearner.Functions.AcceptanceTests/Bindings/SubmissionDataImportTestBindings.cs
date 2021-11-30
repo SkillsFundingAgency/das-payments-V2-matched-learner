@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
@@ -13,16 +10,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 {
     [Binding]
     [Scope(Feature = "SubmissionDataImportTests")]
-    public class SubmissionDataImportTestBindings
+    public class SubmissionDataImportTestBindings : TestBindingBase
     {
         private readonly TestContext _testContext;
         private readonly long _ukprn;
         private readonly long _learnerUln;
         private readonly long _apprenticeshipId;
 
-        private readonly TestApplicationSettings _settings;
-
-        public SubmissionDataImportTestBindings(TestContext testContext)
+        public SubmissionDataImportTestBindings(TestContext testContext) : base(testContext)
         {
             var random = new Random();
 
@@ -31,7 +26,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             _apprenticeshipId = _ukprn + _learnerUln;
 
             _testContext = testContext;
-            _settings = TestConfiguration.TestApplicationSettings;
         }
 
         [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
@@ -53,37 +47,25 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Given("the matched Learners Trainings are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task ThenTheMatchedLearnersTrainingsAreOnlyImportedForCollectionPeriodAndAcademicYear(byte collectionPeriod, short academicYear)
         {
-            var timer = new Stopwatch();
+            var learnerTrainingForCollectionPeriod = new List<TrainingModel>();
 
-            timer.Start();
-
-            var learnerTrainings = new List<TrainingModel>();
-
-            while (!learnerTrainings.Any() && timer.Elapsed < _settings.TimeToWait)
+            await WaitForIt(async () =>
             {
-                learnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
+                var learnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
 
-                if (!learnerTrainings.Any())
-                    Thread.Sleep(_settings.TimeToPause);
-                else
-                    Thread.Sleep(_settings.TimeToWait - timer.Elapsed);
-            }
+                learnerTrainingForCollectionPeriod = learnerTrainings
+                    .Where(x => x.AcademicYear == academicYear && x.IlrSubmissionWindowPeriod == collectionPeriod)
+                    .ToList();
 
-            var learnerTrainingForCollectionPeriod = learnerTrainings.Where(x =>
-                x.AcademicYear == academicYear && x.IlrSubmissionWindowPeriod == collectionPeriod).ToList();
+                return learnerTrainingForCollectionPeriod.Any();
 
-            if (learnerTrainingForCollectionPeriod.Count != 1)
-            {
-                Console.WriteLine($"Failed to Find matching dataLockEvents For Period {collectionPeriod} : {academicYear}, ukprn {_ukprn}, learnerUln {_learnerUln}");
-            }
+            }, $"Failed to Find matched Learners Trainings For Period {collectionPeriod} : {academicYear}, ukprn {_ukprn}, learnerUln {_learnerUln}");
 
             learnerTrainingForCollectionPeriod.Count.Should().Be(1);
 
             AssertSingleLearnerTrainingForCollectionPeriod(learnerTrainingForCollectionPeriod.First(), collectionPeriod, academicYear);
 
             await _testContext.TestRepository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
-
-            timer.Stop();
         }
 
         [When("A SubmissionJobSucceeded message is received for CollectionPeriod (.*) and AcademicYear (.*)")]
@@ -96,23 +78,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Then("the existing matched Learners Trainings are NOT deleted")]
         public async Task ThenTheExistingMatchedLearnersTrainingAreNotDeleted()
         {
-            var timer = new Stopwatch();
-
-            timer.Start();
-
             IEnumerable<TrainingModel> existingMatchedLearnerTrainings = new List<TrainingModel>();
-            var first = true;
 
-            while (first || (existingMatchedLearnerTrainings.Any() && timer.Elapsed < _settings.TimeToWaitUnexpected))
+            await WaitForUnexpected(async () =>
             {
-                var matchedLearnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
-                existingMatchedLearnerTrainings = matchedLearnerTrainings.Where(x => x.Id == _testContext.ExistingMatchedLearnerTrainingId).ToList();
+                existingMatchedLearnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
 
-                Thread.Sleep(_settings.TimeToPause);
-                first = false;
-            }
+                existingMatchedLearnerTrainings = existingMatchedLearnerTrainings.Where(x => x.Id == _testContext.ExistingMatchedLearnerTrainingId);
 
-            timer.Stop();
+                return existingMatchedLearnerTrainings.Any();
+
+            }, $"Expected existing matched Learners Trainings to be NOT deleted for Ukprn: {_ukprn}");
 
             existingMatchedLearnerTrainings.Should().NotBeEmpty();
         }
@@ -120,24 +96,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Then("the existing matched Learners Trainings are deleted")]
         public async Task ThenTheExistingMatchedLearnersTrainingAreDeleted()
         {
-            var timer = new Stopwatch();
-
-            timer.Start();
-
             IEnumerable<TrainingModel> existingMatchedLearnerTrainings = new List<TrainingModel>();
-            var first = true;
 
-            while (first || (existingMatchedLearnerTrainings.Any() && timer.Elapsed < _settings.TimeToWait))
+            await WaitForIt(async () =>
             {
-                var matchedLearnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
-                existingMatchedLearnerTrainings = matchedLearnerTrainings.Where(x => x.Id == _testContext.ExistingMatchedLearnerTrainingId).ToList();
+                existingMatchedLearnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
 
-                if (existingMatchedLearnerTrainings.Any())
-                    Thread.Sleep(_settings.TimeToPause);
-                first = false;
-            }
+                existingMatchedLearnerTrainings = existingMatchedLearnerTrainings.Where(x => x.Id != _testContext.ExistingMatchedLearnerTrainingId);
 
-            timer.Stop();
+                return !existingMatchedLearnerTrainings.Any();
+            }, $"Expected existing matched Learners Trainings to be deleted for Ukprn: {_ukprn}");
 
             existingMatchedLearnerTrainings.Should().BeEmpty();
         }

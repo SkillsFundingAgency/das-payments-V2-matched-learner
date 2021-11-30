@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using TechTalk.SpecFlow;
 
@@ -10,12 +11,58 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
     public class TestBindingBase
     {
         public readonly TestContext TestContext;
-        public readonly FeatureContext FeatureContext;
 
-        public TestBindingBase(TestContext testContext, FeatureContext featureContext)
+        public TestBindingBase(TestContext testContext)
         {
             TestContext = testContext;
-            FeatureContext = featureContext;
+        }
+
+        public async Task WaitForIt(Func<Task<bool>> lookForIt, string failText)
+        {
+            var endTime = DateTime.Now.Add(TestConfiguration.TestApplicationSettings.TimeToWait);
+            var lastRun = false;
+
+            while (DateTime.Now < endTime || lastRun)
+            {
+                if (await lookForIt())
+                {
+                    if (lastRun) return;
+                    lastRun = true;
+                }
+                else
+                {
+                    if (lastRun) break;
+                }
+
+                await Task.Delay(TestConfiguration.TestApplicationSettings.TimeToPause);
+            }
+
+            Assert.Fail($"{failText}  Time: {DateTime.Now:G}.  Ukprn: {TestContext.Ukprn}.");
+        }
+
+        protected async Task WaitForUnexpected(Func<Task<bool>> findUnexpected, string failText)
+        {
+            var endTime = DateTime.Now.Add(TestConfiguration.TestApplicationSettings.TimeToWaitUnexpected);
+            while (DateTime.Now < endTime)
+            {
+                if (! await findUnexpected())
+                {
+                    Assert.Fail($"{failText} Time: {DateTime.Now:G}.  Ukprn: {TestContext.Ukprn}.");
+                }
+
+                await Task.Delay(TestConfiguration.TestApplicationSettings.TimeToPause);
+            }
+        }
+    }
+
+    [Binding]
+    public class ScenarioBase
+    {
+        public readonly TestContext TestContext;
+
+        public ScenarioBase(TestContext testContext)
+        {
+            TestContext = testContext;
         }
 
         [BeforeScenario]
