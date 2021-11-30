@@ -102,7 +102,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             {
                 existingMatchedLearnerTrainings = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
 
-                existingMatchedLearnerTrainings = existingMatchedLearnerTrainings.Where(x => x.Id != _testContext.ExistingMatchedLearnerTrainingId);
+                existingMatchedLearnerTrainings = existingMatchedLearnerTrainings.Where(x => x.Id == _testContext.ExistingMatchedLearnerTrainingId);
 
                 return !existingMatchedLearnerTrainings.Any();
             }, $"Expected existing matched Learners Trainings to be deleted for Ukprn: {_ukprn}");
