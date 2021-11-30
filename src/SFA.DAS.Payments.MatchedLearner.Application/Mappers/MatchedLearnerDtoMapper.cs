@@ -69,10 +69,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                             x.NumberOfInstalments,
                             x.InstalmentAmount,
                             x.CompletionAmount,
-                            x.TotalNegotiatedPriceStartDate
-                        }).Select(priceEpisode =>
+                            x.TotalNegotiatedPriceStartDate,
+                        }).Select((priceEpisode) =>
                         {
-                            var firstPriceEpisode = priceEpisodes.First();
+                            var firstPriceEpisode = priceEpisode
+                                .OrderByDescending(t => t.AcademicYear)
+                                .ThenByDescending(t => t.CollectionPeriod)
+                                .First();
                             return new PriceEpisodeDto
                             {
                                 AcademicYear = firstPriceEpisode.AcademicYear,

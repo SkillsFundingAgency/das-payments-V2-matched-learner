@@ -18,6 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         private readonly long _apprenticeshipId;
         private readonly List<TrainingModel> _expectedTrainings = new List<TrainingModel>();
         private bool _useV1Api;
+        private bool _singleTrainingMultiYear;
         public SmokeTestBindings(SmokeTestContext context)
         {
             _context = context;
@@ -251,8 +252,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             var repository = new TestRepository();
             await repository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
 
-            var singleTrainingMultiYear = numberOfAcademicYear > 1 && numberOfTraining == 1;
-            var singlePriceEpisodeMultiYear = numberOfPriceEpisode == 1 && singleTrainingMultiYear;
+            _singleTrainingMultiYear = numberOfAcademicYear > 1 && numberOfTraining == 1;
+            var singlePriceEpisodeMultiYear = numberOfPriceEpisode == 1 && _singleTrainingMultiYear;
 
             var course = 100;
             var agreedPrice = 3000;
@@ -261,7 +262,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 
             for (var i = 0; i < numberOfAcademicYear; i++)
             {
-                course = singleTrainingMultiYear ? course : course + 1;
+                course = _singleTrainingMultiYear ? course : course + 1;
                 var priceEpisodes = new List<PriceEpisodeModel>();
                 for (var j = 0; j < numberOfPriceEpisode; j++)
                 {
@@ -322,11 +323,29 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 actualTraining.StandardCode.Should().Be(expectedTraining.StandardCode);
                 actualTraining.PriceEpisodes.Should().HaveCount(numberOfPriceEpisode);
 
-                var expectedPriceEpisodes = expectedTrainings
-                    .SelectMany(t => t.PriceEpisodes)
-                    .OrderByDescending(t => t.AcademicYear)
-                    .ThenByDescending(t => t.CollectionPeriod)
-                    .ToList();
+                List<PriceEpisodeModel> expectedPriceEpisodes;
+
+                if (_singleTrainingMultiYear)
+                {
+                    //TestLearnerSingleTrainingAcrossMultipleAcademicYearWithMultiplePriceEpisodeForEachTraining
+                    //in the single training scenario we expecting all price episodes from all trainings to be returned
+                    // this leaves us expecting price episodes from all trainings? is that right?
+                    expectedPriceEpisodes = expectedTrainings
+                        .SelectMany(t => t.PriceEpisodes)
+                        .OrderByDescending(t => t.AcademicYear)
+                        .ThenByDescending(t => t.CollectionPeriod)
+                        .ToList();
+                }
+                else
+                {
+                    ////TestLearnerMultipleTrainingAcrossMultipleAcademicYear
+                    ////in the scenario where there are multiple different trainings we only want the price episodes for the current training
+                    expectedPriceEpisodes = expectedTraining
+                        .PriceEpisodes
+                        .OrderByDescending(t => t.AcademicYear)
+                        .ThenByDescending(t => t.CollectionPeriod)
+                        .ToList(); // if we do this instead should be just the current expected training we are dealing with
+                }
 
                 for (var j = 0; j < numberOfPriceEpisode; j++)
                 {
