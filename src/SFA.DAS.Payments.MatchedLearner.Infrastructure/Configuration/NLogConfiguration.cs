@@ -35,8 +35,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
                 FileName = Path.Combine(Directory.GetCurrentDirectory(), $"logs\\{serviceName}.${{shortdate}}.log"),
                 Layout = "${longdate} [${uppercase:${level}}] [${logger}] - ${message} ${onexception:${exception:format=tostring}}"
             };
-            config.AddTarget(fileTarget);
 
+            config.AddTarget(fileTarget);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "Disk");
         }
 
@@ -54,19 +54,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 
             config.AddTarget(target);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog");
+            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "RedisLog", "Microsoft*");
         }
 
         private static void AddAppInsights(LoggingConfiguration config)
         {
             var target = new ApplicationInsightsTarget
             {
-                Name = "AppInsightsLog"
             };
 
             config.AddTarget(target);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "AppInsightsLog");
+            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "AppInsightsLog", "Microsoft*");
         }
 
         private static LogLevel GetMinLogLevel() => LogLevel.FromString("Info");
+        private static LogLevel GetWarnLogLevel() => LogLevel.FromString("Warn");
     }
 }
