@@ -17,6 +17,7 @@
     "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
 
     "PaymentsConnectionString": "__PaymentsAcceptanceTestConnectionString__",
-    "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__"
+    "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__",
+    "MigrationQueue": "__MigrationQueue__"
   }
 }
