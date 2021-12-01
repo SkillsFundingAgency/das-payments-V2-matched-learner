@@ -54,9 +54,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 
             config.AddTarget(target);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog");
-            config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog", "Microsoft.AspNetCore.Routing.EndpointMiddleware");
-            config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog", "Microsoft.AspNetCore.Hosting.Diagnostics");
-            config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog", "Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor");
         }
 
         private static void AddAppInsights(LoggingConfiguration config, string appInsightsInstrumentationKey)
@@ -70,9 +67,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 
             config.AddTarget(target);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "AppInsightsLog");
-            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "AppInsightsLog", "Microsoft.AspNetCore.Routing.EndpointMiddleware");
-            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "AppInsightsLog", "Microsoft.AspNetCore.Hosting.Diagnostics");
-            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "AppInsightsLog", "Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor");
         }
 
         private static LogLevel GetMinLogLevel() => LogLevel.FromString("Info");
