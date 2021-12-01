@@ -110,7 +110,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             _logger.LogInformation($"Saving Submissions Training Data in Bulk. TrainingCount {trainings.Count}");
 
-            var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 60 };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 60, UseTempDB = true };
 
             await _dataContext.BulkInsertAsync(trainings, bulkConfig);
             

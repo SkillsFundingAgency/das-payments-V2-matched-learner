@@ -209,7 +209,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, UseTempDB = true };
 
             var priceEpisodes = dataLockEvents
                 .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
