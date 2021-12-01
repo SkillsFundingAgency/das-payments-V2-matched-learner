@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -40,7 +41,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             var factory = new WebApplicationFactory<Startup>().WithWebHostBuilder(builder =>
             {
-                builder.UseContentRoot(typeof(Startup).Assembly.Location);
+                var path = Path.GetDirectoryName(typeof(Startup).Assembly.Location);
+                builder.UseContentRoot(path);
                 builder.ConfigureAppConfiguration((context, configurationBuilder) =>
                 {
                     configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
