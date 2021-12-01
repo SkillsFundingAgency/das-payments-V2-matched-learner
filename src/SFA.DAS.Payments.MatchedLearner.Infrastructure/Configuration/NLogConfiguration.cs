@@ -54,7 +54,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 
             config.AddTarget(target);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog");
-            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "RedisLog", "Microsoft*");
+            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "RedisLog", "Microsoft.AspNetCore.*");
         }
 
         private static void AddAppInsights(LoggingConfiguration config)
@@ -65,7 +65,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 
             config.AddTarget(target);
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "AppInsightsLog");
-            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "AppInsightsLog", "Microsoft*");
+            config.AddRule(GetWarnLogLevel(), LogLevel.Fatal, "AppInsightsLog", "Microsoft.AspNetCore.*");
         }
 
         private static LogLevel GetMinLogLevel() => LogLevel.FromString("Info");
