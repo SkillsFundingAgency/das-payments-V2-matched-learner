@@ -17,6 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         private int _learnerCount;
 
         private readonly List<long> _listOfUln = new List<long>();
+        private readonly List<long> _listOfDuplicateUln = new List<long>();
 
         public MigrationSteps(TestContext testContext)
         {
@@ -51,7 +52,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             {
                 var index = random.Next(_learnerCount);
                 var learnerUln = _listOfUln[index];
-
+                _listOfDuplicateUln.Add(learnerUln);
                 await _testContext.TestRepository.AddMatchedLearnerTrainings(_ukprn, learnerUln, collectionPeriod, academicYear);
             }
         }
@@ -72,7 +73,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                 return trainingRecords.Any();
             }, "Failed to find any training records.");
 
-            trainingRecords.Count(uln => _listOfUln.Contains(uln.Uln)).Should().Be(learnerCount);
+            var duplicateUlns = trainingRecords.Where(uln => _listOfDuplicateUln.Contains(uln.Uln)).ToList();
+
+            duplicateUlns.Count.Should().Be(_listOfDuplicateUln.Count, $"Duplicate Ulns should not have additional records in DB, Ukprn: {_ukprn} Duplicated Ulns {string.Join(", ", _listOfDuplicateUln)}, number of Duplicated Ulns {_listOfDuplicateUln.Count}, Number of records in DB {duplicateUlns.Count}");
+            trainingRecords.Count.Should().Be(_listOfUln.Count, $"All Ulns should have matching records in DB, Ukprn: {_ukprn} Test Ulns {string.Join(", ", _listOfUln)}, number of Test Ulns {_listOfDuplicateUln.Count}, Number of records in DB {trainingRecords.Count}");
 
             //NOTE: because all the dataLock evens have been setup using same UKPRN and training details
             //we are only interested in count as the only difference here is LearnerUln
