@@ -12,5 +12,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
         public string MigrationQueue { get; set; }
         public int MigrationBatchSize { get; set; }
         public bool UseV1Api { get; set; }
+        public string AppInsightsInstrumentationKey { get; set; }
     }
 }

@@ -85,7 +85,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 });
                 options.AddConsole();
 
-                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment);
+                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings);
             });
         }
 
@@ -96,6 +96,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 .Get<ApplicationSettings>();
 
             applicationSettings.UseV1Api = configuration.GetValue<bool>("UseV1Api");
+            applicationSettings.AppInsightsInstrumentationKey = configuration.GetValue<string>("APPINSIGHTS_INSTRUMENTATIONKEY");
 
             if (applicationSettings == null)
                 throw new InvalidOperationException("invalid Configuration, unable find 'MatchedLearner' Configuration section");

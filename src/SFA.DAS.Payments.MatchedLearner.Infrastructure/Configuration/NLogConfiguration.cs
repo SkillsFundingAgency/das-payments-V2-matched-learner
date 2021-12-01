@@ -10,18 +10,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
 {
     public class NLogConfiguration
     {
-        public void ConfigureNLog(string serviceName, bool isDevelopmentEnvironment)
+        public void ConfigureNLog(string serviceName, ApplicationSettings settings)
         {
             var config = new LoggingConfiguration();
 
-            if (isDevelopmentEnvironment)
+            if (settings.IsDevelopment)
             {
                 AddLocalTarget(config, serviceName);
             }
             else
             {
                 AddRedisTarget(config, serviceName);
-                AddAppInsights(config);
+                AddAppInsights(config, settings.AppInsightsInstrumentationKey);
             }
 
             LogManager.Configuration = config;
@@ -56,10 +56,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
             config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog");
         }
 
-        private static void AddAppInsights(LoggingConfiguration config)
+        private static void AddAppInsights(LoggingConfiguration config, string appInsightsInstrumentationKey)
         {
             var target = new ApplicationInsightsTarget
             {
+                Name = "AppInsightsLog",
+                InstrumentationKey = appInsightsInstrumentationKey,
+                OptimizeBufferReuse = true,
             };
 
             config.AddTarget(target);
