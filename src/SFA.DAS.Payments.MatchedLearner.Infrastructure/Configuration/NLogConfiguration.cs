@@ -37,7 +37,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
             };
 
             config.AddTarget(fileTarget);
-            config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "Disk");
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, "Disk");
         }
 
         private static void AddRedisTarget(LoggingConfiguration config, string appName)
@@ -53,7 +53,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
             };
 
             config.AddTarget(target);
-            config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "RedisLog");
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, "RedisLog");
         }
 
         private static void AddAppInsights(LoggingConfiguration config, string appInsightsInstrumentationKey)
@@ -66,10 +66,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
             };
 
             config.AddTarget(target);
-            config.AddRule(GetMinLogLevel(), LogLevel.Fatal, "AppInsightsLog");
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, "AppInsightsLog");
         }
-
-        private static LogLevel GetMinLogLevel() => LogLevel.FromString("Info");
-        private static LogLevel GetWarnLogLevel() => LogLevel.FromString("Warn");
     }
 }
