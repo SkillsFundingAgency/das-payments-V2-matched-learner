@@ -18,7 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 
         private readonly List<long> _listOfUln = new List<long>();
 
-        public MigrationSteps(TestContext testContext) : base(testContext)
+        public MigrationSteps(TestContext testContext)
         {
             var random = new Random();
             _ukprn = random.Next(100000);

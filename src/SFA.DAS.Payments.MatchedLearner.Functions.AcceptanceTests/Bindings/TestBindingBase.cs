@@ -10,13 +10,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
     [Binding]
     public class TestBindingBase
     {
-        public readonly TestContext TestContext;
-
-        public TestBindingBase(TestContext testContext)
-        {
-            TestContext = testContext;
-        }
-
         public async Task WaitForIt(Func<Task<bool>> lookForIt, string failText)
         {
             var endTime = DateTime.Now.Add(TestConfiguration.TestApplicationSettings.TimeToWait);
@@ -37,7 +30,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
                 await Task.Delay(TestConfiguration.TestApplicationSettings.TimeToPause);
             }
 
-            Assert.Fail($"{failText}  Time: {DateTime.Now:G}.  Ukprn: {TestContext.Ukprn}.");
+            Assert.Fail($"{failText}  Time: {DateTime.Now:G}.");
         }
 
         protected async Task WaitForUnexpected(Func<Task<bool>> findUnexpected, string failText)
@@ -47,7 +40,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             {
                 if (! await findUnexpected())
                 {
-                    Assert.Fail($"{failText} Time: {DateTime.Now:G}.  Ukprn: {TestContext.Ukprn}.");
+                    Assert.Fail($"{failText} Time: {DateTime.Now:G}.");
                 }
 
                 await Task.Delay(TestConfiguration.TestApplicationSettings.TimeToPause);
@@ -71,7 +64,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            //This is a Hack to check if the Tests are Running on Local Machine
+            //This is to check if the Tests are Running on Local Machine
             if (string.IsNullOrEmpty(TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl))
             {
                 Console.WriteLine("Starting Functions Host");

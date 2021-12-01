@@ -25,7 +25,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         public TestClient(bool useV1Api)
         {
             _url = TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl;
-            if (!string.IsNullOrEmpty(_url) && !useV1Api)
+            if (!string.IsNullOrEmpty(_url))
             {
                 _client = new HttpClientBuilder()
                     .WithDefaultHeaders()

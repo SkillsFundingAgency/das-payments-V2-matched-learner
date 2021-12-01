@@ -17,7 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         private readonly long _learnerUln;
         private readonly long _apprenticeshipId;
 
-        public SubmissionDataImportTestBindings(TestContext testContext) : base(testContext)
+        public SubmissionDataImportTestBindings(TestContext testContext)
         {
             var random = new Random();
 
