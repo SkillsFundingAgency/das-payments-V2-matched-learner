@@ -83,6 +83,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
             });
 
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_INSTRUMENTATIONKEY"]);
+
+            services.AddControllers().AddApplicationPart(typeof(Startup).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
