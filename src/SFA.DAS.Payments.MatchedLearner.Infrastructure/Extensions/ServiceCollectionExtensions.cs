@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using NServiceBus;
+using NServiceBus.Features;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
@@ -63,11 +66,33 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
         public static void AddEndpointInstanceFactory(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            var endpointConfiguration = new EndpointConfiguration($"{applicationSettings.MigrationQueue}");
-            endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
-            endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
-            endpointConfiguration.SendOnly();
-            services.AddTransient<IEndpointInstanceFactory>(provider => new EndpointInstanceFactory(endpointConfiguration));
+            services.AddTransient<IEndpointInstanceFactory>(provider =>
+            {
+                var logger = provider.GetService<ILogger<EndpointInstanceFactory>>();
+
+                var endpointConfiguration = new EndpointConfiguration($"{applicationSettings.MigrationQueue}");
+            
+                endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
+                endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+                endpointConfiguration.SendOnly();
+
+                endpointConfiguration.CustomDiagnosticsWriter(diagnostics =>
+                {
+                    logger.LogDebug(diagnostics);
+                    return Task.CompletedTask;
+                });
+
+                endpointConfiguration.DisableFeature<TimeoutManager>();
+                endpointConfiguration.EnableInstallers();
+
+                if (!string.IsNullOrEmpty(applicationSettings.NServiceBusLicense))
+                {
+                    var license = WebUtility.HtmlDecode(applicationSettings.NServiceBusLicense);
+                    endpointConfiguration.License(license);
+                }
+
+                return new EndpointInstanceFactory(endpointConfiguration);
+            });
         }
 
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
