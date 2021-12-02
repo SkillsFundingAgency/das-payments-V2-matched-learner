@@ -17,6 +17,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
     {
         public MatchedLearnerDto MapToDto(List<TrainingModel> trainings)
         {
+            if (!trainings.Any()) return null;
+
             trainings = trainings
                 .OrderByDescending(t => t.AcademicYear)
                 .ThenByDescending(t => t.IlrSubmissionWindowPeriod)
