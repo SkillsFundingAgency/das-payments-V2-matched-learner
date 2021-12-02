@@ -1,5 +1,9 @@
 ﻿Feature: New Matched Learner Api SmokeTests
 
+Scenario: Test Learner Training Does Not Exists
+	When we call the API with a learner that does not exist
+	Then the result should be a 404
+
 Scenario: Test Learner Training
 	Given we have created a sample learner with 1 Training Records with 1 Price Episode across 1 academic Year 
 	When we call the V2 API with the sample learners details

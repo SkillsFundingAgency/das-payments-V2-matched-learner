@@ -39,7 +39,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             var learnerUln = _learnerUln;
             for (var index = 1; index < learnerCount + 1; index++)
             {
-                
+
                 await repository.ClearLearner(ukprn, learnerUln);
                 await repository.AddDataLockEvent(ukprn, learnerUln);
 
@@ -52,7 +52,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public void WhenWeCallTheApiTimesWithTheSampleLearnersDetails(int learnerCount)
         {
             _useV1Api = true;
-            var request = new TestClient(_useV1Api);
+            var testClient = new TestClient(_useV1Api);
             var ukprn = _ukprn;
             var learnerUln = _learnerUln;
 
@@ -60,18 +60,28 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             {
                 var currentUkprn = ukprn;
                 var currentUln = learnerUln;
-                _context.Requests.Add(request.Awaiting(client => client.Handle(currentUkprn, currentUln)));
+                _context.Requests.Add(testClient.Awaiting(client => client.Handle(currentUkprn, currentUln)));
                 ukprn += index;
                 learnerUln += index;
             }
         }
 
-        [When("we call the API with a learner that does not exist in Legacy Schema")]
+        [When("we call the API with a learner that does not exist")]
         public void WhenWeCallTheApiWithALearnerThatDoesNotExist()
         {
+            _useV1Api = false;
+            var testClient = new TestClient(_useV1Api);
+            var act = testClient.Awaiting(client => client.Handle(0, 0));
+            _context.FailedRequest = act;
+        }
+
+        [When("we call the API with a learner that does not exist in Legacy Schema")]
+        public void WhenWeCallTheApiWithALearnerThatDoesNotExistInLegacySchema()
+        {
             _useV1Api = true;
-            var request = new TestClient(_useV1Api);
-            var act = request.Awaiting(client => client.Handle(0, 0));
+
+            var testClient = new TestClient(_useV1Api);
+            var act = testClient.Awaiting(client => client.Handle(0, 0));
             _context.FailedRequest = act;
         }
 
@@ -86,17 +96,17 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         }
 
         [Then("the result should be a (.*)")]
-        public void ThenTheResultShouldBeA(int p0)
+        public async Task ThenTheResultShouldBeA(int p0)
         {
-            _context.FailedRequest.Should().ThrowAsync<Exception>().WithMessage($"{p0}");
+            await _context.FailedRequest.Should().ThrowAsync<Exception>().WithMessage($"{p0}");
         }
 
         [Then("the result should not be any exceptions")]
-        public void ThenTheResultShouldBeAnyExceptions()
+        public async Task ThenTheResultShouldBeAnyExceptions()
         {
             foreach (var request in _context.Requests)
             {
-                request.Should().NotThrowAsync<Exception>();
+                await request.Should().NotThrowAsync<Exception>();
             }
         }
 
