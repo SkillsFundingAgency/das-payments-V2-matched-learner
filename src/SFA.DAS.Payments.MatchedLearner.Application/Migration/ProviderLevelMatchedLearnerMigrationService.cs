@@ -97,8 +97,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.Failed, request.BatchNumber);
+                await HandleError(exception, request);
+            }
+        }
+
+        private async Task HandleError(Exception exception, ProviderLevelMigrationRequest request)
+        {
+            try
+            {
                 _logger.LogError(exception, $"Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId} failed.");
+                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.Failed, request.BatchNumber);
+            }
+            catch (Exception updateException)
+            {
+                Console.WriteLine(updateException);
+                _logger.LogError(exception, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
             }
         }
 
