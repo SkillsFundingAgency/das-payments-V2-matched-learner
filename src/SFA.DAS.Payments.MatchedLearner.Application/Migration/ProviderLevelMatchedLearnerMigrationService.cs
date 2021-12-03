@@ -97,7 +97,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, $"Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId} failed.");
+                _logger.LogError(exception, $"Error Running Migration for provider: {request.Ukprn}, { (request.IsFirstBatch ? string.Empty : $"Batch: {request.BatchNumber}") } for migration run {request.MigrationRunId}.");
                 try
                 {
                     await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(migrationRunAttempt, MigrationStatus.Failed);
@@ -106,6 +106,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                 {
                     _logger.LogError(updateException, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
                 }
+
+                throw;
             }
         }
 

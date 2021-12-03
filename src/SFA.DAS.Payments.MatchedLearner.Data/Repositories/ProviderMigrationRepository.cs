@@ -25,7 +25,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task CreateMigrationAttempt(MigrationRunAttemptModel model)
         {
-            _matchedLearnerDataContext.MigrationRunAttempts.Add(model);
+            await _matchedLearnerDataContext.MigrationRunAttempts.AddAsync(model);
 
             await _matchedLearnerDataContext.SaveChangesAsync();
         }
@@ -43,6 +43,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             if(status == MigrationStatus.Completed)
                 migrationRun.CompletionTime = DateTime.Now;
+
+            _matchedLearnerDataContext.Update(migrationRun);
 
             await _matchedLearnerDataContext.SaveChangesAsync();
         }
