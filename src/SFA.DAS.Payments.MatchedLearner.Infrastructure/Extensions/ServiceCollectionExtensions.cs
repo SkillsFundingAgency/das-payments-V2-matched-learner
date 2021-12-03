@@ -85,9 +85,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 endpointConfiguration.DisableFeature<TimeoutManager>();
                 endpointConfiguration.EnableInstallers();
 
-                if (!string.IsNullOrEmpty(applicationSettings.DasPaymentsV2NServiceBusLicense))
+                if (!string.IsNullOrEmpty(applicationSettings.NServiceBusLicense))
                 {
-                    var license = WebUtility.HtmlDecode(applicationSettings.DasPaymentsV2NServiceBusLicense);
+                    var license = WebUtility.HtmlDecode(applicationSettings.NServiceBusLicense);
                     endpointConfiguration.License(license);
                 }
 
