@@ -167,7 +167,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.Completed, null), Times.Once);
+            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(It.Is<MigrationRunAttemptModel>(m => m.Ukprn == _ukprn && m.MigrationRunId == _migrationRunId && m.BatchNumber == null), MigrationStatus.Completed), Times.Once);
         }
 
         [Test]
@@ -223,7 +223,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(_ukprn, _migrationRunId, MigrationStatus.CompletedWithErrors, null), Times.Once);
+            _providerMigrationRepositoryMock.Verify(x => x.UpdateMigrationRunAttemptStatus(It.Is<MigrationRunAttemptModel>(m => m.Ukprn == _ukprn && m.MigrationRunId == _migrationRunId && m.BatchNumber == null), MigrationStatus.CompletedWithErrors), Times.Once);
         }
     }
 }
