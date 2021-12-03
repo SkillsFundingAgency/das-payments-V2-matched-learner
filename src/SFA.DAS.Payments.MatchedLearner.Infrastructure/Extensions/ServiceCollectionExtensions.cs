@@ -102,11 +102,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             serviceCollection.AddLogging(options =>
             {
                 options.AddFilter("SFA.DAS", LogLevel.Debug); // this is because all logging is filtered out by default
-                options.AddFilter("Microsoft.AspNetCore.Routing.Matching.DfaMatcher", LogLevel.Warning);
-                options.AddFilter("Microsoft.AspNetCore.Routing.EndpointMiddleware", LogLevel.Warning);
-                options.AddFilter("Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware", LogLevel.Warning);
-                options.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
-                options.AddFilter("Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor", LogLevel.Warning);
+                options.AddFilter("Microsoft.AspNetCore.*", LogLevel.Warning);
+                options.AddFilter("Host.*", LogLevel.Warning);
+                options.AddFilter("	Microsoft.Azure.WebJobs.Hosting.*", LogLevel.Warning);
                 options.SetMinimumLevel(LogLevel.Trace);
 
                 options.AddNLog(new NLogProviderOptions
