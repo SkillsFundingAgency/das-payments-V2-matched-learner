@@ -110,8 +110,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception updateException)
             {
-                Console.WriteLine(updateException);
-                _logger.LogError(exception, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
+                _logger.LogError(updateException, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
             }
         }
 
