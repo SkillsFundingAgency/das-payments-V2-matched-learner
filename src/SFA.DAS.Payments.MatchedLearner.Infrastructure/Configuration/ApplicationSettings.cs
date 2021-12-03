@@ -13,6 +13,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
         public int MigrationBatchSize { get; set; }
         public bool UseV1Api { get; set; }
         public string AppInsightsInstrumentationKey { get; set; }
-        public string NServiceBusLicense { get; set; }
+        public string DasPaymentsV2NServiceBusLicense { get; set; }
     }
 }
