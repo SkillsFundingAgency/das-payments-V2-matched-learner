@@ -35,112 +35,129 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 Uln = firstTraining.Uln,
                 EventTime = firstTraining.EventTime,
                 StartDate = firstTraining.StartDate,
-                Training = trainings.GroupBy(x => new
-                {
-                    x.Reference,
-                    x.StandardCode,
-                    x.ProgrammeType,
-                    x.FrameworkCode,
-                    x.PathwayCode,
-                    x.FundingLineType,
-                    x.StartDate,
-                    x.Uln,
-                    x.Ukprn,
-                }).Select(trainingGrp =>
-                {
-                    var priceEpisodes = trainingGrp.SelectMany(tg => tg.PriceEpisodes)
-                        .OrderByDescending(t => t.AcademicYear)
-                        .ThenByDescending(t => t.CollectionPeriod)
-                        .ToList();
-
-                    return new TrainingDto
-                    {
-                        Reference = trainingGrp.Key.Reference,
-                        StandardCode = trainingGrp.Key.StandardCode,
-                        ProgrammeType = trainingGrp.Key.ProgrammeType,
-                        FrameworkCode = trainingGrp.Key.FrameworkCode,
-                        PathwayCode = trainingGrp.Key.PathwayCode,
-                        FundingLineType = null,
-                        StartDate = trainingGrp.Key.StartDate,
-                        PriceEpisodes = priceEpisodes.GroupBy(x => new
-                        {
-                            x.Identifier,
-                            x.AgreedPrice,
-                            x.StartDate,
-                            x.ActualEndDate,
-                            x.NumberOfInstalments,
-                            x.InstalmentAmount,
-                            x.CompletionAmount,
-                            x.TotalNegotiatedPriceStartDate,
-                        }).Select((priceEpisode) =>
-                        {
-                            var firstPriceEpisode = priceEpisode
-                                .OrderByDescending(t => t.AcademicYear)
-                                .ThenByDescending(t => t.CollectionPeriod)
-                                .First();
-                            return new PriceEpisodeDto
-                            {
-                                AcademicYear = firstPriceEpisode.AcademicYear,
-                                CollectionPeriod = firstPriceEpisode.CollectionPeriod,
-
-                                Identifier = priceEpisode.Key.Identifier,
-                                AgreedPrice = priceEpisode.Key.AgreedPrice,
-                                StartDate = priceEpisode.Key.StartDate,
-                                EndDate = priceEpisode.Key.ActualEndDate,
-                                NumberOfInstalments = priceEpisode.Key.NumberOfInstalments,
-                                InstalmentAmount = priceEpisode.Key.InstalmentAmount,
-                                CompletionAmount = priceEpisode.Key.CompletionAmount,
-                                TotalNegotiatedPriceStartDate = priceEpisode.Key.TotalNegotiatedPriceStartDate,
-
-                                Periods = priceEpisode.SelectMany(p => p.Periods).Select(pd =>
-                                {
-                                    var failures = new List<int>();
-
-                                    if (!pd.IsPayable)
-                                    {
-                                        if (pd.FailedDataLock1) failures.Add(1);
-                                        if (pd.FailedDataLock2) failures.Add(2);
-                                        if (pd.FailedDataLock3) failures.Add(3);
-                                        if (pd.FailedDataLock4) failures.Add(4);
-                                        if (pd.FailedDataLock5) failures.Add(5);
-                                        if (pd.FailedDataLock6) failures.Add(6);
-                                        if (pd.FailedDataLock7) failures.Add(7);
-                                        if (pd.FailedDataLock8) failures.Add(8);
-                                        if (pd.FailedDataLock9) failures.Add(9);
-                                        if (pd.FailedDataLock10) failures.Add(10);
-                                        if (pd.FailedDataLock11) failures.Add(11);
-                                        if (pd.FailedDataLock12) failures.Add(12);
-                                    }
-
-                                    return new PeriodDto
-                                    {
-                                        AccountId = pd.AccountId ?? 0,
-                                        ApprenticeshipId = pd.ApprenticeshipId ?? 0,
-                                        TransferSenderAccountId = pd.TransferSenderAccountId ?? 0,
-                                        ApprenticeshipEmployerType = pd.ApprenticeshipEmployerType ?? 0,
-                                        IsPayable = pd.IsPayable,
-                                        Period = pd.Period,
-                                        DataLockFailures = failures
-                                    };
-                                }).ToList()
-                            };
-                        }).ToList()
-                    };
-                }).ToList()
+                Training = MapTrainingDto(trainings)
             };
 
             return result;
         }
 
+        private static List<TrainingDto> MapTrainingDto(List<TrainingModel> trainings)
+        {
+            return trainings.GroupBy(x => new
+            {
+                x.Reference,
+                x.StandardCode,
+                x.ProgrammeType,
+                x.FrameworkCode,
+                x.PathwayCode,
+                x.FundingLineType,
+                x.StartDate,
+                x.Uln,
+                x.Ukprn,
+            }).Select(trainingGrp =>
+            {
+                var priceEpisodes = trainingGrp.SelectMany(tg => tg.PriceEpisodes)
+                    .OrderByDescending(t => t.AcademicYear)
+                    .ThenByDescending(t => t.CollectionPeriod);
+
+                return new TrainingDto
+                {
+                    Reference = trainingGrp.Key.Reference,
+                    StandardCode = trainingGrp.Key.StandardCode,
+                    ProgrammeType = trainingGrp.Key.ProgrammeType,
+                    FrameworkCode = trainingGrp.Key.FrameworkCode,
+                    PathwayCode = trainingGrp.Key.PathwayCode,
+                    FundingLineType = null,
+                    StartDate = trainingGrp.Key.StartDate,
+                    PriceEpisodes = MapPriceEpisodeDto(priceEpisodes)
+                };
+            }).ToList();
+        }
+
+        private static List<PriceEpisodeDto> MapPriceEpisodeDto(IEnumerable<PriceEpisodeModel> priceEpisodes)
+        {
+            return priceEpisodes.GroupBy(x => new
+            {
+                x.Identifier,
+                x.AgreedPrice,
+                x.StartDate,
+                x.ActualEndDate,
+                x.NumberOfInstalments,
+                x.InstalmentAmount,
+                x.CompletionAmount,
+                x.TotalNegotiatedPriceStartDate,
+            }).Select(priceEpisode =>
+            {
+                var firstPriceEpisode = priceEpisode
+                    .OrderByDescending(t => t.AcademicYear)
+                    .ThenByDescending(t => t.CollectionPeriod)
+                    .First();
+                
+                var periods = priceEpisode.SelectMany(p => p.Periods);
+
+                return new PriceEpisodeDto
+                {
+                    AcademicYear = firstPriceEpisode.AcademicYear,
+                    CollectionPeriod = firstPriceEpisode.CollectionPeriod,
+
+                    Identifier = priceEpisode.Key.Identifier,
+                    AgreedPrice = priceEpisode.Key.AgreedPrice,
+                    StartDate = priceEpisode.Key.StartDate,
+                    EndDate = priceEpisode.Key.ActualEndDate,
+                    NumberOfInstalments = priceEpisode.Key.NumberOfInstalments,
+                    InstalmentAmount = priceEpisode.Key.InstalmentAmount,
+                    CompletionAmount = priceEpisode.Key.CompletionAmount,
+                    TotalNegotiatedPriceStartDate = priceEpisode.Key.TotalNegotiatedPriceStartDate,
+
+                    Periods = MapPeriodDto(periods)
+                };
+            }).ToList();
+        }
+
+        private static List<PeriodDto> MapPeriodDto(IEnumerable<PeriodModel> periods)
+        {
+            return periods.Select(pd =>
+            {
+                var failures = new List<int>();
+
+                if (!pd.IsPayable)
+                {
+                    if (pd.FailedDataLock1) failures.Add(1);
+                    if (pd.FailedDataLock2) failures.Add(2);
+                    if (pd.FailedDataLock3) failures.Add(3);
+                    if (pd.FailedDataLock4) failures.Add(4);
+                    if (pd.FailedDataLock5) failures.Add(5);
+                    if (pd.FailedDataLock6) failures.Add(6);
+                    if (pd.FailedDataLock7) failures.Add(7);
+                    if (pd.FailedDataLock8) failures.Add(8);
+                    if (pd.FailedDataLock9) failures.Add(9);
+                    if (pd.FailedDataLock10) failures.Add(10);
+                    if (pd.FailedDataLock11) failures.Add(11);
+                    if (pd.FailedDataLock12) failures.Add(12);
+                }
+
+                return new PeriodDto
+                {
+                    AccountId = pd.AccountId ?? 0,
+                    ApprenticeshipId = pd.ApprenticeshipId ?? 0,
+                    TransferSenderAccountId = pd.TransferSenderAccountId ?? 0,
+                    ApprenticeshipEmployerType = pd.ApprenticeshipEmployerType ?? 0,
+                    IsPayable = pd.IsPayable,
+                    Period = pd.Period,
+                    DataLockFailures = failures
+                };
+            }).ToList();
+        }
+
         public List<TrainingModel> MapToModel(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels)
         {
 
-            var result = MapTraining(dataLockEvents, apprenticeshipModels);
+            var result = MapTrainingModel(dataLockEvents, apprenticeshipModels);
 
             return result;
         }
 
-        private static List<TrainingModel> MapTraining(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels)
+        private static List<TrainingModel> MapTrainingModel(List<DataLockEventModel> dataLockEvents, List<ApprenticeshipModel> apprenticeshipModels)
         {
             return dataLockEvents
                 .Where(x => x.LearningAimReference == "ZPROG001")
@@ -179,12 +196,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         FundingLineType = dataLockEvent.Key.LearningAimFundingLineType,
                         StartDate = dataLockEvent.Key.LearningStartDate.GetValueOrDefault(),
 
-                        PriceEpisodes = MapPriceEpisodes(dataLockEvent.ToList(), apprenticeshipModels)
+                        PriceEpisodes = MapPriceEpisodeModel(dataLockEvent.ToList(), apprenticeshipModels)
                     };
                 }).ToList();
         }
 
-        private static List<PriceEpisodeModel> MapPriceEpisodes(IList<DataLockEventModel> dataLockEvents, IList<ApprenticeshipModel> apprenticeshipModels)
+        private static List<PriceEpisodeModel> MapPriceEpisodeModel(IList<DataLockEventModel> dataLockEvents, IList<ApprenticeshipModel> apprenticeshipModels)
         {
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
@@ -231,7 +248,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 
                         StartDate = ExtractEpisodeStartDateFromPriceEpisodeIdentifier(priceEpisode.Key.PriceEpisodeIdentifier),
 
-                        Periods = MapPeriods(dataLockEventNonPayablePeriods, dataLockEventPayablePeriods, apprenticeshipModels)
+                        Periods = MapPeriodModel(dataLockEventNonPayablePeriods, dataLockEventPayablePeriods, apprenticeshipModels)
                     };
                 })
                 .ToList();
@@ -248,7 +265,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 : throw new InvalidOperationException($"Cannot determine episode start date from the price episode identifier: {priceEpisodeIdentifier}");
         }
 
-        private static List<PeriodModel> MapPeriods(IEnumerable<DataLockEventNonPayablePeriodModel> dataLockEventNonPayablePeriods, IEnumerable<DataLockEventPayablePeriodModel> dataLockEventPayablePeriods, IList<ApprenticeshipModel> apprenticeshipModels)
+        private static List<PeriodModel> MapPeriodModel(IEnumerable<DataLockEventNonPayablePeriodModel> dataLockEventNonPayablePeriods, IEnumerable<DataLockEventPayablePeriodModel> dataLockEventPayablePeriods, IList<ApprenticeshipModel> apprenticeshipModels)
         {
             var nonPayablePeriods = dataLockEventNonPayablePeriods
                 .Select(nonPayablePeriod =>
