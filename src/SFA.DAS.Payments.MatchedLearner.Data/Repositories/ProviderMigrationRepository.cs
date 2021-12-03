@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
@@ -12,36 +10,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
     public interface IProviderMigrationRepository
     {
-        Task BeginTransactionAsync(IsolationLevel isolationLevel);
-        Task CommitTransactionAsync();
-        Task RollbackTransactionAsync();
         Task CreateMigrationAttempt(MigrationRunAttemptModel model);
         Task<List<MigrationRunAttemptModel>> GetProviderMigrationAttempts(long ukprn);
-        Task UpdateMigrationRunAttemptStatus(long ukprn, Guid migrationRunId, MigrationStatus status, int? batchNumber = null);
+        Task UpdateMigrationRunAttemptStatus(MigrationRunAttemptModel migrationRun, MigrationStatus status);
     }
     public class ProviderMigrationRepository : IProviderMigrationRepository
     {
         private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
-        private IDbContextTransaction currentTransaction;
 
         public ProviderMigrationRepository(MatchedLearnerDataContext matchedLearnerDataContext)
         {
             _matchedLearnerDataContext = matchedLearnerDataContext;
-        }
-
-        public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted)
-        {
-            currentTransaction = await _matchedLearnerDataContext.Database.BeginTransactionAsync(isolationLevel);
-        }
-
-        public async Task CommitTransactionAsync()
-        {
-            await currentTransaction.CommitAsync();
-        }
-
-        public async Task RollbackTransactionAsync()
-        {
-            await currentTransaction.RollbackAsync();
         }
 
         public async Task CreateMigrationAttempt(MigrationRunAttemptModel model)
@@ -58,18 +37,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task UpdateMigrationRunAttemptStatus(long ukprn, Guid migrationRunId, MigrationStatus status, int? batchNumber = null)
+        public async Task UpdateMigrationRunAttemptStatus(MigrationRunAttemptModel migrationRun, MigrationStatus status)
         {
-            var model = await _matchedLearnerDataContext.MigrationRunAttempts
-                .SingleAsync(x =>
-                    x.Ukprn == ukprn &&
-                    x.MigrationRunId == migrationRunId &&
-                    x.BatchNumber == batchNumber);
-
-            model.Status = status;
+            migrationRun.Status = status;
 
             if(status == MigrationStatus.Completed)
-                model.CompletionTime = DateTime.Now;
+                migrationRun.CompletionTime = DateTime.Now;
 
             await _matchedLearnerDataContext.SaveChangesAsync();
         }

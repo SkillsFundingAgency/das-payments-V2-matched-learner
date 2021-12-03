@@ -24,8 +24,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         public ProviderLevelMatchedLearnerMigrationService(
             IProviderMigrationRepository providerMigrationRepository,
-            IMatchedLearnerRepository matchedLearnerRepository, 
-            IMatchedLearnerDtoMapper matchedLearnerDtoMapper, 
+            IMatchedLearnerRepository matchedLearnerRepository,
+            IMatchedLearnerDtoMapper matchedLearnerDtoMapper,
             ILogger<ProviderLevelMatchedLearnerMigrationService> logger,
             int batchSize,
             IProviderLevelMigrationRequestSendWrapper providerLevelMigrationRequestSendWrapper)
@@ -40,6 +40,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         public async Task MigrateProviderScopedData(ProviderLevelMigrationRequest request)
         {
+            var migrationRunAttempt = new MigrationRunAttemptModel
+            {
+                MigrationRunId = request.MigrationRunId,
+                Status = MigrationStatus.InProgress,
+                Ukprn = request.Ukprn,
+            };
+
             try
             {
                 List<TrainingModel> currentBatch;
@@ -47,29 +54,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                 {
                     _logger.LogInformation($"Migrating data for provider {request.Ukprn}. Migration run {request.MigrationRunId}.");
                     currentBatch = await GetTrainingsForProvider(request.Ukprn);
+                    migrationRunAttempt.TrainingCount = currentBatch.Count;
 
-                    await _providerMigrationRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
-                    {
-                        MigrationRunId = request.MigrationRunId,
-                        Status = MigrationStatus.InProgress,
-                        Ukprn = request.Ukprn,
-                        TrainingCount = currentBatch.Count
-                    });
+                    await _providerMigrationRepository.CreateMigrationAttempt(migrationRunAttempt);
                 }
                 else
                 {
                     _logger.LogInformation($"Migrating batch of data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Batch {request.BatchNumber} of {request.TotalBatches}.");
+
                     currentBatch = request.TrainingData.ToList();
-                    await _providerMigrationRepository.CreateMigrationAttempt(new MigrationRunAttemptModel
-                    {
-                        MigrationRunId = request.MigrationRunId,
-                        Status = MigrationStatus.InProgress,
-                        Ukprn = request.Ukprn,
-                        TrainingCount = currentBatch.Count,
-                        BatchNumber = request.BatchNumber,
-                        TotalBatches = request.TotalBatches,
-                        BatchUlns = string.Join(',', currentBatch.Select(x => x.Uln))
-                    });
+
+                    migrationRunAttempt.TrainingCount = currentBatch.Count;
+                    migrationRunAttempt.BatchNumber = request.BatchNumber;
+                    migrationRunAttempt.TotalBatches = request.TotalBatches;
+                    migrationRunAttempt.BatchUlns = string.Join(',', currentBatch.Select(x => x.Uln));
+
+                    await _providerMigrationRepository.CreateMigrationAttempt(migrationRunAttempt);
                 }
 
                 if (await HandleSingleBatchAndTransaction(currentBatch))
@@ -77,7 +77,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                     _logger.LogInformation(request.IsFirstBatch ?
                         $"Successfully completed migrating data for provider {request.Ukprn}. Migration run {request.MigrationRunId}." :
                         $"Successfully completed migrating batch of data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Batch {request.BatchNumber} of {request.TotalBatches}.");
-                    await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.Completed, request.BatchNumber);
+                    await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(migrationRunAttempt, MigrationStatus.Completed);
                 }
                 else
                 {
@@ -86,7 +86,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                         $"Failed migrating batch of data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Batch {request.BatchNumber} of {request.TotalBatches}.");
                     if (request.IsFirstBatch && _batchSize > 0)
                     {
-                        await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.CompletedWithErrors);
+                        await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(migrationRunAttempt, MigrationStatus.CompletedWithErrors);
                         ConvertToBatchesAndSend(currentBatch.ToList(), request.Ukprn, request.MigrationRunId);
                     }
 
@@ -97,20 +97,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                await HandleError(exception, request);
-            }
-        }
-
-        private async Task HandleError(Exception exception, ProviderLevelMigrationRequest request)
-        {
-            try
-            {
                 _logger.LogError(exception, $"Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId} failed.");
-                await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(request.Ukprn, request.MigrationRunId, MigrationStatus.Failed, request.BatchNumber);
-            }
-            catch (Exception updateException)
-            {
-                _logger.LogError(updateException, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
+                try
+                {
+                    await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(migrationRunAttempt, MigrationStatus.Failed);
+                }
+                catch (Exception updateException)
+                {
+                    _logger.LogError(updateException, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
+                }
             }
         }
 
