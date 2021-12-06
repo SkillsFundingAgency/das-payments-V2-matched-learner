@@ -26,7 +26,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var options = new DbContextOptionsBuilder()
-                    .UseSqlServer(applicationSettings.PaymentsConnectionString)
+                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(540))
                     .Options;
 
                 return new PaymentsDataContext(options);
@@ -48,7 +48,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
@@ -57,7 +57,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString),optionsBuilder => optionsBuilder.CommandTimeout(540))
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
