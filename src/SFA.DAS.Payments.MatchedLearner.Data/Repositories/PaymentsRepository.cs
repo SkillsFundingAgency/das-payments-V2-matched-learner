@@ -47,16 +47,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
             return await _paymentsDataContext.DataLockEvent
-                .Include(d => d.NonPayablePeriods.Where(np => transactionTypes.Contains(np.TransactionType) && np.PriceEpisodeIdentifier != null && np.Amount != 0))
+                .Include(d => d.NonPayablePeriods)
                 .ThenInclude(npp => npp.Failures)
-                .Include(d => d.PayablePeriods.Where(p => transactionTypes.Contains(p.TransactionType) && p.PriceEpisodeIdentifier != null && p.Amount != 0))
+                .Include(d => d.PayablePeriods)
                 .Include(d => d.PriceEpisodes)
                 .Where(d =>
                     d.Ukprn == submissionSucceededEvent.Ukprn &&
                     d.AcademicYear == submissionSucceededEvent.AcademicYear &&
                     d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
                     d.JobId == submissionSucceededEvent.JobId &&
-                    d.LearningAimReference == "ZPROG001")
+                    d.LearningAimReference == "ZPROG001" &&
+                    d.NonPayablePeriods.Any(npp => transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null && npp.Amount != 0) &&
+                    d.PayablePeriods.Any(pp => transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null && pp.Amount != 0))
                 .ToListAsync();
         }
     }

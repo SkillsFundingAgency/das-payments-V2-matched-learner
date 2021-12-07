@@ -154,7 +154,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
             await _sut.MigrateProviderScopedData(new ProviderLevelMigrationRequest { MigrationRunId = _migrationRunId, Ukprn = _ukprn });
 
             //Assert
-            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainingsIndividually(_mappedTrainingModels), Times.Once);
+            _matchedLearnerRepositoryMock.Verify(x => x.SaveTrainingsIndividually(It.IsAny<List<TrainingModel>>()), Times.Once);
         }
 
         [Test]
@@ -179,7 +179,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
                 .Setup(x => x.SaveTrainings(_mappedTrainingModels))
                 .ThrowsAsync(new InvalidOperationException());
             _matchedLearnerRepositoryMock
-                .Setup(x => x.SaveTrainingsIndividually(_mappedTrainingModels))
+                .Setup(x => x.SaveTrainingsIndividually(It.IsAny<List<TrainingModel>>()))
                 .ThrowsAsync(new InvalidOperationException());
 
             _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 2, _providerLevelMigrationRequestSendWrapperMock.Object);
@@ -214,7 +214,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MigrationTests
                 .Setup(x => x.SaveTrainings(_mappedTrainingModels))
                 .ThrowsAsync(new InvalidOperationException());
             _matchedLearnerRepositoryMock
-                .Setup(x => x.SaveTrainingsIndividually(_mappedTrainingModels))
+                .Setup(x => x.SaveTrainingsIndividually(It.IsAny<List<TrainingModel>>()))
                 .ThrowsAsync(new InvalidOperationException());
 
             _sut = new ProviderLevelMatchedLearnerMigrationService(_providerMigrationRepositoryMock.Object, _matchedLearnerRepositoryMock.Object, _matchedLearnerDtoMapperMock.Object, _loggerMock.Object, 2, _providerLevelMigrationRequestSendWrapperMock.Object);

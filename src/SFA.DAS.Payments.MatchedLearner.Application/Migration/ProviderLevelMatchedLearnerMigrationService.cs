@@ -153,10 +153,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         private async Task<bool> HandleSingleBatchAndTransaction(List<TrainingModel> trainingData)
         {
+            var originalTrainingData = trainingData.Clone();
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync();
-                await _matchedLearnerRepository.SaveTrainings(trainingData.Clone());
+                await _matchedLearnerRepository.SaveTrainings(trainingData);
                 await _matchedLearnerRepository.CommitTransactionAsync();
                 return true;
             }
@@ -164,7 +165,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             {
                 _logger.LogError(exception, "Error saving batch/provider, rolling back transaction and saving training items individually.");
                 await _matchedLearnerRepository.RollbackTransactionAsync();
-                return await HandleSavingTrainingDataIndividually(trainingData);
+                return await HandleSavingTrainingDataIndividually(originalTrainingData);
             }
         }
 
