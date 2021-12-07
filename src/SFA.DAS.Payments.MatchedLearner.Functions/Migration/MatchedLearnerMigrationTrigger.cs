@@ -18,7 +18,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Migration
         [FunctionName("HttpTriggerMatchedLearnerMigration")]
         public async Task HttpTriggerMatchedLearnerMigration(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
-            HttpRequest httpRequest
+            HttpRequest _
         )
         {
             await _matchedLearnerMigrationService.TriggerMigrationForAllProviders();

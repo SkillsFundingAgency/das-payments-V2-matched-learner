@@ -15,7 +15,4 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX IX_DataLockEventPayablePeriod_DataLockEventId
-ON [Payments2].[DataLockEventPayablePeriod] ([DataLockEventId])
-INCLUDE ([PriceEpisodeIdentifier],[TransactionType],[DeliveryPeriod],[Amount],[SfaContributionPercentage],[LearningStartDate],[ApprenticeshipId],[ApprenticeshipPriceEpisodeId],[ApprenticeshipEmployerType])
-WITH (ONLINE = ON);
+CREATE NONCLUSTERED INDEX [IX_DataLockEventPayablePeriod__DataLockEventId] ON [Payments2].[DataLockEventPayablePeriod] ([DataLockEventId]) WITH (ONLINE = ON);

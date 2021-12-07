@@ -70,7 +70,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             await WaitForIt(async () =>
             {
                 trainingRecords = await _testContext.TestRepository.GetMatchedLearnerTrainings(_ukprn);
-                return trainingRecords.Any();
+                return trainingRecords.Count == _listOfUln.Count;
             }, "Failed to find any training records.");
 
             var duplicateUlns = trainingRecords.Where(uln => _listOfDuplicateUln.Contains(uln.Uln)).ToList();

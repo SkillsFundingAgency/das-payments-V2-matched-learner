@@ -107,7 +107,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
         private static DateTime ExtractEpisodeStartDateFromPriceEpisodeIdentifier(string priceEpisodeIdentifier)
         {
             return DateTime.TryParseExact(
-                   priceEpisodeIdentifier.Substring(priceEpisodeIdentifier.Length - 10),
+                   priceEpisodeIdentifier[^10..],
                     "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces,
                     out var episodeStartDate)
                 ? episodeStartDate

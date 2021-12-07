@@ -44,16 +44,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task<List<DataLockEventModel>> GetDataLockEvents(SubmissionJobSucceeded submissionSucceededEvent)
         {
+            var transactionTypes = new List<byte> { 1, 2, 3 };
+
             return await _paymentsDataContext.DataLockEvent
-                .Include(d => d.NonPayablePeriods)
+                .Include(d => d.NonPayablePeriods.Where(np => transactionTypes.Contains(np.TransactionType) && np.PriceEpisodeIdentifier != null && np.Amount != 0))
                 .ThenInclude(npp => npp.Failures)
-                .Include(d => d.PayablePeriods)
+                .Include(d => d.PayablePeriods.Where(p => transactionTypes.Contains(p.TransactionType) && p.PriceEpisodeIdentifier != null && p.Amount != 0))
                 .Include(d => d.PriceEpisodes)
                 .Where(d =>
                     d.Ukprn == submissionSucceededEvent.Ukprn &&
                     d.AcademicYear == submissionSucceededEvent.AcademicYear &&
                     d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
-                    d.JobId == submissionSucceededEvent.JobId)
+                    d.JobId == submissionSucceededEvent.JobId &&
+                    d.LearningAimReference == "ZPROG001")
                 .ToListAsync();
         }
     }

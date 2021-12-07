@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
+using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 
@@ -155,7 +156,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync();
-                await _matchedLearnerRepository.SaveTrainings(trainingData);
+                await _matchedLearnerRepository.SaveTrainings(trainingData.Clone());
                 await _matchedLearnerRepository.CommitTransactionAsync();
                 return true;
             }

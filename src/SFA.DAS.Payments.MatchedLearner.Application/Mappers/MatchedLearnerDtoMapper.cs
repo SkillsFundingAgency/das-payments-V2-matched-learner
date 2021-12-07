@@ -260,7 +260,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                 throw new InvalidOperationException($"Price episode identifier is invalid (null, empty, or too short): {priceEpisodeIdentifier}");
 
             return DateTime.TryParseExact(
-                priceEpisodeIdentifier.Substring(priceEpisodeIdentifier.Length - 10), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var episodeStartDate)
+                priceEpisodeIdentifier[^10..], "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var episodeStartDate)
                 ? episodeStartDate
                 : throw new InvalidOperationException($"Cannot determine episode start date from the price episode identifier: {priceEpisodeIdentifier}");
         }
