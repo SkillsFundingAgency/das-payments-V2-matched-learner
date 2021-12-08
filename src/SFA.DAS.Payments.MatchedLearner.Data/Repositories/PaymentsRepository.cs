@@ -46,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            return await _paymentsDataContext.DataLockEvent
+            var result = await _paymentsDataContext.DataLockEvent
                 .Include(d => d.NonPayablePeriods)
                 .ThenInclude(npp => npp.Failures)
                 .Include(d => d.PayablePeriods)
@@ -56,10 +56,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                     d.AcademicYear == submissionSucceededEvent.AcademicYear &&
                     d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
                     d.JobId == submissionSucceededEvent.JobId &&
-                    d.LearningAimReference == "ZPROG001" &&
-                    d.NonPayablePeriods.Any(npp => transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null && npp.Amount != 0) &&
-                    d.PayablePeriods.Any(pp => transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null && pp.Amount != 0))
+                    d.LearningAimReference == "ZPROG001")
                 .ToListAsync();
+
+            return result.Select(d =>
+            {
+                d.NonPayablePeriods = d.NonPayablePeriods.Where(npp =>
+                    transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null &&
+                    npp.Amount != 0).ToList();
+                d.PayablePeriods = d.PayablePeriods.Where(pp =>
+                    transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null &&
+                    pp.Amount != 0).ToList();
+                return d;
+            }).ToList();
         }
     }
 }
