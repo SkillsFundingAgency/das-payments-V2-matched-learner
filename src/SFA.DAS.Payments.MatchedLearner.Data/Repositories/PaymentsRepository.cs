@@ -57,17 +57,43 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                     d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
                     d.JobId == submissionSucceededEvent.JobId &&
                     d.LearningAimReference == "ZPROG001")
+                .Select(d => new
+                {
+                    d.Id,
+                    d.EarningEventId,
+                    d.ContractType,
+                    d.AgreementId,
+                    d.IlrFileName,
+                    d.SfaContributionPercentage,
+                    d.EventType,
+                    d.IsPayable,
+                    d.DataLockSource,
+                    d.PriceEpisodes,
+                    NonPayablePeriods = d.NonPayablePeriods
+                        .Where(npp =>
+                            transactionTypes.Contains(npp.TransactionType) &&
+                            npp.PriceEpisodeIdentifier != null &&
+                            npp.Amount != 0),
+                    PayablePeriods = d.PayablePeriods.Where(pp =>
+                        transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null &&
+                        pp.Amount != 0)
+                })
                 .ToListAsync();
 
-            return result.Select(d =>
+            return result.Select(d => new DataLockEventModel
             {
-                d.NonPayablePeriods = d.NonPayablePeriods.Where(npp =>
-                    transactionTypes.Contains(npp.TransactionType) && npp.PriceEpisodeIdentifier != null &&
-                    npp.Amount != 0).ToList();
-                d.PayablePeriods = d.PayablePeriods.Where(pp =>
-                    transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null &&
-                    pp.Amount != 0).ToList();
-                return d;
+                Id = d.Id,
+                EarningEventId = d.EarningEventId,
+                ContractType = d.ContractType,
+                AgreementId = d.AgreementId,
+                IlrFileName = d.IlrFileName,
+                SfaContributionPercentage = d.SfaContributionPercentage,
+                EventType = d.EventType,
+                IsPayable = d.IsPayable,
+                DataLockSource = d.DataLockSource,
+                PriceEpisodes = d.PriceEpisodes,
+                NonPayablePeriods = d.NonPayablePeriods.ToList(),
+                PayablePeriods = d.PayablePeriods.ToList()
             }).ToList();
         }
     }
