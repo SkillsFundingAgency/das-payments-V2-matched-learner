@@ -46,7 +46,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var basicDataLockEvents = _paymentsDataContext.DataLockEvent
+            var basicDataLockEvents = await _paymentsDataContext.DataLockEvent
                 //.Include(d => d.NonPayablePeriods)
                 //.ThenInclude(npp => npp.Failures)
                 //.Include(d => d.PayablePeriods)
@@ -56,7 +56,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                     d.AcademicYear == submissionSucceededEvent.AcademicYear &&
                     d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
                     d.JobId == submissionSucceededEvent.JobId &&
-                    d.LearningAimReference == "ZPROG001").ToList();
+                    d.LearningAimReference == "ZPROG001").ToListAsync();
             //.Select(d => new
             //{
             //    d.Id,
@@ -81,7 +81,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 //})
                 //.ToListAsync();
 
-            var basicDataLockEventsWithNonPayablePeriods = basicDataLockEvents.Join(
+            var basicDataLockEventsWithNonPayablePeriods =  basicDataLockEvents.Join(
                 _paymentsDataContext.DataLockEventNonPayablePeriod.Include(x => x.Failures).Where(npp =>
                     transactionTypes.Contains(npp.TransactionType) &&
                     npp.PriceEpisodeIdentifier != null &&
@@ -89,7 +89,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 dle => dle.EventId,
                 npp => npp.DataLockEventId,
                 (dle, npp) => dle
-            ).ToList();
+            ).Distinct();
 
             var dataLockEventsWithPayableAndNonPayablePeriods = basicDataLockEventsWithNonPayablePeriods.Join(
                 _paymentsDataContext.DataLockEventPayablePeriod.Where(pp =>
@@ -98,9 +98,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 dle => dle.EventId,
                 pp => pp.DataLockEventId,
                 (dle, pp) => dle
-            ).ToList();
+            ).Distinct();
 
-            return dataLockEventsWithPayableAndNonPayablePeriods;
+            return dataLockEventsWithPayableAndNonPayablePeriods.ToList();
 
             //return result.Select(d => new DataLockEventModel
             //{
