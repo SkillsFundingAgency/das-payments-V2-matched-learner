@@ -56,7 +56,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
 
-            if (dataLockEvents == null)
+            if (dataLockEvents == null || !dataLockEvents.Any())
             {
                 return new List<DataLockEventModel>();
             }
@@ -88,17 +88,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .Where(d => dataLockEventNonPayablePeriodIds.Contains(d.DataLockEventNonPayablePeriodId))
                 .ToListAsync();
             }
-
-            //var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
-            //     .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
-            //     .Distinct()
-            //     .ToList();
-
-            //var apprenticeshipDetails = new List<ApprenticeshipModel>();
-            //if (apprenticeshipIds.Any())
-            //{
-            //    apprenticeshipDetails = await _paymentsDataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
-            //}
 
             return dataLockEvents.Select(dle =>
                 {
