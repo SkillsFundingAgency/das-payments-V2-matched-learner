@@ -14,6 +14,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<DataLockEventNonPayablePeriodFailureModel> DataLockEventNonPayablePeriodFailure { get; set; }
         public DbSet<DataLockEventNonPayablePeriodModel> DataLockEventNonPayablePeriod { get; set; }
         public DbSet<DataLockEventPayablePeriodModel> DataLockEventPayablePeriod { get; set; }
+        public DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

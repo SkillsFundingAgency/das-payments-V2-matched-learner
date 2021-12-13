@@ -46,77 +46,86 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var basicDataLockEvents = await _paymentsDataContext.DataLockEvent
-                //.Include(d => d.NonPayablePeriods)
-                //.ThenInclude(npp => npp.Failures)
-                //.Include(d => d.PayablePeriods)
-                .Include(d => d.PriceEpisodes)
-                .Where(d =>
-                    d.Ukprn == submissionSucceededEvent.Ukprn &&
-                    d.AcademicYear == submissionSucceededEvent.AcademicYear &&
-                    d.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
-                    d.JobId == submissionSucceededEvent.JobId &&
-                    d.LearningAimReference == "ZPROG001").ToListAsync();
-            //.Select(d => new
+            var dataLockEvents = await _paymentsDataContext.DataLockEvent
+                .Where(x =>
+                    x.LearningAimReference == "ZPROG001" &&
+                    x.AcademicYear == submissionSucceededEvent.AcademicYear &&
+                    x.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
+                    x.JobId == submissionSucceededEvent.JobId &&
+                    x.Ukprn == submissionSucceededEvent.Ukprn)
+                .OrderBy(x => x.LearningStartDate)
+                .ToListAsync();
+
+            if (dataLockEvents == null)
+            {
+                return new List<DataLockEventModel>();
+            }
+
+            var eventIds = dataLockEvents.Select(d => d.EventId).ToList();
+
+            var dataLockEventPriceEpisodes = await _paymentsDataContext.DataLockEventPriceEpisode
+                .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
+                .OrderBy(p => p.StartDate)
+                .ThenBy(p => p.PriceEpisodeIdentifier)
+                .ToListAsync();
+
+            var dataLockEventPayablePeriods = await _paymentsDataContext.DataLockEventPayablePeriod
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .OrderBy(p => p.DeliveryPeriod)
+                .ToListAsync();
+
+            var dataLockEventNonPayablePeriods = await _paymentsDataContext.DataLockEventNonPayablePeriod
+                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
+                .OrderBy(p => p.DeliveryPeriod)
+                .ToListAsync();
+
+            var dataLockEventNonPayablePeriodIds = dataLockEventNonPayablePeriods.Select(d => d.DataLockEventNonPayablePeriodId).ToList();
+
+            var dataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>();
+            if (dataLockEventNonPayablePeriodIds.Any())
+            {
+                dataLockEventNonPayablePeriodFailures = await _paymentsDataContext.DataLockEventNonPayablePeriodFailure
+                .Where(d => dataLockEventNonPayablePeriodIds.Contains(d.DataLockEventNonPayablePeriodId))
+                .ToListAsync();
+            }
+
+            //var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
+            //     .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
+            //     .Distinct()
+            //     .ToList();
+
+            //var apprenticeshipDetails = new List<ApprenticeshipModel>();
+            //if (apprenticeshipIds.Any())
             //{
-            //    d.Id,
-            //    d.EarningEventId,
-            //    d.ContractType,
-            //    d.AgreementId,
-            //    d.IlrFileName,
-            //    d.SfaContributionPercentage,
-            //    d.EventType,
-            //    d.IsPayable,
-            //    d.DataLockSource,
-            //    d.PriceEpisodes,
-            //    d.EventId,
-            //    NonPayablePeriods = d.NonPayablePeriods
-            //        .Where(npp =>
-            //            transactionTypes.Contains(npp.TransactionType) &&
-            //            npp.PriceEpisodeIdentifier != null &&
-            //            npp.Amount != 0),
-            //PayablePeriods = d.PayablePeriods.Where(pp =>
-            //    transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null &&
-            //    pp.Amount != 0)
-                //})
-                //.ToListAsync();
+            //    apprenticeshipDetails = await _paymentsDataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
+            //}
 
-            var basicDataLockEventsWithNonPayablePeriods =  basicDataLockEvents.Join(
-                _paymentsDataContext.DataLockEventNonPayablePeriod.Include(x => x.Failures).Where(npp =>
-                    transactionTypes.Contains(npp.TransactionType) &&
-                    npp.PriceEpisodeIdentifier != null &&
-                    npp.Amount != 0),
-                dle => dle.EventId,
-                npp => npp.DataLockEventId,
-                (dle, npp) => dle
-            ).Distinct();
+            return dataLockEvents.Select(dle =>
+                {
+                    dle.NonPayablePeriods = dataLockEventNonPayablePeriods
+                        .Where(npp => npp.DataLockEventId == dle.EventId)
+                        .Select(npp =>
+                        {
+                            npp.Failures = dataLockEventNonPayablePeriodFailures
+                                .Where(nppf =>
+                                    nppf.DataLockEventNonPayablePeriodId == npp.DataLockEventNonPayablePeriodId)
+                                .ToList();
 
-            var dataLockEventsWithPayableAndNonPayablePeriods = basicDataLockEventsWithNonPayablePeriods.Join(
-                _paymentsDataContext.DataLockEventPayablePeriod.Where(pp =>
-                    transactionTypes.Contains(pp.TransactionType) && pp.PriceEpisodeIdentifier != null &&
-                    pp.Amount != 0),
-                dle => dle.EventId,
-                pp => pp.DataLockEventId,
-                (dle, pp) => dle
-            ).Distinct();
+                            return npp;
+                        })
+                        .ToList();
 
-            return dataLockEventsWithPayableAndNonPayablePeriods.ToList();
+                    dle.PayablePeriods = dataLockEventPayablePeriods
+                        .Where(pp => pp.DataLockEventId == dle.EventId)
+                        .ToList();
 
-            //return result.Select(d => new DataLockEventModel
-            //{
-            //    Id = d.Id,
-            //    EarningEventId = d.EarningEventId,
-            //    ContractType = d.ContractType,
-            //    AgreementId = d.AgreementId,
-            //    IlrFileName = d.IlrFileName,
-            //    SfaContributionPercentage = d.SfaContributionPercentage,
-            //    EventType = d.EventType,
-            //    IsPayable = d.IsPayable,
-            //    DataLockSource = d.DataLockSource,
-            //    PriceEpisodes = d.PriceEpisodes,
-            //    NonPayablePeriods = d.NonPayablePeriods.ToList(),
-            //    PayablePeriods = d.PayablePeriods.ToList()
-            //}).ToList();
+                    dle.PriceEpisodes = dataLockEventPriceEpisodes
+                        .Where(pe => pe.DataLockEventId == dle.EventId)
+                        .ToList();
+
+                    return dle;
+                })
+                .ToList();
         }
     }
 }
