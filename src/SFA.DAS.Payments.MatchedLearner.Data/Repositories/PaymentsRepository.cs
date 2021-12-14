@@ -90,30 +90,30 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
 
             return dataLockEvents.Select(dle =>
-                {
-                    dle.NonPayablePeriods = dataLockEventNonPayablePeriods
-                        .Where(npp => npp.DataLockEventId == dle.EventId)
-                        .Select(npp =>
-                        {
-                            npp.Failures = dataLockEventNonPayablePeriodFailures
-                                .Where(nppf =>
-                                    nppf.DataLockEventNonPayablePeriodId == npp.DataLockEventNonPayablePeriodId)
-                                .ToList();
+            {
+                dle.NonPayablePeriods = dataLockEventNonPayablePeriods
+                    .Where(npp => npp.DataLockEventId == dle.EventId)
+                    .Select(npp =>
+                    {
+                        npp.Failures = dataLockEventNonPayablePeriodFailures
+                            .Where(nppf =>
+                                nppf.DataLockEventNonPayablePeriodId == npp.DataLockEventNonPayablePeriodId)
+                            .ToList();
 
-                            return npp;
-                        })
-                        .ToList();
+                        return npp;
+                    })
+                    .ToList();
 
-                    dle.PayablePeriods = dataLockEventPayablePeriods
-                        .Where(pp => pp.DataLockEventId == dle.EventId)
-                        .ToList();
+                dle.PayablePeriods = dataLockEventPayablePeriods
+                    .Where(pp => pp.DataLockEventId == dle.EventId)
+                    .ToList();
 
-                    dle.PriceEpisodes = dataLockEventPriceEpisodes
-                        .Where(pe => pe.DataLockEventId == dle.EventId)
-                        .ToList();
+                dle.PriceEpisodes = dataLockEventPriceEpisodes
+                    .Where(pe => pe.DataLockEventId == dle.EventId)
+                    .ToList();
 
-                    return dle;
-                })
+                return dle;
+            })
                 .ToList();
         }
     }
