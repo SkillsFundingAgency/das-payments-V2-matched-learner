@@ -59,14 +59,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             var dataLockEventPayablePeriods = await _paymentsDataContext.DataLockEventPayablePeriod
                 .Join(dataLockEvents, pp => pp.DataLockEventId, d => d.EventId, (pe, d) => pe)
                 .Where(d => transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                //.OrderBy(p => p.DeliveryPeriod)
                 .ToListAsync();
 
             var dataLockEventNonPayablePeriods = await _paymentsDataContext.DataLockEventNonPayablePeriod
                 .Include(npp => npp.Failures)
                 .Join(dataLockEvents, pp => pp.DataLockEventId, d => d.EventId, (pe, d) => pe)
                 .Where(d => transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                //.OrderBy(p => p.DeliveryPeriod)
                 .ToListAsync();
 
             var result = await dataLockEvents.ToListAsync();
