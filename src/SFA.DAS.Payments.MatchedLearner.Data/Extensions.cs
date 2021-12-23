@@ -52,5 +52,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Data
             var serializeObject = JsonConvert.SerializeObject(oldList);
             return JsonConvert.DeserializeObject<List<T>>(serializeObject);
         }
+        public static T Clone<T>(this T oldObj)
+        {
+            var serializeObject = JsonConvert.SerializeObject(oldObj);
+            return JsonConvert.DeserializeObject<T>(serializeObject);
+        }
     }
 }

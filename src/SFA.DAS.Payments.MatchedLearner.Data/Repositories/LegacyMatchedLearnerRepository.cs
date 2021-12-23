@@ -209,7 +209,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false, UseTempDB = true };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 150, PreserveInsertOrder = false, UseTempDB = true };
 
             var priceEpisodes = dataLockEvents
                 .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
@@ -225,10 +225,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .SelectMany(npp => npp.Failures))
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig);
-            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig);
-            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig);
+            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig.Clone());
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig.Clone());
+            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig.Clone());
+            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig.Clone());
             await _dataContext.BulkInsertAsync(failures, bulkConfig);
         }
 

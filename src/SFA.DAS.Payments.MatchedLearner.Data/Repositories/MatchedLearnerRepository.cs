@@ -112,7 +112,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 150, UseTempDB = true };
 
-            await _dataContext.BulkInsertAsync(trainings, bulkConfig);
+            await _dataContext.BulkInsertAsync(trainings, bulkConfig.Clone());
             
             var priceEpisodes = trainings
                 .SelectMany(training =>
@@ -125,7 +125,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 })
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig);
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig.Clone());
 
             var periods = priceEpisodes
                 .SelectMany(priceEpisode =>
