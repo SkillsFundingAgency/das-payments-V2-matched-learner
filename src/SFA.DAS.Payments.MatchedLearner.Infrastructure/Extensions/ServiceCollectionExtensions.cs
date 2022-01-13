@@ -43,7 +43,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
             services.Decorate<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProviderCache>();
 
-            services.AddSingleton<SqlAzureIdentityAuthenticationDbConnectionInterceptor>();
+            services.AddSingleton(provider => new SqlAzureIdentityAuthenticationDbConnectionInterceptor(provider.GetService<ISqlAzureIdentityTokenProvider>(), applicationSettings.ConnectionNeedsAccessToken));
 
             services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {

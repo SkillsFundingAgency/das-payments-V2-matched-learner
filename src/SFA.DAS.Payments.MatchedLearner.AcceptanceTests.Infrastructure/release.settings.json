@@ -1,23 +1,24 @@
 {
-  "AzureAd": {
-    "ApiBaseUrl": "__MatchedLearnerAcceptanceTestApiTargetUrl__",
-    "ClientId": "__MatchedLearnerAcceptanceTestClientId__",
-    "ClientSecret": "__MatchedLearnerAcceptanceTestClientSecret__",
-    "IdentifierUri": "__MatchedLearnerIdentifier__",
-    "Tenant": "__Tenant__"
-  },
+    "AzureAd": {
+        "ApiBaseUrl": "__MatchedLearnerAcceptanceTestApiTargetUrl__",
+        "ClientId": "__MatchedLearnerAcceptanceTestClientId__",
+        "ClientSecret": "__MatchedLearnerAcceptanceTestClientSecret__",
+        "IdentifierUri": "__MatchedLearnerIdentifier__",
+        "Tenant": "__Tenant__"
+    },
 
-  "MatchedLearner": {
-    "TimeToWait": "__TimeToWait__",
-    "TimeToPause": "__TimeToPause__",
-    "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
+    "MatchedLearner": {
+        "TimeToWait": "__TimeToWait__",
+        "TimeToPause": "__TimeToPause__",
+        "TimeToWaitUnexpected": "__TimeToWaitUnexpected__",
 
-    "MatchedLearnerStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
+        "MatchedLearnerStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
 
-    "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
+        "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
 
-    "PaymentsConnectionString": "__PaymentsAcceptanceTestConnectionString__",
-    "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__",
-    "MigrationQueue": "__MigrationQueue__"
-  }
+        "PaymentsConnectionString": "__PaymentsAcceptanceTestConnectionString__",
+        "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__",
+        "ConnectionNeedsAccessToken": "__ConnectionNeedsAccessToken__",
+	    "MigrationQueue": "__MigrationQueue__"
+    }
 }

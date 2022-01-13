@@ -9,6 +9,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
         public string MatchedLearnerConnectionString { get; set; }
         public string PaymentsServiceBusConnectionString { get; set; }
         public bool IsDevelopment { get; set; }
+        public bool ConnectionNeedsAccessToken { get; set; }
         public string MigrationQueue { get; set; }
         public int MigrationBatchSize { get; set; }
         public bool UseV1Api { get; set; }

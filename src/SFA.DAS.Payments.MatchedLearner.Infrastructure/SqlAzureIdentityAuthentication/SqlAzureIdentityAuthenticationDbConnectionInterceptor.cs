@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
@@ -10,10 +9,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
     public class SqlAzureIdentityAuthenticationDbConnectionInterceptor : DbConnectionInterceptor
     {
         private readonly ISqlAzureIdentityTokenProvider _tokenProvider;
+        private static bool _connectionNeedsAccessToken = true;
 
-        public SqlAzureIdentityAuthenticationDbConnectionInterceptor(ISqlAzureIdentityTokenProvider tokenProvider)
+        public SqlAzureIdentityAuthenticationDbConnectionInterceptor(ISqlAzureIdentityTokenProvider tokenProvider, bool connectionNeedsAccessToken)
         {
             _tokenProvider = tokenProvider;
+            _connectionNeedsAccessToken = connectionNeedsAccessToken;
         }
 
         public override InterceptionResult ConnectionOpening(
@@ -54,9 +55,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
             //  - We connect to an Azure SQL instance; and
             //  - The connection doesn't specify a username.
             //
-            var connectionStringBuilder = new SqlConnectionStringBuilder(connection.ConnectionString);
+            //var connectionStringBuilder = new SqlConnectionStringBuilder(connection.ConnectionString);
 
-            return connectionStringBuilder.DataSource.Contains("database.windows.net", StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(connectionStringBuilder.UserID);
+            //return connectionStringBuilder.DataSource.Contains("database.windows.net", StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(connectionStringBuilder.UserID);
+            return _connectionNeedsAccessToken;
         }
     }
 }
