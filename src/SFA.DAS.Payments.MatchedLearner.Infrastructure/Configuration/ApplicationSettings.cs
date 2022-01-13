@@ -7,5 +7,6 @@
         public string MatchedLearnerConnectionString { get; set; }
         public string PaymentsServiceBusConnectionString { get; set; }
         public bool IsDevelopment { get; set; }
+        public bool ConnectionNeedsAccessToken { get; set; }
     }
 }
