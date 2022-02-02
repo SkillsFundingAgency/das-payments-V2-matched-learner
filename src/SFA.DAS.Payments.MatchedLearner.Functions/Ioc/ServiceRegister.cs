@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Application;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Application.Migration;
@@ -18,7 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 
             services.AddPaymentsDataContext(applicationSettings);
 
-            services.AddEndpointInstanceFactory(applicationSettings);
+            services.AddEndpointInstance(applicationSettings);
 
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
             services.AddTransient<IPaymentsRepository, PaymentsRepository>();
@@ -28,26 +29,25 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
             services.AddTransient<ILegacyMatchedLearnerRepository, LegacyMatchedLearnerRepository>();
             services.AddTransient<ILegacyMatchedLearnerDataImportService, LegacyMatchedLearnerDataImportService>();
 
-            services.AddTransient<IMatchedLearnerMigrationService, MatchedLearnerMigrationService>(x => 
-                new MatchedLearnerMigrationService(
-                    x.GetService<MatchedLearnerDataContext>(), 
-                    x.GetService<IEndpointInstanceFactory>(), 
-                    applicationSettings.MigrationQueue,
-                    x.GetService<IProviderMigrationRepository>()));
+            services.AddTransient<ISubmissionSucceededDelayedImportService, SubmissionSucceededDelayedImportService>(x =>
+                new SubmissionSucceededDelayedImportService(applicationSettings,
+                    x.GetService<IEndpointInstance>(),
+                    x.GetService<ILogger<SubmissionSucceededDelayedImportService>>()));
 
-            services.AddTransient<IProviderLevelMigrationRequestSendWrapper, ProviderLevelMigrationRequestSendWrapper>(
-                x =>
-                    new ProviderLevelMigrationRequestSendWrapper(x.GetService<IEndpointInstanceFactory>(),
-                        applicationSettings.MigrationQueue));
+            services.AddTransient<IMigrateProviderMatchedLearnerDataTriggerService, MigrateProviderMatchedLearnerDataTriggerService>(x =>
+                new MigrateProviderMatchedLearnerDataTriggerService(applicationSettings,
+                    x.GetService<IEndpointInstance>(),
+                    x.GetService<MatchedLearnerDataContext>(),
+                    x.GetService<IProviderMigrationRepository>(),
+                    x.GetService<ILogger<MigrateProviderMatchedLearnerDataTriggerService>>()));
 
-            services.AddTransient<IProviderLevelMatchedLearnerMigrationService, ProviderLevelMatchedLearnerMigrationService>(x =>
-                new ProviderLevelMatchedLearnerMigrationService(
+            services.AddTransient<IMigrateProviderMatchedLearnerDataService, MigrateProviderMatchedLearnerDataService>(x =>
+                new MigrateProviderMatchedLearnerDataService(applicationSettings,
+                    x.GetService<IEndpointInstance>(),
                     x.GetService<IProviderMigrationRepository>(),
                     x.GetService<IMatchedLearnerRepository>(),
                     x.GetService<IMatchedLearnerDtoMapper>(),
-                    x.GetService<ILogger<ProviderLevelMatchedLearnerMigrationService>>(),
-                    applicationSettings.MigrationBatchSize,
-                    x.GetService<IProviderLevelMigrationRequestSendWrapper>()));
+                    x.GetService<ILogger<MigrateProviderMatchedLearnerDataService>>()));
             services.AddTransient<IProviderMigrationRepository, ProviderMigrationRepository>();
             services.AddTransient<IMatchedLearnerDtoMapper, MatchedLearnerDtoMapper>();
         }

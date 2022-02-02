@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
-using SFA.DAS.Payments.MatchedLearner.Application.Migration;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
@@ -42,6 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             var conventions = endpointConfiguration.Conventions();
 
             conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
+            conventions.DefiningCommandsAs(t => typeof(MigrateProviderMatchedLearnerData).IsAssignableFrom(t) || typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
 
             var persistence = endpointConfiguration.UsePersistence<AzureStoragePersistence>();
 
@@ -92,7 +93,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         {
             var options = new SendOptions();
             options.SetDestination(_testConfiguration.MigrationQueue);
-            await _endpointInstance.Send(new ProviderLevelMigrationRequest
+            await _endpointInstance.Send(new MigrateProviderMatchedLearnerData
             {
                 Ukprn = ukprn,
                 MigrationRunId = Guid.NewGuid(),

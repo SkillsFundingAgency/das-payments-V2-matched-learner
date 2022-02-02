@@ -36,6 +36,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
             EnsureQueueAndSubscription(managementClient, applicationSettings.MigrationQueue);
+            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 
         private static void EnsureQueueAndSubscription(ManagementClient managementClient, string queue, Type messageType = null)

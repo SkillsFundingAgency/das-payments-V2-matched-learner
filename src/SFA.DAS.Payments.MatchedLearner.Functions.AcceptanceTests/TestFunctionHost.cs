@@ -22,6 +22,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 { "AzureWebJobsStorage", TestConfiguration.TestApplicationSettings.MatchedLearnerStorageAccountConnectionString },
                 { "PaymentsServiceBusConnectionString", TestConfiguration.TestApplicationSettings.PaymentsServiceBusConnectionString },
                 { "MatchedLearnerQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerQueue },
+                { "MatchedLearnerImportQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerImportQueue },
                 { "MigrationQueue", TestConfiguration.TestApplicationSettings.MigrationQueue },
             };
 

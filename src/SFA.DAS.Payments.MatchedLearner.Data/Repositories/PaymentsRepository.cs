@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
-using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
+using ImportMatchedLearnerData = SFA.DAS.Payments.MatchedLearner.Data.Entities.ImportMatchedLearnerData;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
     public interface IPaymentsRepository
     {
         Task<List<ApprenticeshipModel>> GetApprenticeships(List<long> ids);
-        Task<List<DataLockEventModel>> GetDataLockEvents(SubmissionJobSucceeded submissionSucceededEvent);
+        Task<List<DataLockEventModel>> GetDataLockEvents(ImportMatchedLearnerData importMatchedLearnerData);
     }
 
     public class PaymentsRepository : IPaymentsRepository
@@ -42,7 +42,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             return apprenticeshipModels;
         }
 
-        public async Task<List<DataLockEventModel>> GetDataLockEvents(SubmissionJobSucceeded submissionSucceededEvent)
+        public async Task<List<DataLockEventModel>> GetDataLockEvents(ImportMatchedLearnerData importMatchedLearnerData)
         {
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
@@ -50,10 +50,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                     .Include(d => d.PriceEpisodes)
                     .Where(x =>
                         x.LearningAimReference == "ZPROG001" &&
-                        x.AcademicYear == submissionSucceededEvent.AcademicYear &&
-                        x.CollectionPeriod == submissionSucceededEvent.CollectionPeriod &&
-                        x.JobId == submissionSucceededEvent.JobId &&
-                        x.Ukprn == submissionSucceededEvent.Ukprn)
+                        x.AcademicYear == importMatchedLearnerData.AcademicYear &&
+                        x.CollectionPeriod == importMatchedLearnerData.CollectionPeriod &&
+                        x.JobId == importMatchedLearnerData.JobId &&
+                        x.Ukprn == importMatchedLearnerData.Ukprn)
                     .OrderBy(x => x.LearningStartDate);
 
             var dataLockEventPayablePeriods = await _paymentsDataContext.DataLockEventPayablePeriod

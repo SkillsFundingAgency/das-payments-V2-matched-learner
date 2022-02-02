@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,14 +8,13 @@ using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.MatchedLearnerDataImportServiceTests
 {
     [TestFixture]
     public class WhenImporting
     {
-        private SubmissionJobSucceeded _submissionSucceededEvent;
+        private ImportMatchedLearnerData _importMatchedLearnerData;
         private MatchedLearnerDataImportService _sut;
         private List<DataLockEventModel> _dataLockEvents;
         private List<ApprenticeshipModel> _apprenticeships;
@@ -30,7 +28,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         [SetUp]
         public async Task SetUp()
         {
-            _submissionSucceededEvent = new SubmissionJobSucceeded
+            _importMatchedLearnerData = new ImportMatchedLearnerData
             {
                 Ukprn = 173658,
                 CollectionPeriod = 5,
@@ -139,7 +137,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
                 }
             };
 
-            _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_submissionSucceededEvent))
+            _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_importMatchedLearnerData))
                 .ReturnsAsync(_dataLockEvents);
 
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
@@ -147,19 +145,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
 
             _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper(), _mockLogger.Object);
 
-            await _sut.Import(_submissionSucceededEvent, _dataLockEvents);
+            await _sut.Import(_importMatchedLearnerData, _dataLockEvents);
         }
 
         [Test]
         public void ThenRemovesPreviousSubmissionDataForCurrentPeriod()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_submissionSucceededEvent.Ukprn, _submissionSucceededEvent.AcademicYear, It.Is<IList<byte>>(y => y.Contains(_submissionSucceededEvent.CollectionPeriod))));
+            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_importMatchedLearnerData.Ukprn, _importMatchedLearnerData.AcademicYear, It.Is<IList<byte>>(y => y.Contains(_importMatchedLearnerData.CollectionPeriod))));
         }
 
         [Test]
         public void ThenRemovesPreviousSubmissionDataForPreviousPeriod()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_submissionSucceededEvent.Ukprn, _submissionSucceededEvent.AcademicYear, It.Is<IList<byte>>(y => y.Contains(_submissionSucceededEvent.CollectionPeriod))));
+            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_importMatchedLearnerData.Ukprn, _importMatchedLearnerData.AcademicYear, It.Is<IList<byte>>(y => y.Contains(_importMatchedLearnerData.CollectionPeriod))));
         }
 
         [Test]

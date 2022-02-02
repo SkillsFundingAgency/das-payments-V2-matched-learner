@@ -3,43 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 {
-    public interface IProviderLevelMatchedLearnerMigrationService
+    public interface IMigrateProviderMatchedLearnerDataService
     {
-        Task MigrateProviderScopedData(ProviderLevelMigrationRequest request);
+        Task MigrateProviderScopedData(MigrateProviderMatchedLearnerData request);
     }
-    public class ProviderLevelMatchedLearnerMigrationService : IProviderLevelMatchedLearnerMigrationService
+
+    public class MigrateProviderMatchedLearnerDataService : IMigrateProviderMatchedLearnerDataService
     {
+        private readonly IEndpointInstance _endpointInstance;
         private readonly IProviderMigrationRepository _providerMigrationRepository;
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
         private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
-        private readonly ILogger<ProviderLevelMatchedLearnerMigrationService> _logger;
-        private readonly int _batchSize;
-        private readonly IProviderLevelMigrationRequestSendWrapper _providerLevelMigrationRequestSendWrapper;
+        private readonly ILogger<MigrateProviderMatchedLearnerDataService> _logger;
+        private readonly ApplicationSettings _applicationSettings;
 
-        public ProviderLevelMatchedLearnerMigrationService(
+        public MigrateProviderMatchedLearnerDataService(
+            ApplicationSettings applicationSettings,
+            IEndpointInstance endpointInstance,
             IProviderMigrationRepository providerMigrationRepository,
             IMatchedLearnerRepository matchedLearnerRepository,
             IMatchedLearnerDtoMapper matchedLearnerDtoMapper,
-            ILogger<ProviderLevelMatchedLearnerMigrationService> logger,
-            int batchSize,
-            IProviderLevelMigrationRequestSendWrapper providerLevelMigrationRequestSendWrapper)
+            ILogger<MigrateProviderMatchedLearnerDataService> logger)
         {
-            _providerMigrationRepository = providerMigrationRepository;
-            _matchedLearnerRepository = matchedLearnerRepository;
-            _matchedLearnerDtoMapper = matchedLearnerDtoMapper;
-            _logger = logger;
-            _batchSize = batchSize;
-            _providerLevelMigrationRequestSendWrapper = providerLevelMigrationRequestSendWrapper;
+            _endpointInstance = endpointInstance ?? throw new ArgumentNullException(nameof(endpointInstance));
+            _providerMigrationRepository = providerMigrationRepository ?? throw new ArgumentNullException(nameof(providerMigrationRepository));
+            _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
+            _matchedLearnerDtoMapper = matchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(matchedLearnerDtoMapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
         }
 
-        public async Task MigrateProviderScopedData(ProviderLevelMigrationRequest request)
+        public async Task MigrateProviderScopedData(MigrateProviderMatchedLearnerData request)
         {
             var migrationRunAttempt = new MigrationRunAttemptModel
             {
@@ -85,7 +88,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                     _logger.LogInformation(request.IsFirstBatch ?
                         $"Failed migrating data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Splitting into batches for reprocessing." :
                         $"Failed migrating batch of data for provider {request.Ukprn}. Migration run {request.MigrationRunId}. Batch {request.BatchNumber} of {request.TotalBatches}.");
-                    if (request.IsFirstBatch && _batchSize > 0)
+                    if (request.IsFirstBatch && _applicationSettings.MigrationBatchSize > 0)
                     {
                         await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(migrationRunAttempt, MigrationStatus.CompletedWithErrors);
                         ConvertToBatchesAndSend(currentBatch.ToList(), request.Ukprn, request.MigrationRunId);
@@ -136,18 +139,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             var tasks = trainingData
                 .GroupBy(x => x.Uln)
                 .Select((trainingItems, index) => new { trainingItems, index })
-                .GroupBy(x => x.index / _batchSize)
+                .GroupBy(x => x.index / _applicationSettings.MigrationBatchSize)
                 .Select(async g =>
                 {
-                    await _providerLevelMigrationRequestSendWrapper.Send(new ProviderLevelMigrationRequest
+                    var options = new SendOptions();
+                    options.SetDestination(_applicationSettings.MigrationQueue);
+
+                    await _endpointInstance.Send(new MigrateProviderMatchedLearnerData
                     {
                         TrainingData = g.SelectMany(batch => batch.trainingItems).ToArray(),
                         Ukprn = ukprn,
                         BatchNumber = g.Key,
-                        TotalBatches = (int)Math.Ceiling((decimal)trainingData.Count/_batchSize),
+                        TotalBatches = (int)Math.Ceiling((decimal)trainingData.Count / _applicationSettings.MigrationBatchSize),
                         MigrationRunId = migrationRunId
-                    }).ConfigureAwait(false);
+                    }, options).ConfigureAwait(false);
                 });
+
             Task.WaitAll(tasks.ToArray());
         }
 

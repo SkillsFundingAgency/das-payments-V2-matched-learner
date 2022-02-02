@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Payments.MatchedLearner.Data.Configurations;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 

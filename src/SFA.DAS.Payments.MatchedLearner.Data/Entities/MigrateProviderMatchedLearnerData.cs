@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using NServiceBus;
-using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
-namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
+namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
 {
-    public class ProviderLevelMigrationRequest : ICommand
+    public class MigrateProviderMatchedLearnerData
     {
         public Guid MigrationRunId { get; set; }
         public long Ukprn { get; set; }

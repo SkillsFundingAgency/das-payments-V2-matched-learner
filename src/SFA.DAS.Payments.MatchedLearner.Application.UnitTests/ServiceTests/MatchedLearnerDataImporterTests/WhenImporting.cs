@@ -6,14 +6,13 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.MatchedLearnerDataImporterTests
 {
     [TestFixture]
     public class WhenImporting
     {
-        private SubmissionJobSucceeded _submissionSucceededEvent;
+        private ImportMatchedLearnerData _importMatchedLearnerData;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
         private Mock<IMatchedLearnerDataImportService> _mockMatchedLearnerDataImportService;
         private Mock<ILegacyMatchedLearnerDataImportService> _mockLegacyMatchedLearnerDataImportService;
@@ -25,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         [SetUp]
         public async Task SetUp()
         {
-            _submissionSucceededEvent = new SubmissionJobSucceeded
+            _importMatchedLearnerData = new ImportMatchedLearnerData
             {
                 Ukprn = 173658,
                 CollectionPeriod = 5,
@@ -114,32 +113,32 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
 
             };
 
-            _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_submissionSucceededEvent))
+            _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_importMatchedLearnerData))
                 .ReturnsAsync(_dataLockEvents);
 
             _sut = new MatchedLearnerDataImporter(_mockPaymentsRepository.Object, _mockMatchedLearnerDataImportService.Object, _mockLegacyMatchedLearnerDataImportService.Object);
 
-            await _sut.Import(_submissionSucceededEvent);
+            await _sut.Import(_importMatchedLearnerData);
         }
 
         [Test]
         public void ThenCallsMatchedLearnerDataImportService()
         {
-            _mockMatchedLearnerDataImportService.Verify(x => x.Import(_submissionSucceededEvent, 
+            _mockMatchedLearnerDataImportService.Verify(x => x.Import(_importMatchedLearnerData, 
                 It.Is<List<DataLockEventModel>>(d => d.Count == 1 && d.First().EventId == _dataLockEventId)));
         }
 
         [Test]
         public void ThenCallsLegacyMatchedLearnerDataImportService()
         {
-            _mockLegacyMatchedLearnerDataImportService.Verify(x => x.Import(_submissionSucceededEvent, 
+            _mockLegacyMatchedLearnerDataImportService.Verify(x => x.Import(_importMatchedLearnerData, 
                 It.Is<List<DataLockEventModel>>(d => d.Count == 1 && d.First().EventId == _dataLockEventId)));
         }
 
         [Test]
         public void ThenGetsDataLockEventsFromPaymentsRepository()
         {
-            _mockPaymentsRepository.Verify(x => x.GetDataLockEvents(_submissionSucceededEvent));
+            _mockPaymentsRepository.Verify(x => x.GetDataLockEvents(_importMatchedLearnerData));
         }
     }
 }

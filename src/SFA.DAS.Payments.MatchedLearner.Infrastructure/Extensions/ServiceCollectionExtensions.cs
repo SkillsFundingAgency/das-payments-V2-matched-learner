@@ -12,10 +12,11 @@ using NLog.Extensions.Logging;
 using NServiceBus;
 using NServiceBus.Features;
 using SFA.DAS.Configuration.AzureTableStorage;
-using SFA.DAS.Payments.MatchedLearner.Application.Migration;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthentication;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 {
@@ -57,42 +58,43 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString),optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
             });
         }
 
-        public static void AddEndpointInstanceFactory(this IServiceCollection services, ApplicationSettings applicationSettings)
+        public static void AddEndpointInstance(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            services.AddTransient<IEndpointInstanceFactory>(provider =>
+            var endpointConfiguration = new EndpointConfiguration(applicationSettings.MatchedLearnerImportQueue);
+            var conventions = endpointConfiguration.Conventions();
+
+            conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
+            conventions.DefiningCommandsAs(t => typeof(MigrateProviderMatchedLearnerData).IsAssignableFrom(t) || typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
+
+            endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
+            endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+            endpointConfiguration.SendOnly();
+
+            endpointConfiguration.CustomDiagnosticsWriter(diagnostics => Task.CompletedTask);
+
+            endpointConfiguration.DisableFeature<TimeoutManager>();
+            endpointConfiguration.EnableInstallers();
+
+            if (!string.IsNullOrEmpty(applicationSettings.NServiceBusLicense))
             {
-                var logger = provider.GetService<ILogger<EndpointInstanceFactory>>();
+                var license = WebUtility.HtmlDecode(applicationSettings.NServiceBusLicense);
+                endpointConfiguration.License(license);
+            }
+#if DEBUG
+            //NOTE: This is required to run the function from Acceptance test project
+            var assemblyScanner = endpointConfiguration.AssemblyScanner();
+            assemblyScanner.ThrowExceptions = false;
+#endif
+            var endpointInstance = Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult();
 
-                var endpointConfiguration = new EndpointConfiguration($"{applicationSettings.MigrationQueue}");
-            
-                endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
-                endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
-                endpointConfiguration.SendOnly();
-
-                endpointConfiguration.CustomDiagnosticsWriter(diagnostics =>
-                {
-                    logger.LogDebug(diagnostics);
-                    return Task.CompletedTask;
-                });
-
-                endpointConfiguration.DisableFeature<TimeoutManager>();
-                endpointConfiguration.EnableInstallers();
-
-                if (!string.IsNullOrEmpty(applicationSettings.NServiceBusLicense))
-                {
-                    var license = WebUtility.HtmlDecode(applicationSettings.NServiceBusLicense);
-                    endpointConfiguration.License(license);
-                }
-
-                return new EndpointInstanceFactory(endpointConfiguration);
-            });
+            services.AddSingleton(endpointInstance);
         }
 
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)

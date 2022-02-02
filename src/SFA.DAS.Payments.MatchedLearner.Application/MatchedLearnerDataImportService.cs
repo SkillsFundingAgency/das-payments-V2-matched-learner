@@ -7,13 +7,12 @@ using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application
 {
     public interface IMatchedLearnerDataImportService
     {
-        Task Import(SubmissionJobSucceeded submissionSucceededEvent, List<DataLockEventModel> dataLockEvents);
+        Task Import(ImportMatchedLearnerData importMatchedLearnerData, List<DataLockEventModel> dataLockEvents);
     }
 
     public class MatchedLearnerDataImportService : IMatchedLearnerDataImportService
@@ -31,13 +30,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task Import(SubmissionJobSucceeded submissionSucceededEvent, List<DataLockEventModel> dataLockEvents)
+        public async Task Import(ImportMatchedLearnerData importMatchedLearnerData, List<DataLockEventModel> dataLockEvents)
         {
-            var collectionPeriods = new List<byte> { submissionSucceededEvent.CollectionPeriod };
+            var collectionPeriods = new List<byte> { importMatchedLearnerData.CollectionPeriod };
 
-            if (submissionSucceededEvent.CollectionPeriod != 1)
+            if (importMatchedLearnerData.CollectionPeriod != 1)
             {
-                collectionPeriods.Add((byte)(submissionSucceededEvent.CollectionPeriod - 1));
+                collectionPeriods.Add((byte)(importMatchedLearnerData.CollectionPeriod - 1));
             }
 
             try
@@ -57,7 +56,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
                 await _matchedLearnerRepository.BeginTransactionAsync();
 
-                await _matchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
+                await _matchedLearnerRepository.RemovePreviousSubmissionsData(importMatchedLearnerData.Ukprn, importMatchedLearnerData.AcademicYear, collectionPeriods);
 
 
                 var trainings = _matchedLearnerDtoMapper.MapToModel(dataLockEvents, apprenticeshipDetails);
@@ -82,7 +81,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             {
                 await _matchedLearnerRepository.RollbackTransactionAsync();
 
-                _logger.LogError(exception,$"Error Importing Training Data. JobId: {submissionSucceededEvent.JobId}, AcademicYear: {submissionSucceededEvent.AcademicYear}, CollectionPeriod: {submissionSucceededEvent.CollectionPeriod}");
+                _logger.LogError(exception,$"Error Importing Training Data. JobId: {importMatchedLearnerData.JobId}, AcademicYear: {importMatchedLearnerData.AcademicYear}, CollectionPeriod: {importMatchedLearnerData.CollectionPeriod}");
 
                 throw;
             }

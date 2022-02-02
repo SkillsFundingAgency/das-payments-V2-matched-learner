@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using SFA.DAS.Payments.MatchedLearner.Data;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application
 {
     public interface IMatchedLearnerDataImporter
     {
-        Task Import(SubmissionJobSucceeded submissionSucceededEvent);
+        Task Import(ImportMatchedLearnerData importMatchedLearnerData);
     }
 
     public class MatchedLearnerDataImporter : IMatchedLearnerDataImporter
@@ -24,15 +24,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             _legacyMatchedLearnerDataImportService = legacyMatchedLearnerDataImportService ?? throw new ArgumentNullException(nameof(legacyMatchedLearnerDataImportService));
         }
 
-        public async Task Import(SubmissionJobSucceeded submissionSucceededEvent)
+        public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
         {
-            var dataLockEvents = await _paymentsRepository.GetDataLockEvents(submissionSucceededEvent);
+            var dataLockEvents = await _paymentsRepository.GetDataLockEvents(importMatchedLearnerData);
 
             var dataLockEventSecondCopy = dataLockEvents.Clone();
 
-            var legacyImportTask = _legacyMatchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEvents);
+            var legacyImportTask = _legacyMatchedLearnerDataImportService.Import(importMatchedLearnerData, dataLockEvents);
 
-            var importTask = _matchedLearnerDataImportService.Import(submissionSucceededEvent, dataLockEventSecondCopy);
+            var importTask = _matchedLearnerDataImportService.Import(importMatchedLearnerData, dataLockEventSecondCopy);
 
             await Task.WhenAll(legacyImportTask, importTask);
         }
