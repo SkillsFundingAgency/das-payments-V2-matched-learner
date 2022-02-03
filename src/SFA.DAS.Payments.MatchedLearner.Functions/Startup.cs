@@ -33,51 +33,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            EnsureQueueAndSubscription(applicationSettings, typeof(SubmissionJobSucceeded));
+            var managementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+
+            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
+
+            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 
-        private static void EnsureQueueAndSubscription(ApplicationSettings settings, Type messageType)
+        private static void EnsureQueueAndSubscription(ManagementClient managementClient, string queue, Type messageType = null)
         {
             try
             {
-                const string topicPath = "bundle-1";
+                EnsureQueue(managementClient, queue);
 
-                var manageClient = new ManagementClient(settings.PaymentsServiceBusConnectionString);
+                if (messageType == null) return;
 
-                if (!manageClient.QueueExistsAsync(settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
-                {
-                    var queueDescription = new QueueDescription(settings.MatchedLearnerQueue)
-                    {
-                        DefaultMessageTimeToLive = TimeSpan.FromDays(7),
-                        EnableDeadLetteringOnMessageExpiration = true,
-                        LockDuration = TimeSpan.FromMinutes(5),
-                        MaxDeliveryCount = 1,
-                        MaxSizeInMB = 5120,
-                        Path = settings.MatchedLearnerQueue
-                    };
-
-                    manageClient.CreateQueueAsync(queueDescription, CancellationToken.None).GetAwaiter().GetResult();
-                }
-
-                var ruleDescription = new RuleDescription(messageType.Name, new SqlFilter($"[NServiceBus.EnclosedMessageTypes] LIKE '%{messageType.FullName}%'"));
-
-                if (manageClient.SubscriptionExistsAsync(topicPath, settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult())
-                {
-                    manageClient.DeleteSubscriptionAsync(topicPath, settings.MatchedLearnerQueue, CancellationToken.None).GetAwaiter().GetResult();
-                }
-
-                var subscriptionDescription = new SubscriptionDescription(topicPath, settings.MatchedLearnerQueue)
-                {
-                    DefaultMessageTimeToLive = TimeSpan.FromDays(7),
-                    EnableDeadLetteringOnMessageExpiration = true,
-                    LockDuration = TimeSpan.FromMinutes(5),
-                    MaxDeliveryCount = 1,
-                    SubscriptionName = settings.MatchedLearnerQueue,
-                    ForwardTo = settings.MatchedLearnerQueue,
-                    EnableBatchedOperations = false,
-                };
-
-                manageClient.CreateSubscriptionAsync(subscriptionDescription, ruleDescription, CancellationToken.None).GetAwaiter().GetResult();
+                EnsureSubscription(managementClient, queue, messageType);
             }
             catch (Exception e)
             {
@@ -85,6 +56,47 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        private static void EnsureQueue(ManagementClient managementClient, string queue)
+        {
+            if (managementClient.QueueExistsAsync(queue, CancellationToken.None).GetAwaiter().GetResult()) return;
+
+            var queueDescription = new QueueDescription(queue)
+            {
+                DefaultMessageTimeToLive = TimeSpan.FromDays(7),
+                EnableDeadLetteringOnMessageExpiration = true,
+                LockDuration = TimeSpan.FromMinutes(5),
+                MaxDeliveryCount = 1,
+                MaxSizeInMB = 5120,
+                Path = queue
+            };
+
+            managementClient.CreateQueueAsync(queueDescription, CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        private static void EnsureSubscription(ManagementClient managementClient, string queue, Type messageType)
+        {
+            const string topicPath = "bundle-1";
+            var ruleDescription = new RuleDescription(messageType.Name, new SqlFilter($"[NServiceBus.EnclosedMessageTypes] LIKE '%{messageType.FullName}%'"));
+
+            if (managementClient.SubscriptionExistsAsync(topicPath, queue, CancellationToken.None).GetAwaiter().GetResult())
+            {
+                managementClient.DeleteSubscriptionAsync(topicPath, queue, CancellationToken.None).GetAwaiter().GetResult();
+            }
+
+            var subscriptionDescription = new SubscriptionDescription(topicPath, queue)
+            {
+                DefaultMessageTimeToLive = TimeSpan.FromDays(7),
+                EnableDeadLetteringOnMessageExpiration = true,
+                LockDuration = TimeSpan.FromMinutes(5),
+                MaxDeliveryCount = 1,
+                SubscriptionName = queue,
+                ForwardTo = queue,
+                EnableBatchedOperations = false,
+            };
+
+            managementClient.CreateSubscriptionAsync(subscriptionDescription, ruleDescription, CancellationToken.None).GetAwaiter().GetResult();
         }
     }
 }

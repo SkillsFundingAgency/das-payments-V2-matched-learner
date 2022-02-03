@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application
 {
     public interface IMatchedLearnerDataImportService
     {
-        Task Import(SubmissionJobSucceeded submissionSucceededEvent);
+        Task Import(ImportMatchedLearnerData importMatchedLearnerData);
     }
 
     public class MatchedLearnerDataImportService : IMatchedLearnerDataImportService
@@ -24,22 +24,22 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
         }
 
-        public async Task Import(SubmissionJobSucceeded submissionSucceededEvent)
+        public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
         {
-            var collectionPeriods = new List<byte> { submissionSucceededEvent.CollectionPeriod };
+            var collectionPeriods = new List<byte> { importMatchedLearnerData.CollectionPeriod };
 
-            if (submissionSucceededEvent.CollectionPeriod != 1)
+            if (importMatchedLearnerData.CollectionPeriod != 1)
             {
-                collectionPeriods.Add((byte)(submissionSucceededEvent.CollectionPeriod - 1));
+                collectionPeriods.Add((byte)(importMatchedLearnerData.CollectionPeriod - 1));
             }
 
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
 
-                await _matchedLearnerRepository.RemovePreviousSubmissionsData(submissionSucceededEvent.Ukprn, submissionSucceededEvent.AcademicYear, collectionPeriods);
+                await _matchedLearnerRepository.RemovePreviousSubmissionsData(importMatchedLearnerData.Ukprn, importMatchedLearnerData.AcademicYear, collectionPeriods);
 
-                var dataLockEvents = await _paymentsRepository.GetDataLockEvents(submissionSucceededEvent);
+                var dataLockEvents = await _paymentsRepository.GetDataLockEvents(importMatchedLearnerData);
 
                 var apprenticeshipIds = dataLockEvents
                     .SelectMany(dle => dle.PayablePeriods)
