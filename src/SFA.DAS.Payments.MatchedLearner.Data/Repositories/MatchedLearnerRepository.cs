@@ -24,6 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task RollbackTransactionAsync();
         Task SaveTrainingsIndividually(List<TrainingModel> trainings);
         Task SaveTrainings(IList<TrainingModel> trainings);
+        Task SaveLatestSubmissionJob(LatestSubmissionJobModel latestSubmissionJob);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -57,11 +58,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         public async Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln)
         {
-           return await _dataContext.Trainings
-                .Include(t => t.PriceEpisodes)
-                .ThenInclude(p => p.Periods)
-                .Where(t => t.Ukprn == ukprn && t.Uln == uln)
-                .ToListAsync();
+            return await _dataContext.Trainings
+                 .Include(t => t.PriceEpisodes)
+                 .ThenInclude(p => p.Periods)
+                 .Where(t => t.Ukprn == ukprn && t.Uln == uln)
+                 .ToListAsync();
         }
 
         public async Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn)
@@ -113,7 +114,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 150, UseTempDB = true };
 
             await _dataContext.BulkInsertAsync(trainings, bulkConfig.Clone());
-            
+
             var priceEpisodes = trainings
                 .SelectMany(training =>
                 {
@@ -169,6 +170,48 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
 
             await tx.CommitAsync();
+        }
+
+        public async Task SaveLatestSubmissionJob(LatestSubmissionJobModel latestSubmissionJob)
+        {
+            _logger.LogInformation($"Saving latestSubmission Job, DcJobId {latestSubmissionJob.DcJobId}");
+
+            try
+            {
+                await RemovePreviousSubmissionJob(latestSubmissionJob);
+
+                await _dataContext.LatestSubmissionJobs.AddAsync(latestSubmissionJob);
+
+                await _dataContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.IsUniqueKeyConstraintException())
+                {
+                    _logger.LogInformation($"Discarding duplicate latestSubmission Job. DcJobId {latestSubmissionJob.DcJobId}");
+                    return;
+                }
+
+                throw;
+            }
+        }
+
+        private async Task RemovePreviousSubmissionJob(LatestSubmissionJobModel latestSubmissionJob)
+        {
+            var collectionPeriods = new List<byte> { latestSubmissionJob.CollectionPeriod };
+
+            if (latestSubmissionJob.CollectionPeriod != 1)
+            {
+                collectionPeriods.Add((byte)(latestSubmissionJob.CollectionPeriod - 1));
+            }
+
+            var sqlParameters = collectionPeriods.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
+            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
+
+            sqlParameters.Add(new SqlParameter("@ukprn", latestSubmissionJob.Ukprn));
+            sqlParameters.Add(new SqlParameter("@academicYear", latestSubmissionJob.AcademicYear));
+
+            await _dataContext.Database.ExecuteSqlRawAsync($"DELETE FROM dbo.LatestSubmissionJob WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ({sqlParamName})", sqlParameters);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
     public class WhenImporting
     {
         private ImportMatchedLearnerData _importMatchedLearnerData;
+        private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
         private Mock<IMatchedLearnerDataImportService> _mockMatchedLearnerDataImportService;
         private Mock<ILegacyMatchedLearnerDataImportService> _mockLegacyMatchedLearnerDataImportService;
@@ -32,6 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
                 JobId = 123,
             };
             
+            _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
             _mockMatchedLearnerDataImportService = new Mock<IMatchedLearnerDataImportService>();
             _mockLegacyMatchedLearnerDataImportService = new Mock<ILegacyMatchedLearnerDataImportService>();
@@ -116,7 +118,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             _mockPaymentsRepository.Setup(x => x.GetDataLockEvents(_importMatchedLearnerData))
                 .ReturnsAsync(_dataLockEvents);
 
-            _sut = new MatchedLearnerDataImporter(_mockPaymentsRepository.Object, _mockMatchedLearnerDataImportService.Object, _mockLegacyMatchedLearnerDataImportService.Object);
+            _sut = new MatchedLearnerDataImporter(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, _mockMatchedLearnerDataImportService.Object, _mockLegacyMatchedLearnerDataImportService.Object);
 
             await _sut.Import(_importMatchedLearnerData);
         }
@@ -139,6 +141,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         public void ThenGetsDataLockEventsFromPaymentsRepository()
         {
             _mockPaymentsRepository.Verify(x => x.GetDataLockEvents(_importMatchedLearnerData));
+        }
+
+        [Test]
+        public void ThenSaveLatestSubmissionJobToDb()
+        {
+            _mockMatchedLearnerRepository.Verify(x => x.SaveLatestSubmissionJob(It.IsAny<LatestSubmissionJobModel>()));
         }
     }
 }

@@ -13,12 +13,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
     public class MatchedLearnerDataImporter : IMatchedLearnerDataImporter
     {
+        private readonly IMatchedLearnerRepository _matchedLearnerRepository;
         private readonly IPaymentsRepository _paymentsRepository;
         private readonly IMatchedLearnerDataImportService _matchedLearnerDataImportService;
         private readonly ILegacyMatchedLearnerDataImportService _legacyMatchedLearnerDataImportService;
 
-        public MatchedLearnerDataImporter(IPaymentsRepository paymentsRepository, IMatchedLearnerDataImportService matchedLearnerDataImportService, ILegacyMatchedLearnerDataImportService legacyMatchedLearnerDataImportService)
+        public MatchedLearnerDataImporter(
+            IMatchedLearnerRepository matchedLearnerRepository,
+            IPaymentsRepository paymentsRepository, 
+            IMatchedLearnerDataImportService matchedLearnerDataImportService, 
+            ILegacyMatchedLearnerDataImportService legacyMatchedLearnerDataImportService)
         {
+            _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
             _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
             _matchedLearnerDataImportService = matchedLearnerDataImportService ?? throw new ArgumentNullException(nameof(matchedLearnerDataImportService));
             _legacyMatchedLearnerDataImportService = legacyMatchedLearnerDataImportService ?? throw new ArgumentNullException(nameof(legacyMatchedLearnerDataImportService));
@@ -26,6 +32,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
         public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
         {
+            await _matchedLearnerRepository.SaveLatestSubmissionJob(new LatestSubmissionJobModel
+            {
+                CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
+                DcJobId = importMatchedLearnerData.JobId,
+                Ukprn = importMatchedLearnerData.Ukprn,
+                AcademicYear = importMatchedLearnerData.AcademicYear,
+                IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
+                EventTime = importMatchedLearnerData.EventTime
+            });
+
             var dataLockEvents = await _paymentsRepository.GetDataLockEvents(importMatchedLearnerData);
 
             var dataLockEventSecondCopy = dataLockEvents.Clone();
