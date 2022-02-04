@@ -42,7 +42,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
                 JobId = submissionSucceededEvent.JobId,
                 Ukprn = submissionSucceededEvent.Ukprn,
                 AcademicYear = submissionSucceededEvent.AcademicYear,
-                IlrSubmissionDateTime = submissionSucceededEvent.IlrSubmissionDateTime
+                IlrSubmissionDateTime = submissionSucceededEvent.IlrSubmissionDateTime,
+                EventTime = submissionSucceededEvent.EventTime
             }, options).ConfigureAwait(false);
 
             _logger.LogInformation($"Delayed MatchedLearner Data Import for {delay.TotalSeconds} seconds for job: {submissionSucceededEvent.JobId}");
