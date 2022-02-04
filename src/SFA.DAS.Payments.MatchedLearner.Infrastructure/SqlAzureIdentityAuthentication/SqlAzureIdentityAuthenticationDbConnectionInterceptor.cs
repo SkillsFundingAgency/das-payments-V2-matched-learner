@@ -23,7 +23,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
             InterceptionResult result)
         {
             var sqlConnection = (SqlConnection)connection;
-            if (ConnectionNeedsAccessToken(sqlConnection))
+            if (_connectionNeedsAccessToken)
             {
                 var token = _tokenProvider.GetAccessToken();
                 sqlConnection.AccessToken = token;
@@ -39,7 +39,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
             CancellationToken cancellationToken = default)
         {
             var sqlConnection = (SqlConnection)connection;
-            if (ConnectionNeedsAccessToken(sqlConnection))
+            if (_connectionNeedsAccessToken)
             {
                 var token = await _tokenProvider.GetAccessTokenAsync(cancellationToken);
                 sqlConnection.AccessToken = token;
@@ -48,17 +48,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
             return await base.ConnectionOpeningAsync(connection, eventData, result, cancellationToken);
         }
 
-        private static bool ConnectionNeedsAccessToken(SqlConnection connection)
-        {
-            //
-            // Only try to get a token from AAD if
-            //  - We connect to an Azure SQL instance; and
-            //  - The connection doesn't specify a username.
-            //
-            //var connectionStringBuilder = new SqlConnectionStringBuilder(connection.ConnectionString);
-
-            //return connectionStringBuilder.DataSource.Contains("database.windows.net", StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(connectionStringBuilder.UserID);
-            return _connectionNeedsAccessToken;
-        }
+        //private static bool ConnectionNeedsAccessToken(SqlConnection connection)
+        //{
+        //    //
+        //    // Only try to get a token from AAD if
+        //    //  - We connect to an Azure SQL instance; and
+        //    //  - The connection doesn't specify a username.
+        //    //
+        //    //var connectionStringBuilder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        //    //
+        //    //return connectionStringBuilder.DataSource.Contains("database.windows.net", StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(connectionStringBuilder.UserID);
+        //}
     }
 }
