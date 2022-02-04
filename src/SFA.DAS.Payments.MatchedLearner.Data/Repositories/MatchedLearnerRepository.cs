@@ -24,6 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task BeginTransactionAsync(CancellationToken cancellationToken);
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
+        Task SaveSubmissionJob(SubmissionJobModel latestSubmissionJob);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -273,6 +274,28 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
 
             await tx.CommitAsync(cancellationToken);
+        }
+
+        public async Task SaveSubmissionJob(SubmissionJobModel submissionJob)
+        {
+            _logger.LogInformation($"Saving Submission Job, DcJobId {submissionJob.DcJobId}");
+
+            try
+            {
+                await _dataContext.SubmissionJobs.AddAsync(submissionJob);
+
+                await _dataContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                if (e.IsUniqueKeyConstraintException())
+                {
+                    _logger.LogInformation($"Discarding duplicate Submission Job. DcJobId {submissionJob.DcJobId}");
+                    return;
+                }
+
+                throw;
+            }
         }
     }
 }
