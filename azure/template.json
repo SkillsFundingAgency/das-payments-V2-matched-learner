@@ -402,7 +402,7 @@
                                 {
                                     "name": "MatchedLearnerImportQueue",
                                     "value": "[parameters('matchedLearnerImportQueue')]"
-                                },
+                                }
                             ]
                         }
                     },
