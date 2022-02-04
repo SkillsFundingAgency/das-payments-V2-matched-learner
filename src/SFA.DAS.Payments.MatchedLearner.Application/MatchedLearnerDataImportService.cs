@@ -41,6 +41,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             try
             {
+                await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
+                {
+                    CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
+                    DcJobId = importMatchedLearnerData.JobId,
+                    Ukprn = importMatchedLearnerData.Ukprn,
+                    AcademicYear = importMatchedLearnerData.AcademicYear,
+                    IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
+                    EventTime = importMatchedLearnerData.EventTime
+                });
+
                 var apprenticeshipIds =
                     dataLockEvents.SelectMany(d => d.PayablePeriods).Select(a => a.ApprenticeshipId ?? 0).Union(
                     dataLockEvents.SelectMany(d => d.NonPayablePeriods)
