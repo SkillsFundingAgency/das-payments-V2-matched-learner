@@ -32,7 +32,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error Handling Submission Succeeded Event, Please see internal exception for more info");
+                _logger.LogError(e, $"Error Handling Submission Succeeded Event, Inner Exception {e}");
                 throw;
             }
         }

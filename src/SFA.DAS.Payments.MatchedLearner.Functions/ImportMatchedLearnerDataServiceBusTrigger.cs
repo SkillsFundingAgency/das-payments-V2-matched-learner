@@ -32,7 +32,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error Handling ImportMatchedLearnerData, Please see internal exception for more info");
+                _logger.LogError(e, $"Error Handling ImportMatchedLearnerData, Inner Exception {e}");
                 throw;
             }
         }
