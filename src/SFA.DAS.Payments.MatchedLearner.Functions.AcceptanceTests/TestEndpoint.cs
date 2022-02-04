@@ -85,7 +85,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 Ukprn = ukprn,
                 CollectionPeriod = collectionPeriod,
                 AcademicYear = academicYear,
-                JobId = 123
+                JobId = 123,
+                IlrSubmissionDateTime = DateTime.Now
             });
         }
         
