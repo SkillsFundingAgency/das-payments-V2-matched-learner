@@ -35,16 +35,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             try
             {
-                await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
-                {
-                    CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
-                    DcJobId = importMatchedLearnerData.JobId,
-                    Ukprn = importMatchedLearnerData.Ukprn,
-                    AcademicYear = importMatchedLearnerData.AcademicYear,
-                    IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
-                    EventTime = importMatchedLearnerData.EventTime
-                });
-
                 await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
 
                 await _matchedLearnerRepository.RemovePreviousSubmissionsData(importMatchedLearnerData.Ukprn, importMatchedLearnerData.AcademicYear, collectionPeriods);
@@ -65,6 +55,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
                 await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
 
                 await _matchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
+
+                await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
+                {
+                    CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
+                    DcJobId = importMatchedLearnerData.JobId,
+                    Ukprn = importMatchedLearnerData.Ukprn,
+                    AcademicYear = importMatchedLearnerData.AcademicYear,
+                    IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
+                    EventTime = importMatchedLearnerData.EventTime
+                });
 
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
             }
