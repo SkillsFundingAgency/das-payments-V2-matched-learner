@@ -109,6 +109,9 @@
         },
         "paymentsServiceBusConnectionString": {
             "type": "string"
+        },
+        "matchedLearnerImportQueue": {
+            "type": "string"
         }
     },
     "variables": {
@@ -402,6 +405,10 @@
                                 {
                                     "name": "FUNCTIONS_WORKER_RUNTIME",
                                     "value": "dotnet"
+                                },
+                                {
+                                    "name": "MatchedLearnerImportQueue",
+                                    "value": "[parameters('matchedLearnerImportQueue')]"
                                 }
                             ]
                         }
