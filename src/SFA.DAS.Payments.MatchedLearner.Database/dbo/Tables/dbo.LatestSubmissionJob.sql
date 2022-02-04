@@ -11,7 +11,7 @@
 )
 GO
 
-Create Unique Index UX_LatestSubmissionJob_LogicalDuplicates on [dbo].[LatestSubmissionJob] ( [DCJobId], [Ukprn], [AcademicYear], [CollectionPeriod] )
+Create Unique Index UX_LatestSubmissionJob_LogicalDuplicates on [dbo].[LatestSubmissionJob] ( [DCJobId], [Ukprn], [AcademicYear], [CollectionPeriod], [IlrSubmissionDateTime] )
 GO
 
 

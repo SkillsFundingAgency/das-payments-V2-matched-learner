@@ -178,8 +178,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             try
             {
-                await RemovePreviousSubmissionJob(latestSubmissionJob);
-
                 await _dataContext.LatestSubmissionJobs.AddAsync(latestSubmissionJob);
 
                 await _dataContext.SaveChangesAsync();
@@ -194,24 +192,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
                 throw;
             }
-        }
-
-        private async Task RemovePreviousSubmissionJob(LatestSubmissionJobModel latestSubmissionJob)
-        {
-            var collectionPeriods = new List<byte> { latestSubmissionJob.CollectionPeriod };
-
-            if (latestSubmissionJob.CollectionPeriod != 1)
-            {
-                collectionPeriods.Add((byte)(latestSubmissionJob.CollectionPeriod - 1));
-            }
-
-            var sqlParameters = collectionPeriods.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
-            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
-
-            sqlParameters.Add(new SqlParameter("@ukprn", latestSubmissionJob.Ukprn));
-            sqlParameters.Add(new SqlParameter("@academicYear", latestSubmissionJob.AcademicYear));
-
-            await _dataContext.Database.ExecuteSqlRawAsync($"DELETE FROM dbo.LatestSubmissionJob WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ({sqlParamName})", sqlParameters);
         }
     }
 }
