@@ -101,14 +101,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, $"Error Running Migration for provider: {request.Ukprn}, { (request.IsFirstBatch ? string.Empty : $"Batch: {request.BatchNumber}") } for migration run {request.MigrationRunId}.");
+                _logger.LogError(exception, $"Error Running Migration for provider: {request.Ukprn}, { (request.IsFirstBatch ? string.Empty : $"Batch: {request.BatchNumber}") } for migration run {request.MigrationRunId}. Inner Exception {exception}");
                 try
                 {
                     await _providerMigrationRepository.UpdateMigrationRunAttemptStatus(migrationRunAttempt, MigrationStatus.Failed);
                 }
                 catch (Exception updateException)
                 {
-                    _logger.LogError(updateException, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}.");
+                    _logger.LogError(updateException, $"Error updating migration status in error scenario. Batch {request.BatchNumber} for provider {request.Ukprn} on migration run {request.MigrationRunId}. Inner Exception {exception}");
                 }
 
                 throw;
@@ -170,7 +170,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Error saving batch/provider, rolling back transaction and saving training items individually.");
+                _logger.LogError(exception, $"Error saving batch/provider, rolling back transaction and saving training items individually. Inner Exception {exception}");
                 await _matchedLearnerRepository.RollbackTransactionAsync();
                 return await HandleSavingTrainingDataIndividually(originalTrainingData);
             }
@@ -185,7 +185,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Error saving training items individually.");
+                _logger.LogError(exception, $"Error saving training items individually. Inner Exception {exception}");
                 return false;
             }
         }

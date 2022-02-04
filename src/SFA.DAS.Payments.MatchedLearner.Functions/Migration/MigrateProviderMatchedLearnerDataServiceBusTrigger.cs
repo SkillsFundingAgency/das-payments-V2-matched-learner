@@ -30,9 +30,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Migration
 
                 await _migrateProviderMatchedLearnerDataService.MigrateProviderScopedData(migrateProviderMatchedLearnerData);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                _logger.LogError(e, "Error Handling Submission Succeeded Event, Please see internal exception for more info");
+                _logger.LogError(exception, "Error Handling Submission Succeeded Event, Please see internal exception for more info");
                 throw;
             }
         }

@@ -81,7 +81,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             {
                 await _matchedLearnerRepository.RollbackTransactionAsync();
 
-                _logger.LogError(exception,$"Error Importing Training Data. JobId: {importMatchedLearnerData.JobId}, AcademicYear: {importMatchedLearnerData.AcademicYear}, CollectionPeriod: {importMatchedLearnerData.CollectionPeriod}");
+                _logger.LogError(exception,$"Error Importing Training Data. JobId: {importMatchedLearnerData.JobId}, AcademicYear: {importMatchedLearnerData.AcademicYear}, CollectionPeriod: {importMatchedLearnerData.CollectionPeriod}, Inner Exception {exception}");
 
                 throw;
             }

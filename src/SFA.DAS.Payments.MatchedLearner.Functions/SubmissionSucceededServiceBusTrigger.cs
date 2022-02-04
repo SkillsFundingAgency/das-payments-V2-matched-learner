@@ -30,9 +30,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
                 await _submissionSucceededDelayedImportService.ProcessSubmissionSucceeded(submissionSucceededEvent);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                _logger.LogError(e, $"Error Handling Submission Succeeded Event, Inner Exception {e}");
+                _logger.LogError(exception, $"Error Handling Submission Succeeded Event, Inner Exception {exception}");
                 throw;
             }
         }
