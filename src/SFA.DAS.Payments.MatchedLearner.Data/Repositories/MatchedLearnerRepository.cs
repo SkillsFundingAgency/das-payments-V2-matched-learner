@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task RollbackTransactionAsync();
         Task SaveTrainingsIndividually(List<TrainingModel> trainings);
         Task SaveTrainings(IList<TrainingModel> trainings);
-        Task SaveLatestSubmissionJob(LatestSubmissionJobModel latestSubmissionJob);
+        Task SaveSubmissionJob(SubmissionJobModel submissionJob);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -172,13 +172,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             await tx.CommitAsync();
         }
 
-        public async Task SaveLatestSubmissionJob(LatestSubmissionJobModel latestSubmissionJob)
+        public async Task SaveSubmissionJob(SubmissionJobModel submissionJob)
         {
-            _logger.LogInformation($"Saving latestSubmission Job, DcJobId {latestSubmissionJob.DcJobId}");
+            _logger.LogInformation($"Saving Submission Job, DcJobId {submissionJob.DcJobId}");
 
             try
             {
-                await _dataContext.LatestSubmissionJobs.AddAsync(latestSubmissionJob);
+                await _dataContext.SubmissionJobs.AddAsync(submissionJob);
 
                 await _dataContext.SaveChangesAsync();
             }
@@ -186,7 +186,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             {
                 if (e.IsUniqueKeyConstraintException())
                 {
-                    _logger.LogInformation($"Discarding duplicate latestSubmission Job. DcJobId {latestSubmissionJob.DcJobId}");
+                    _logger.LogInformation($"Discarding duplicate Submission Job. DcJobId {submissionJob.DcJobId}");
                     return;
                 }
 

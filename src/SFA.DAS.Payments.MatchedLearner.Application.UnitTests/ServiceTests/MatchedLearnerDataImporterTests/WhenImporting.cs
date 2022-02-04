@@ -144,9 +144,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         }
 
         [Test]
-        public void ThenSaveLatestSubmissionJobToDb()
+        public void ThenSaveSubmissionJobToDb()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.SaveLatestSubmissionJob(It.IsAny<LatestSubmissionJobModel>()));
+            _mockMatchedLearnerRepository.Verify(x => x.SaveSubmissionJob(It.IsAny<SubmissionJobModel>()));
         }
     }
 }

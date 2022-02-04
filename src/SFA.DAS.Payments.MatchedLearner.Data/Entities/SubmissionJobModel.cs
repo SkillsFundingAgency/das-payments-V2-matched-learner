@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
 {
-    public class LatestSubmissionJobModel
+    public class SubmissionJobModel
     {
         public long Id { get; set; }
         public long DcJobId { get; set; }

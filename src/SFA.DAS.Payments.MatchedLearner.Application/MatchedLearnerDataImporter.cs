@@ -32,7 +32,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
         public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
         {
-            await _matchedLearnerRepository.SaveLatestSubmissionJob(new LatestSubmissionJobModel
+            await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
             {
                 CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
                 DcJobId = importMatchedLearnerData.JobId,

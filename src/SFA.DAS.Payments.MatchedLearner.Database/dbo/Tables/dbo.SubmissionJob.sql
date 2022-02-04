@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[LatestSubmissionJob]
+﻿CREATE TABLE [dbo].[SubmissionJob]
 (
 	[Id] BIGINT NOT NULL IDENTITY(1,1) CONSTRAINT PK_Id PRIMARY KEY CLUSTERED,
 	DCJobId BIGINT NULL,
@@ -11,7 +11,7 @@
 )
 GO
 
-Create Unique Index UX_LatestSubmissionJob_LogicalDuplicates on [dbo].[LatestSubmissionJob] ( [DCJobId], [Ukprn], [AcademicYear], [CollectionPeriod], [IlrSubmissionDateTime] )
+Create Unique Index UX_SubmissionJob_LogicalDuplicates on [dbo].[SubmissionJob] ( [DCJobId], [Ukprn], [AcademicYear], [CollectionPeriod], [IlrSubmissionDateTime] )
 GO
 
 

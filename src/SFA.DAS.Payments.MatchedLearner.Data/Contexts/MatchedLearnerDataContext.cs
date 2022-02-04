@@ -19,7 +19,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<TrainingModel> Trainings { get; set; }
         public DbSet<PriceEpisodeModel> PriceEpisodes { get; set; }
         public DbSet<PeriodModel> Periods { get; set; }
-        public DbSet<LatestSubmissionJobModel> LatestSubmissionJobs { get; set; }
+        public DbSet<SubmissionJobModel> SubmissionJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,7 +35,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             modelBuilder.ApplyConfiguration(new TrainingConfiguration());
             modelBuilder.ApplyConfiguration(new PriceEpisodeConfiguration());
             modelBuilder.ApplyConfiguration(new PeriodConfiguration());
-            modelBuilder.ApplyConfiguration(new LatestSubmissionJobConfiguration());
+            modelBuilder.ApplyConfiguration(new SubmissionJobConfiguration());
         }
     }
 }

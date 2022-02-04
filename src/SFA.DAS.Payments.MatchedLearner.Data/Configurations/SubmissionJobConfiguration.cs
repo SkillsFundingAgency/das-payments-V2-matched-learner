@@ -4,11 +4,11 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.Data.Configurations
 {
-    public class LatestSubmissionJobConfiguration : IEntityTypeConfiguration<LatestSubmissionJobModel>
+    public class SubmissionJobConfiguration : IEntityTypeConfiguration<SubmissionJobModel>
     {
-        public void Configure(EntityTypeBuilder<LatestSubmissionJobModel> builder)
+        public void Configure(EntityTypeBuilder<SubmissionJobModel> builder)
         {
-            builder.ToTable("LatestSubmissionJob", "dbo");
+            builder.ToTable("SubmissionJob", "dbo");
             builder.HasKey(x => x.Id);
         }
     }
