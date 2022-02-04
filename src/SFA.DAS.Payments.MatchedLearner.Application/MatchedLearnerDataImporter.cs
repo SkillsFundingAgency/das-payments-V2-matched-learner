@@ -32,16 +32,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
         public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
         {
-            await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
-            {
-                CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
-                DcJobId = importMatchedLearnerData.JobId,
-                Ukprn = importMatchedLearnerData.Ukprn,
-                AcademicYear = importMatchedLearnerData.AcademicYear,
-                IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
-                EventTime = importMatchedLearnerData.EventTime
-            });
-
             var dataLockEvents = await _paymentsRepository.GetDataLockEvents(importMatchedLearnerData);
 
             var dataLockEventSecondCopy = dataLockEvents.Clone();
@@ -51,6 +41,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
             var importTask = _matchedLearnerDataImportService.Import(importMatchedLearnerData, dataLockEventSecondCopy);
 
             await Task.WhenAll(legacyImportTask, importTask);
+            
+            await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
+            {
+                CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
+                DcJobId = importMatchedLearnerData.JobId,
+                Ukprn = importMatchedLearnerData.Ukprn,
+                AcademicYear = importMatchedLearnerData.AcademicYear,
+                IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
+                EventTime = importMatchedLearnerData.EventTime
+            });
         }
     }
 }
