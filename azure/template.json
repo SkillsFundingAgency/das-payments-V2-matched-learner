@@ -107,6 +107,9 @@
         "paymentsServiceBusConnectionString": {
             "type": "string"
         },
+		"MatchedLearnerServiceBusConnectionString": {
+            "type": "string"
+        },
         "matchedLearnerImportQueue": {
             "type": "string"
         }
@@ -386,6 +389,10 @@
                                 {
                                     "name": "PaymentsServiceBusConnectionString",
                                     "value": "[parameters('paymentsServiceBusConnectionString')]"
+                                },
+								{
+                                    "name": "MatchedLearnerServiceBusConnectionString",
+                                    "value": "[parameters('SharedServiceBusConnectionString')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
