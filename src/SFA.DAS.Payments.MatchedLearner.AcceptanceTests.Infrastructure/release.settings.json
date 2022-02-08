@@ -15,6 +15,7 @@
         "MatchedLearnerStorageAccountConnectionString": "__MatchedLearnerAcceptanceTestStorageAccountConnectionString__",
 
         "PaymentsServiceBusConnectionString": "__PaymentsServiceBusConnectionString__",
+        "MatchedLearnerServiceBusConnectionString": "__MatchedLearnerServiceBusConnectionString__",
 
         "PaymentsConnectionString": "__PaymentsAcceptanceTestConnectionString__",
         "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__",
