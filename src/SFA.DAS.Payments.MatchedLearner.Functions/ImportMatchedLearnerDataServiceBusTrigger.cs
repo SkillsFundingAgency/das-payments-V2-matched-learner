@@ -20,7 +20,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
         }
 
         [FunctionName("ImportMatchedLearnerDataHandler")]
-        public async Task RunServiceBusTrigger([ServiceBusTrigger("%MatchedLearnerImportQueue%", Connection = "PaymentsServiceBusConnectionString")] string message)
+        public async Task RunServiceBusTrigger([ServiceBusTrigger("%MatchedLearnerImportQueue%", Connection = "MatchedLearnerServiceBusConnectionString")] string message)
         {
             try
             {

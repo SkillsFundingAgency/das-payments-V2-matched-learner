@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
@@ -33,11 +32,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            var managementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+            var paymentsManagementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
 
-            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
+            EnsureQueueAndSubscription(paymentsManagementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
 
-            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerImportQueue);
+            var matchedLearnerManagementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+
+            EnsureQueueAndSubscription(matchedLearnerManagementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 
         private static void EnsureQueueAndSubscription(ManagementClient managementClient, string queue, Type messageType = null)

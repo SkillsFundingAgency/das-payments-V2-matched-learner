@@ -4,43 +4,50 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 {
     public class TestEndpoint
     {
-        private IEndpointInstance _endpointInstance;
+        private bool _endpointStarted;
+        private IEndpointInstance _paymentsEndpointInstance;
+
         private readonly TestApplicationSettings _testConfiguration;
         public TestEndpoint()
         {
             _testConfiguration = TestConfiguration.TestApplicationSettings;
         }
 
-        public async Task<IEndpointInstance> Start()
+        public async Task Start()
         {
-            if (_endpointInstance != null)
-                return _endpointInstance;
+            if (_endpointStarted)
+                return;
 
-            var endpointConfiguration = CreateEndpointConfiguration();
+            var paymentEndpointConfiguration = CreateEndpointConfiguration(_testConfiguration.PaymentsServiceBusConnectionString, "payments-SubmissionJobSucceeded");
 
-            _endpointInstance = await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
 
-            return _endpointInstance;
+
+            _paymentsEndpointInstance = await Endpoint.Start(paymentEndpointConfiguration);
+
+
+            _endpointStarted = true;
         }
 
         public async Task Stop()
         {
-            await _endpointInstance.Stop();
+            await _paymentsEndpointInstance.Stop();
         }
 
-        private EndpointConfiguration CreateEndpointConfiguration()
+        private EndpointConfiguration CreateEndpointConfiguration(string serviceBusConnectionString, string endpointName)
         {
-            var endpointConfiguration = new EndpointConfiguration("MatchedLearner.Functions.AcceptanceTests");
+            var endpointConfiguration = new EndpointConfiguration(endpointName);
 
             var conventions = endpointConfiguration.Conventions();
 
             conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
+            conventions.DefiningCommandsAs(t => typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
 
             var persistence = endpointConfiguration.UsePersistence<AzureStoragePersistence>();
 
@@ -53,10 +60,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
 
-            if (string.IsNullOrWhiteSpace(_testConfiguration.PaymentsServiceBusConnectionString))
-                throw new InvalidOperationException("PaymentsServiceBusConnectionString is null");
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+                throw new InvalidOperationException("ServiceBusConnectionString is null");
 
-            transport.ConnectionString(_testConfiguration.PaymentsServiceBusConnectionString)
+            transport.ConnectionString(serviceBusConnectionString)
                 .Transactions(TransportTransactionMode.ReceiveOnly)
                 .SubscriptionRuleNamingConvention(rule => rule.Name.Split('.').LastOrDefault() ?? rule.Name);
 
@@ -78,7 +85,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
         public async Task PublishSubmissionSucceededEvent(long ukprn, short academicYear, byte collectionPeriod)
         {
-            await _endpointInstance.Publish(new SubmissionJobSucceeded
+            await _paymentsEndpointInstance.Publish(new SubmissionJobSucceeded
             {
                 Ukprn = ukprn,
                 CollectionPeriod = collectionPeriod,
