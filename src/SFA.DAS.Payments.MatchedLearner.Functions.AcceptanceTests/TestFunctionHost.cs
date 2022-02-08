@@ -21,10 +21,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 { "EnvironmentName", "Development" },
                 { "AzureWebJobsStorage", TestConfiguration.TestApplicationSettings.MatchedLearnerStorageAccountConnectionString },
                 { "PaymentsServiceBusConnectionString", TestConfiguration.TestApplicationSettings.PaymentsServiceBusConnectionString },
-                { "MatchedLearnerServiceBusConnectionString", TestConfiguration.TestApplicationSettings.MatchedLearnerServiceBusConnectionString },
                 { "MatchedLearnerQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerQueue },
-                { "MatchedLearnerImportQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerImportQueue },
-                { "MigrationQueue", TestConfiguration.TestApplicationSettings.MigrationQueue },
             };
 
             var directory = Directory.GetCurrentDirectory();
@@ -49,6 +46,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                         a.AddInMemoryCollection(appConfig);
                     })
                     .ConfigureWebJobs(builder => builder
+                        .AddExecutionContextBinding()
+                        .AddBuiltInBindings()
                         .AddAzureStorageCoreServices()
                         .AddServiceBus()
                         .AddHttp()

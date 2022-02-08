@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Application;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Application.Migration;
@@ -19,8 +18,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 
             services.AddPaymentsDataContext(applicationSettings);
 
-            services.AddEndpointInstance(applicationSettings);
-
             services.AddTransient<IMatchedLearnerRepository, MatchedLearnerRepository>();
             services.AddTransient<IPaymentsRepository, PaymentsRepository>();
             services.AddTransient<IMatchedLearnerDataImportService, MatchedLearnerDataImportService>();
@@ -31,19 +28,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.Ioc
 
             services.AddTransient<ISubmissionSucceededDelayedImportService, SubmissionSucceededDelayedImportService>(x =>
                 new SubmissionSucceededDelayedImportService(applicationSettings,
-                    x.GetService<IEndpointInstance>(),
                     x.GetService<ILogger<SubmissionSucceededDelayedImportService>>()));
 
             services.AddTransient<IMigrateProviderMatchedLearnerDataTriggerService, MigrateProviderMatchedLearnerDataTriggerService>(x =>
-                new MigrateProviderMatchedLearnerDataTriggerService(applicationSettings,
-                    x.GetService<IEndpointInstance>(),
-                    x.GetService<MatchedLearnerDataContext>(),
+                new MigrateProviderMatchedLearnerDataTriggerService(x.GetService<MatchedLearnerDataContext>(),
                     x.GetService<IProviderMigrationRepository>(),
                     x.GetService<ILogger<MigrateProviderMatchedLearnerDataTriggerService>>()));
 
             services.AddTransient<IMigrateProviderMatchedLearnerDataService, MigrateProviderMatchedLearnerDataService>(x =>
                 new MigrateProviderMatchedLearnerDataService(applicationSettings,
-                    x.GetService<IEndpointInstance>(),
                     x.GetService<IProviderMigrationRepository>(),
                     x.GetService<IMatchedLearnerRepository>(),
                     x.GetService<IMatchedLearnerDtoMapper>(),

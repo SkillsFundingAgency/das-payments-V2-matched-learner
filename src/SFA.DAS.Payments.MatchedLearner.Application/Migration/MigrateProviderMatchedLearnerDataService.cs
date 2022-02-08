@@ -8,18 +8,19 @@ using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using SFA.DAS.Payments.MatchedLearner.Functions.Migration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 {
     public interface IMigrateProviderMatchedLearnerDataService
     {
-        Task MigrateProviderScopedData(MigrateProviderMatchedLearnerData request);
+        Task MigrateProviderScopedData(MigrateProviderMatchedLearnerData request, IMessageHandlerContext messageHandlerContext);
     }
 
     public class MigrateProviderMatchedLearnerDataService : IMigrateProviderMatchedLearnerDataService
     {
-        private readonly IEndpointInstance _endpointInstance;
+        private IMessageHandlerContext _messageHandlerContext;
         private readonly IProviderMigrationRepository _providerMigrationRepository;
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
         private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
@@ -28,13 +29,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
         public MigrateProviderMatchedLearnerDataService(
             ApplicationSettings applicationSettings,
-            IEndpointInstance endpointInstance,
             IProviderMigrationRepository providerMigrationRepository,
             IMatchedLearnerRepository matchedLearnerRepository,
             IMatchedLearnerDtoMapper matchedLearnerDtoMapper,
             ILogger<MigrateProviderMatchedLearnerDataService> logger)
         {
-            _endpointInstance = endpointInstance ?? throw new ArgumentNullException(nameof(endpointInstance));
             _providerMigrationRepository = providerMigrationRepository ?? throw new ArgumentNullException(nameof(providerMigrationRepository));
             _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
             _matchedLearnerDtoMapper = matchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(matchedLearnerDtoMapper));
@@ -42,8 +41,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
             _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
         }
 
-        public async Task MigrateProviderScopedData(MigrateProviderMatchedLearnerData request)
+        public async Task MigrateProviderScopedData(MigrateProviderMatchedLearnerData request, IMessageHandlerContext messageHandlerContext)
         {
+            _messageHandlerContext = messageHandlerContext ?? throw new ArgumentNullException(nameof(messageHandlerContext));
+
             var migrationRunAttempt = new MigrationRunAttemptModel
             {
                 MigrationRunId = request.MigrationRunId,
@@ -142,17 +143,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
                 .GroupBy(x => x.index / _applicationSettings.MigrationBatchSize)
                 .Select(async g =>
                 {
-                    var options = new SendOptions();
-                    options.SetDestination(_applicationSettings.MigrationQueue);
-
-                    await _endpointInstance.Send(new MigrateProviderMatchedLearnerData
+                    await _messageHandlerContext.Send(new MigrateProviderMatchedLearnerData
                     {
                         TrainingData = g.SelectMany(batch => batch.trainingItems).ToArray(),
                         Ukprn = ukprn,
                         BatchNumber = g.Key,
                         TotalBatches = (int)Math.Ceiling((decimal)trainingData.Count / _applicationSettings.MigrationBatchSize),
                         MigrationRunId = migrationRunId
-                    }, options).ConfigureAwait(false);
+                    }, SendLocally.Options).ConfigureAwait(false);
                 });
 
             Task.WaitAll(tasks.ToArray());

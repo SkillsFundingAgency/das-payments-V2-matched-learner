@@ -7,33 +7,29 @@ using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
+using SFA.DAS.Payments.MatchedLearner.Functions.Migration;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 {
     public interface IMigrateProviderMatchedLearnerDataTriggerService
     {
-        Task TriggerMigration();
+        Task TriggerMigration(IMessageHandlerContext messageHandlerContext);
     }
 
     public class MigrateProviderMatchedLearnerDataTriggerService : IMigrateProviderMatchedLearnerDataTriggerService
     {
         private readonly MatchedLearnerDataContext _matchedLearnerDataContext;
-        private readonly IEndpointInstance _endpointInstance;
         private readonly ILogger<MigrateProviderMatchedLearnerDataTriggerService> _logger;
         private readonly IProviderMigrationRepository _providerMigrationRepository;
-        private readonly ApplicationSettings _applicationSettings;
 
-        public MigrateProviderMatchedLearnerDataTriggerService(ApplicationSettings applicationSettings, IEndpointInstance endpointInstance, MatchedLearnerDataContext matchedLearnerDataContext, IProviderMigrationRepository providerMigrationRepository, ILogger<MigrateProviderMatchedLearnerDataTriggerService> logger)
+        public MigrateProviderMatchedLearnerDataTriggerService(MatchedLearnerDataContext matchedLearnerDataContext, IProviderMigrationRepository providerMigrationRepository, ILogger<MigrateProviderMatchedLearnerDataTriggerService> logger)
         {
             _matchedLearnerDataContext = matchedLearnerDataContext;
-            _endpointInstance = endpointInstance;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _providerMigrationRepository = providerMigrationRepository;
-            _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
         }
 
-        public async Task TriggerMigration()
+        public async Task TriggerMigration(IMessageHandlerContext messageHandlerContext)
         {
 
             var migrationRunId = Guid.NewGuid();
@@ -51,9 +47,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Migration
 
                 _logger.LogInformation($"Staring Data Migration for providers Ukprn: {provider}");
 
-                var options = new SendOptions();
-                options.SetDestination(_applicationSettings.MigrationQueue);
-                await _endpointInstance.Send(new MigrateProviderMatchedLearnerData { MigrationRunId = migrationRunId, Ukprn = provider }, options);
+                await messageHandlerContext.Send(new MigrateProviderMatchedLearnerData
+                {
+                    MigrationRunId = migrationRunId,
+                    Ukprn = provider
+                }, SendLocally.Options);
             }
         }
 

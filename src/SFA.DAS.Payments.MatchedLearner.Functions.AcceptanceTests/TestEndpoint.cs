@@ -12,8 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
     public class TestEndpoint
     {
         private bool _endpointStarted;
-        private IEndpointInstance _paymentsEndpointInstance;
-        private IEndpointInstance _matchedLearnerEndpointInstance;
+        private IEndpointInstance _endpointInstance;
         private readonly TestApplicationSettings _testConfiguration;
         public TestEndpoint()
         {
@@ -27,17 +26,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var paymentEndpointConfiguration = CreateEndpointConfiguration(_testConfiguration.PaymentsServiceBusConnectionString, "payments-SubmissionJobSucceeded");
 
-            var matchedLearnerEndpointConfiguration = CreateEndpointConfiguration(_testConfiguration.MatchedLearnerServiceBusConnectionString, "matchedLaener-MigrateProviderMatchedLearnerData");
-
-            _paymentsEndpointInstance = await Endpoint.Start(paymentEndpointConfiguration);
-            _matchedLearnerEndpointInstance = await Endpoint.Start(matchedLearnerEndpointConfiguration);
+            _endpointInstance = await Endpoint.Start(paymentEndpointConfiguration);
 
             _endpointStarted = true;
         }
 
         public async Task Stop()
         {
-            await _paymentsEndpointInstance.Stop();
+            await _endpointInstance.Stop();
         }
 
         private EndpointConfiguration CreateEndpointConfiguration(string serviceBusConnectionString, string endpointName)
@@ -85,7 +81,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
         public async Task PublishSubmissionSucceededEvent(long ukprn, short academicYear, byte collectionPeriod)
         {
-            await _paymentsEndpointInstance.Publish(new SubmissionJobSucceeded
+            await _endpointInstance.Publish(new SubmissionJobSucceeded
             {
                 Ukprn = ukprn,
                 CollectionPeriod = collectionPeriod,
@@ -98,8 +94,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         public async Task PublishProviderLevelMigrationRequest(long ukprn)
         {
             var options = new SendOptions();
-            options.SetDestination(_testConfiguration.MigrationQueue);
-            await _matchedLearnerEndpointInstance.Send(new MigrateProviderMatchedLearnerData
+            options.SetDestination(_testConfiguration.MatchedLearnerQueue);
+            await _endpointInstance.Send(new MigrateProviderMatchedLearnerData
             {
                 Ukprn = ukprn,
                 MigrationRunId = Guid.NewGuid(),
