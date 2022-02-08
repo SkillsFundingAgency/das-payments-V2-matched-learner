@@ -399,7 +399,7 @@
                                 },
 								{
                                     "name": "MatchedLearnerServiceBusConnectionString",
-                                    "value": "[parameters('SharedServiceBusConnectionString')]"
+                                    "value": "[parameters('SharedServiceBusEndpoint')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
