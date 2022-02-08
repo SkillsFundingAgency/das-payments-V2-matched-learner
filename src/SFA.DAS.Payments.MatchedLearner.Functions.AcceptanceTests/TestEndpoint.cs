@@ -11,33 +11,38 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 {
     public class TestEndpoint
     {
-        private IEndpointInstance _endpointInstance;
+        private bool _endpointStarted;
+        private IEndpointInstance _paymentsEndpointInstance;
+        private IEndpointInstance _matchedLearnerEndpointInstance;
         private readonly TestApplicationSettings _testConfiguration;
         public TestEndpoint()
         {
             _testConfiguration = TestConfiguration.TestApplicationSettings;
         }
 
-        public async Task<IEndpointInstance> Start()
+        public async Task Start()
         {
-            if (_endpointInstance != null)
-                return _endpointInstance;
+            if (_endpointStarted)
+                return;
 
-            var endpointConfiguration = CreateEndpointConfiguration();
+            var paymentEndpointConfiguration = CreateEndpointConfiguration(_testConfiguration.PaymentsServiceBusConnectionString, "payments-SubmissionJobSucceeded");
 
-            _endpointInstance = await Endpoint.Start(endpointConfiguration);
+            var matchedLearnerEndpointConfiguration = CreateEndpointConfiguration(_testConfiguration.MatchedLearnerServiceBusConnectionString, "matchedLaener-MigrateProviderMatchedLearnerData");
 
-            return _endpointInstance;
+            _paymentsEndpointInstance = await Endpoint.Start(paymentEndpointConfiguration);
+            _matchedLearnerEndpointInstance = await Endpoint.Start(matchedLearnerEndpointConfiguration);
+
+            _endpointStarted = true;
         }
 
         public async Task Stop()
         {
-            await _endpointInstance.Stop();
+            await _paymentsEndpointInstance.Stop();
         }
 
-        private EndpointConfiguration CreateEndpointConfiguration()
+        private EndpointConfiguration CreateEndpointConfiguration(string serviceBusConnectionString, string endpointName)
         {
-            var endpointConfiguration = new EndpointConfiguration("MatchedLearner.Functions.AcceptanceTests");
+            var endpointConfiguration = new EndpointConfiguration(endpointName);
 
             var conventions = endpointConfiguration.Conventions();
 
@@ -55,10 +60,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
 
-            if (string.IsNullOrWhiteSpace(_testConfiguration.PaymentsServiceBusConnectionString))
-                throw new InvalidOperationException("PaymentsServiceBusConnectionString is null");
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+                throw new InvalidOperationException("ServiceBusConnectionString is null");
 
-            transport.ConnectionString(_testConfiguration.PaymentsServiceBusConnectionString)
+            transport.ConnectionString(serviceBusConnectionString)
                 .Transactions(TransportTransactionMode.ReceiveOnly)
                 .SubscriptionRuleNamingConvention(rule => rule.Name.Split('.').LastOrDefault() ?? rule.Name);
 
@@ -80,7 +85,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
         public async Task PublishSubmissionSucceededEvent(long ukprn, short academicYear, byte collectionPeriod)
         {
-            await _endpointInstance.Publish(new SubmissionJobSucceeded
+            await _paymentsEndpointInstance.Publish(new SubmissionJobSucceeded
             {
                 Ukprn = ukprn,
                 CollectionPeriod = collectionPeriod,
@@ -94,7 +99,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
         {
             var options = new SendOptions();
             options.SetDestination(_testConfiguration.MigrationQueue);
-            await _endpointInstance.Send(new MigrateProviderMatchedLearnerData
+            await _matchedLearnerEndpointInstance.Send(new MigrateProviderMatchedLearnerData
             {
                 Ukprn = ukprn,
                 MigrationRunId = Guid.NewGuid(),

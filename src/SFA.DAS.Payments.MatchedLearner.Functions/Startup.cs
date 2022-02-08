@@ -32,11 +32,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            var managementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+            var paymentsManagementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
 
-            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
-            EnsureQueueAndSubscription(managementClient, applicationSettings.MigrationQueue);
-            EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerImportQueue);
+            EnsureQueueAndSubscription(paymentsManagementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
+
+            var matchedLearnerManagementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+            EnsureQueueAndSubscription(matchedLearnerManagementClient, applicationSettings.MigrationQueue);
+            EnsureQueueAndSubscription(matchedLearnerManagementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 
         private static void EnsureQueueAndSubscription(ManagementClient managementClient, string queue, Type messageType = null)
