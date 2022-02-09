@@ -8,7 +8,6 @@
         public string PaymentsConnectionString { get; set; }
         public string MatchedLearnerConnectionString { get; set; }
         public string PaymentsServiceBusConnectionString { get; set; }
-        public string MatchedLearnerServiceBusConnectionString { get; set; }
 
         public string NServiceBusLicense { get; set; }
         

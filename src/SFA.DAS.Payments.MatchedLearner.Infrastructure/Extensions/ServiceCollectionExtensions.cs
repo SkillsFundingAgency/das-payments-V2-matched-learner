@@ -16,6 +16,7 @@ using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthentication;
+using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 {
@@ -69,9 +70,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             var endpointConfiguration = new EndpointConfiguration(applicationSettings.MatchedLearnerImportQueue);
             var conventions = endpointConfiguration.Conventions();
 
+            conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
             conventions.DefiningCommandsAs(t => typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
 
-            endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.MatchedLearnerServiceBusConnectionString);
+            endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
             endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
             endpointConfiguration.SendOnly();
 
