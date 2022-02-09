@@ -104,16 +104,7 @@
         "matchedLearnerQueue": {
             "type": "string"
         },
-        "MigrationQueue": {
-            "type": "string"
-        },
         "paymentsServiceBusConnectionString": {
-            "type": "string"
-        },
-		"MatchedLearnerServiceBusConnectionString": {
-            "type": "string"
-        },
-        "matchedLearnerImportQueue": {
             "type": "string"
         }
     },
@@ -390,16 +381,8 @@
                                     "value": "[parameters('matchedLearnerQueue')]"
                                 },
                                 {
-                                    "name": "MigrationQueue",
-                                    "value": "[parameters('MigrationQueue')]"
-                                },
-                                {
                                     "name": "PaymentsServiceBusConnectionString",
                                     "value": "[parameters('paymentsServiceBusConnectionString')]"
-                                },
-								{
-                                    "name": "MatchedLearnerServiceBusConnectionString",
-                                    "value": "[parameters('SharedServiceBusEndpoint')]"
                                 },
                                 {
                                     "name": "LoggingRedisConnectionString",
@@ -412,10 +395,6 @@
                                 {
                                     "name": "FUNCTIONS_WORKER_RUNTIME",
                                     "value": "dotnet"
-                                },
-                                {
-                                    "name": "MatchedLearnerImportQueue",
-                                    "value": "[parameters('matchedLearnerImportQueue')]"
                                 }
                             ]
                         }
