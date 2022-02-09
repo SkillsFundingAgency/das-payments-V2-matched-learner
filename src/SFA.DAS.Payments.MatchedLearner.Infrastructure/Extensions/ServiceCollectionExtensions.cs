@@ -64,6 +64,37 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             });
         }
 
+        public static void AddEndpointInstance(this IServiceCollection services, ApplicationSettings applicationSettings)
+        {
+            var endpointConfiguration = new EndpointConfiguration(applicationSettings.MatchedLearnerImportQueue);
+            var conventions = endpointConfiguration.Conventions();
+
+            conventions.DefiningCommandsAs(t => typeof(MigrateProviderMatchedLearnerData).IsAssignableFrom(t) || typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
+
+            endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.MatchedLearnerServiceBusConnectionString);
+            endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+            endpointConfiguration.SendOnly();
+
+            endpointConfiguration.CustomDiagnosticsWriter(diagnostics => Task.CompletedTask);
+
+            endpointConfiguration.DisableFeature<TimeoutManager>();
+            endpointConfiguration.EnableInstallers();
+
+            if (!string.IsNullOrEmpty(applicationSettings.NServiceBusLicense))
+            {
+                var license = WebUtility.HtmlDecode(applicationSettings.NServiceBusLicense);
+                endpointConfiguration.License(license);
+            }
+#if DEBUG
+            //NOTE: This is required to run the function from Acceptance test project
+            var assemblyScanner = endpointConfiguration.AssemblyScanner();
+            assemblyScanner.ThrowExceptions = false;
+#endif
+            var endpointInstance = Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult();
+
+            services.AddSingleton(endpointInstance);
+        }
+
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
         {
             var nLogConfiguration = new NLogConfiguration();

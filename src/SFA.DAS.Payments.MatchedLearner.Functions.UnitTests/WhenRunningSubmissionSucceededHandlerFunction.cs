@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NServiceBus;
+using Newtonsoft.Json;
 using NServiceBus.Testing;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application;
@@ -11,20 +11,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.UnitTests
 {
     public class WhenRunningSubmissionSucceededHandlerFunction
     {
-        private Mock<ILogger<SubmissionSucceededHandler>> _mockLogger;
+        private Mock<ILogger<SubmissionSucceededServiceBusTrigger>> _mockLogger;
         private Mock<ISubmissionSucceededDelayedImportService> _mockSubmissionSucceededDelayedImportService;
-        private TestableMessageHandlerContext _testableMessageHandlerContext;
-        private SubmissionSucceededHandler _sut;
+        private TestableEndpointInstance _mockFunctionEndpoint;
+        private SubmissionSucceededServiceBusTrigger _sut;
         private SubmissionJobSucceeded _submissionSucceededEvent;
+        private string _message;
 
         [SetUp]
         public void Setup()
         {
-            _mockLogger = new Mock<ILogger<SubmissionSucceededHandler>>();
+            _mockLogger = new Mock<ILogger<SubmissionSucceededServiceBusTrigger>>();
             _mockSubmissionSucceededDelayedImportService = new Mock<ISubmissionSucceededDelayedImportService>();
-            _testableMessageHandlerContext = new TestableMessageHandlerContext();
+            _mockFunctionEndpoint = new TestableEndpointInstance();
 
-            _sut = new SubmissionSucceededHandler(_mockSubmissionSucceededDelayedImportService.Object, _mockLogger.Object);
+            _sut = new SubmissionSucceededServiceBusTrigger(_mockSubmissionSucceededDelayedImportService.Object, _mockLogger.Object);
 
             _submissionSucceededEvent = new SubmissionJobSucceeded
             {
@@ -32,19 +33,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.UnitTests
                 CollectionPeriod = 1,
                 AcademicYear = 2021
             };
+
+            _message = JsonConvert.SerializeObject(_submissionSucceededEvent);
         }
 
         [Test]
         public async Task ThenImportMatchedLearnerDataMessageIsSent()
         {
-            await _sut.Handle(_submissionSucceededEvent, _testableMessageHandlerContext);
+            await _sut.RunServiceBusTrigger(_message);
 
             _mockSubmissionSucceededDelayedImportService.Verify(x => x.ProcessSubmissionSucceeded(It.Is<SubmissionJobSucceeded>(
                 messages =>
                     messages.JobId == _submissionSucceededEvent.JobId &&
                     messages.Ukprn == _submissionSucceededEvent.Ukprn &&
                     messages.CollectionPeriod == _submissionSucceededEvent.CollectionPeriod &&
-                    messages.AcademicYear == _submissionSucceededEvent.AcademicYear), It.IsAny<IMessageHandlerContext>()));
+                    messages.AcademicYear == _submissionSucceededEvent.AcademicYear)));
         }
     }
 }

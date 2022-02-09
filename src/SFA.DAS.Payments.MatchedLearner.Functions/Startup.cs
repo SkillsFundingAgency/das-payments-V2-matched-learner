@@ -6,8 +6,6 @@ using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NServiceBus;
-using NServiceBus.Features;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
@@ -34,35 +32,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            builder.UseNServiceBus(() =>
-            {
-                var serviceBusTriggeredEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(applicationSettings.MatchedLearnerQueue);
-
-                var endpointConfiguration = serviceBusTriggeredEndpointConfiguration.AdvancedConfiguration;
-
-                endpointConfiguration.DisableFeature<TimeoutManager>();
-                
-                endpointConfiguration.EnableInstallers();
-
-                // Look for license as an environment variable
-                var licenseText = applicationSettings.NServiceBusLicense;
-                if (!string.IsNullOrWhiteSpace(licenseText))
-                {
-                    endpointConfiguration.License(licenseText);
-                }
-
-                serviceBusTriggeredEndpointConfiguration.Transport.ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
-#if DEBUG
-                //NOTE: This is required to run the function from Acceptance test project
-                var assemblyScanner = endpointConfiguration.AssemblyScanner();
-                assemblyScanner.ThrowExceptions = false;
-#endif
-                return serviceBusTriggeredEndpointConfiguration;
-            });
-
             var paymentsManagementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
 
             EnsureQueueAndSubscription(paymentsManagementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
+
+            var matchedLearnerManagementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+            EnsureQueueAndSubscription(matchedLearnerManagementClient, applicationSettings.MigrationQueue);
+            EnsureQueueAndSubscription(matchedLearnerManagementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 
         private static void EnsureQueueAndSubscription(ManagementClient managementClient, string queue, Type messageType = null)

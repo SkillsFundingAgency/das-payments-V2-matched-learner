@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NServiceBus;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
-using SFA.DAS.Payments.MatchedLearner.Functions.Migration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
@@ -11,30 +10,33 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 {
     public interface ISubmissionSucceededDelayedImportService
     {
-        Task ProcessSubmissionSucceeded(SubmissionJobSucceeded submissionSucceededEvent, IMessageHandlerContext messageHandlerContext);
+        Task ProcessSubmissionSucceeded(SubmissionJobSucceeded submissionSucceededEvent);
     }
 
     public class SubmissionSucceededDelayedImportService : ISubmissionSucceededDelayedImportService
     {
         private readonly ApplicationSettings _applicationSettings;
+        private readonly IEndpointInstance _endpointInstance;
         private readonly ILogger<SubmissionSucceededDelayedImportService> _logger;
 
-        public SubmissionSucceededDelayedImportService(ApplicationSettings applicationSettings, ILogger<SubmissionSucceededDelayedImportService> logger)
+        public SubmissionSucceededDelayedImportService(ApplicationSettings applicationSettings, IEndpointInstance endpointInstance, ILogger<SubmissionSucceededDelayedImportService> logger)
         {
             _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
+            _endpointInstance = endpointInstance ?? throw new ArgumentNullException(nameof(endpointInstance));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task ProcessSubmissionSucceeded(SubmissionJobSucceeded submissionSucceededEvent, IMessageHandlerContext messageHandlerContext)
+        public async Task ProcessSubmissionSucceeded(SubmissionJobSucceeded submissionSucceededEvent)
         {
             var delay = TimeSpan.Parse(_applicationSettings.MatchedLearnerImportDelay);
 
             _logger.LogDebug($"Delaying MatchedLearner Data Import for {delay.TotalSeconds} seconds for job: {submissionSucceededEvent.JobId}");
 
-            var options = SendLocally.Options;
+            var options = new SendOptions();
+            options.SetDestination(_applicationSettings.MatchedLearnerImportQueue);
             options.DelayDeliveryWith(delay);
 
-            await messageHandlerContext.Send(new ImportMatchedLearnerData
+            await _endpointInstance.Send(new ImportMatchedLearnerData
             {
                 CollectionPeriod = submissionSucceededEvent.CollectionPeriod,
                 JobId = submissionSucceededEvent.JobId,
