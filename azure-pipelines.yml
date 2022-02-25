@@ -6,6 +6,7 @@ trigger:
 
 resources:
   repositories:
+  - repository: self
   - repository: das-platform-building-blocks
     type: github
     name: SkillsFundingAgency/das-platform-building-blocks
