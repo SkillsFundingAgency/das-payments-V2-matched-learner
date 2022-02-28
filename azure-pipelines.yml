@@ -13,13 +13,7 @@ resources:
     ref: refs/tags/0.4.37
     endpoint: SkillsFundingAgency
 
-variables:
-  - name: SolutionBaseName
-    value: SFA.DAS.Payments.MatchedLearner.Api
-
 stages:
 - stage: Build
   jobs:
   - template: pipeline-templates/job/code-build.yml
-    parameters:
-      SolutionBaseName: $(SolutionBaseName)
