@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Payments.MatchedLearner.Types
 {
-    public class PeriodDto
+    public struct PeriodDto
     {
         public int Period { get; set; }
         public bool IsPayable { get; set; }
