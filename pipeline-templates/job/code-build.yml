@@ -1,0 +1,70 @@
+jobs:
+- job: CodeBuild
+  pool:
+    name: 'DAS - Continuous Integration Agents'
+    demands: LATEST_DOTNET_VERSION -equals 3.1
+  variables:
+  - group: BUILD Management Resources
+  - name: buildConfiguration
+    value: release
+  workspace:
+    clean: all
+  steps:
+  - task: UseGitVersion@5
+    displayName: GitVersion
+    inputs:
+      versionSpec: 5.x
+      useConfigFile: true
+      configFilePath: GitVersion.yml
+
+  - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
+    parameters:
+        SonarCloudProjectKey: SkillsFundingAgency_das-payments-V2-matched-learner
+    
+  - template: azure-pipelines-templates/build/step/dependency-check.yml@das-platform-building-blocks
+
+  - task: DotNetCoreCLI@2
+    displayName: Publish Payments V2 Matched Learner Api
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj
+      arguments: --configuration release --output $(build.artifactstagingdirectory)/publish --no-restore --no-build
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Function App Payments Matched Learner'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/SFA.DAS.Payments.MatchedLearner.Functions/SFA.DAS.Payments.MatchedLearner.Functions.csproj'
+      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build Acceptance Tests'
+    inputs: 
+      command: build
+      projects: 'src/*AcceptanceTests/*AcceptanceTests.csproj'
+      arguments: '--configuration $(buildConfiguration) --no-restore'
+
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+    inputs:
+      Contents: |
+        azure/**
+      TargetFolder: '$(build.artifactstagingdirectory)/publish'
+      OverWrite: true
+
+  - task: CopyFiles@2
+    displayName: 'Copy AcceptanceTests Files to: $(build.artifactstagingdirectory)'
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)/src/'
+      Contents: |
+        *AcceptanceTests*/**/bin/$(BuildConfiguration)/**
+      TargetFolder: '$(build.artifactstagingdirectory)/publish'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(build.artifactstagingdirectory)/publish'
+      artifactName: drop
