@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using SFA.DAS.Payments.MatchedLearner.Application.Data;
+using SFA.DAS.Payments.MatchedLearner.Application.Data.Models;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
-using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
@@ -44,22 +46,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
-                //TODO: Fix this
-                //LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
-                //{
-                //    new LatestSuccessfulJobModel
-                //    {
-                //        CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
-                //        AcademicYear = _expectedAcademicYear,
-                //        IlrSubmissionTime = _expectedIlrSubmissionDate,
-                //        Ukprn = _expectedUkprn,
-                //        JobId = 1,
-                //        DcJobId = 1,
-                //    }
-                //},
-                DataLockEvents = new List<DataLockEventModel>
+                LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
                 {
-                    new DataLockEventModel
+                    new LatestSuccessfulJobModel
+                    {
+                        CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
+                        AcademicYear = _expectedAcademicYear,
+                        IlrSubmissionTime = _expectedIlrSubmissionDate,
+                        Ukprn = _expectedUkprn,
+                        JobId = 1,
+                        DcJobId = 1,
+                    }
+                },
+                DataLockEvents = new List<DataLockEvent>
+                {
+                    new DataLockEvent
                     {
                         LearningStartDate = _expectedLearningStartDate,
                         EventTime = _expectedEventTime,
@@ -77,9 +78,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     }
                 },
 
-                DataLockEventPriceEpisodes = new List<DataLockEventPriceEpisodeModel>
+                DataLockEventPriceEpisodes = new List<DataLockEventPriceEpisode>
                 {
-                    new DataLockEventPriceEpisodeModel
+                    new DataLockEventPriceEpisode
                     {
                         StartDate = _expectedPriceEpisodeStartDate,
                         ActualEndDate = _expectedPriceEpisodeEndDate,
@@ -93,46 +94,46 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     }
                 },
 
-                DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>
+                DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriod>
                 {
-                    new DataLockEventNonPayablePeriodModel
+                    new DataLockEventNonPayablePeriod
                     {
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         DeliveryPeriod = 2,
                     }
                 },
 
-                DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>
+                DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailure>
                 {
-                    new DataLockEventNonPayablePeriodFailureModel
+                    new DataLockEventNonPayablePeriodFailure
                     {
                         ApprenticeshipId = 123,
                         DataLockFailureId = 2,
                     },
-                    new DataLockEventNonPayablePeriodFailureModel
+                    new DataLockEventNonPayablePeriodFailure
                     {
                         ApprenticeshipId = 123,
                         DataLockFailureId = 3,
                     },
                 },
 
-                Apprenticeships = new List<ApprenticeshipModel>
+                Apprenticeships = new List<Apprenticeship>
                 {
-                    new ApprenticeshipModel
+                    new Apprenticeship
                     {
                         Id = 123,
                         ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType
                     },
-                    new ApprenticeshipModel
+                    new Apprenticeship
                     {
                         Id = 456,
                         ApprenticeshipEmployerType = _expectedApprenticeshipEmployerType
                     }
                 },
 
-                DataLockEventPayablePeriods = new List<DataLockEventPayablePeriodModel>
+                DataLockEventPayablePeriods = new List<DataLockEventPayablePeriod>
                 {
-                    new DataLockEventPayablePeriodModel
+                    new DataLockEventPayablePeriod
                     {
                         PriceEpisodeIdentifier = _expectedPriceEpisodeIdentifier,
                         ApprenticeshipId = 456,
