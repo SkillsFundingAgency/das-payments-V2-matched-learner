@@ -1,8 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
+using SFA.DAS.Http;
+using SFA.DAS.Http.Configuration;
+using SFA.DAS.Http.TokenGenerators;
+using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Api;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
@@ -15,11 +22,34 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
         public TestClient()
         {
-            _url = TestConfiguration.MatchedLearnerApiConfiguration.TargetUrl;
+            _url = TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl;
+            if (!string.IsNullOrEmpty(_url))
+            {
+                _client = new HttpClientBuilder()
+                    .WithDefaultHeaders()
+                    .WithBearerAuthorisationHeader(new GenerateBearerToken(TestConfiguration.TestAzureAdClientSettings))
+                    .Build();
 
-            if (!string.IsNullOrEmpty(_url)) return;
+                if (!_url.EndsWith("/")) _url += "/";
 
-            _client = new WebApplicationFactory<Startup>().CreateClient();
+                _client.BaseAddress = new Uri(_url);
+
+                return;
+            }
+
+            var factory = new WebApplicationFactory<Startup>().WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureAppConfiguration((context, configurationBuilder) =>
+                {
+                    configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        {"EnvironmentName", "Development"},
+                    });
+                });
+            });
+
+            _client = factory.CreateClient();
+
             _url = _client.BaseAddress.ToString();
         }
 
@@ -36,6 +66,25 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             var responseAsObjectGraph = JsonConvert.DeserializeObject<MatchedLearnerDto>(responseAsString);
 
             return responseAsObjectGraph;
+        }
+    }
+
+    public class GenerateBearerToken : IGenerateBearerToken
+    {
+        private readonly IAzureActiveDirectoryClientConfiguration _configuration;
+
+        public GenerateBearerToken(IAzureActiveDirectoryClientConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+        public async Task<string> Generate()
+        {
+            var authority = $"https://login.microsoftonline.com/{TestConfiguration.TestAzureAdClientSettings.Tenant}";
+            var clientCredential = new ClientCredential(_configuration.ClientId, _configuration.ClientSecret);
+            var context = new AuthenticationContext(authority, true);
+            var result = await context.AcquireTokenAsync(_configuration.IdentifierUri, clientCredential).ConfigureAwait(false);
+
+            return result.AccessToken;
         }
     }
 }

@@ -31,13 +31,13 @@ jobs:
       projects: src/SFA.DAS.Payments.MatchedLearner.Api/SFA.DAS.Payments.MatchedLearner.Api.csproj
       arguments: --configuration release --output $(build.artifactstagingdirectory)/publish --no-restore --no-build
 
-  # - task: DotNetCoreCLI@2
-  #   displayName: 'Publish Function App Payments Matched Learner'
-  #   inputs:
-  #     command: publish
-  #     publishWebProjects: false
-  #     projects: 'src/SFA.DAS.Payments.MatchedLearner.Functions/SFA.DAS.Payments.MatchedLearner.Functions.csproj'
-  #     arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Function App Payments Matched Learner'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/SFA.DAS.Payments.MatchedLearner.Functions/SFA.DAS.Payments.MatchedLearner.Functions.csproj'
+      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet build Acceptance Tests'

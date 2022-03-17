@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using SFA.DAS.Payments.MatchedLearner.Application.Data;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
@@ -21,22 +21,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
 
             var firstEvent = matchedLearnerDataLockInfo.DataLockEvents
                 .OrderByDescending(x => x.AcademicYear)
-                .ThenBy(x => x.LearningStartDate)
-                .First();
-
-            var firstSubmissionJob = matchedLearnerDataLockInfo.LatestSuccessfulJobs
-                .OrderByDescending(x => x.AcademicYear)
                 .ThenByDescending(x => x.CollectionPeriod)
+                .ThenBy(x => x.LearningStartDate)
                 .First();
 
             return new MatchedLearnerDto
             {
                 StartDate = firstEvent.LearningStartDate.GetValueOrDefault(),
                 EventTime = firstEvent.EventTime,
-                IlrSubmissionDate = firstSubmissionJob.IlrSubmissionTime,
-                IlrSubmissionWindowPeriod = firstSubmissionJob.CollectionPeriod,
-                AcademicYear = firstSubmissionJob.AcademicYear,
-                Ukprn = firstSubmissionJob.Ukprn,
+                IlrSubmissionDate = firstEvent.IlrSubmissionDateTime,
+                IlrSubmissionWindowPeriod = firstEvent.CollectionPeriod,
+                AcademicYear = firstEvent.AcademicYear,
+                Ukprn = firstEvent.Ukprn,
                 Uln = firstEvent.LearnerUln,
                 Training = MapTraining(matchedLearnerDataLockInfo)
             };
@@ -113,7 +109,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
             return DateTime.TryParseExact(
                    priceEpisodeIdentifier.Substring(priceEpisodeIdentifier.Length - 10),
                     "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces,
-                    out DateTime episodeStartDate)
+                    out var episodeStartDate)
                 ? episodeStartDate
                 : throw new InvalidOperationException(
                     $"Cannot determine episode start date from the price episode identifier: {priceEpisodeIdentifier}");

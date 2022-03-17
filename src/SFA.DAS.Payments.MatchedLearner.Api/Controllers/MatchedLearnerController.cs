@@ -28,7 +28,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api.Controllers
         [ProducesResponseType(typeof(MatchedLearnerDto),200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
-        [HttpGet()]
+        [HttpGet]
         [Route("{ukprn}/{uln}")]
         public async Task<ActionResult> Get(long ukprn, long uln)
         {
