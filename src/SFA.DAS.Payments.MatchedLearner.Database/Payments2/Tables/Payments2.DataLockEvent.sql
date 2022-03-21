@@ -35,3 +35,5 @@ GO
 
 CREATE INDEX [IX_DataLockEvent_Submission] ON [Payments2].[DataLockEvent] ([Ukprn], [LearnerUln], [LearningAimReference], [LearningStartDate])
 GO
+
+CREATE NONCLUSTERED INDEX [IX_DataLockEvent_RemoveSubmission] ON [Payments2].[DataLockEvent] ([AcademicYear], [Ukprn], [CollectionPeriod])
