@@ -40,7 +40,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             services.AddNLog(applicationSettings, "Api");
 
-            if (!Configuration.IsDevelopment())
+            if (Configuration.IsAAdEnabled())
             {
                 var azureAdConfiguration = Configuration
                     .GetSection(ApplicationSettingsKeys.AzureADConfigKey)
@@ -66,7 +66,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
 
             services.AddMvc(o =>
             {
-                if (!Configuration.IsDevelopment())
+                if (Configuration.IsAAdEnabled())
                 {
                     o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string> { PolicyNames.Default }));
                 }

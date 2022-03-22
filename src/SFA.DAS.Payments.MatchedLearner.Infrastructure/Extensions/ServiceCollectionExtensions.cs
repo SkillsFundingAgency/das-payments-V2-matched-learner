@@ -156,7 +156,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 #if DEBUG
             if (isDevelopmentEnvironment)
             {
-                config.AddJsonFile("local.settings.json", optional: false);
+                config.AddJsonFile("local.settings.json", optional: true);
             }
 #endif
             return config.Build();
@@ -171,5 +171,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
             throw new ApplicationException("Configuration is not initialized correctly");
         }
+        public static bool AadFlag(this IConfiguration configuration)
+        {
+            var aadFlag = configuration["AAdEnabled"];
+
+            if (string.IsNullOrEmpty(aadFlag))
+                throw new ApplicationException("Configuration is not initialized correctly");
+
+            return bool.Parse(aadFlag);
+        }
+        
+        public static bool IsAAdEnabled(this IConfiguration configuration)
+        {
+            return !configuration.IsDevelopment() && configuration.AadFlag();
+        }
+
+
     }
 }
