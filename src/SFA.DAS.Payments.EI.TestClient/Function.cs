@@ -73,6 +73,12 @@ namespace SFA.DAS.Payments.EI.TestClient
             await context.CallActivityWithRetryAsync(nameof(LearnerMatchAndUpdate),
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
                 incentive);
+            
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+
+            await context.CallActivityWithRetryAsync(nameof(LearnerMatchAndUpdate),
+                new RetryOptions(TimeSpan.FromSeconds(1), 3),
+                incentive);
         }
     }
 
