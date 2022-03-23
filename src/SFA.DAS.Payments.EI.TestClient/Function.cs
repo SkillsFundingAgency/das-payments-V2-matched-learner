@@ -60,6 +60,12 @@ namespace SFA.DAS.Payments.EI.TestClient
 
     public class LearnerMatchingApprenticeshipOrchestrator
     {
+        private readonly TestDataContext _dataContext;
+        public LearnerMatchingApprenticeshipOrchestrator(TestDataContext dataContext)
+        {
+            _dataContext = dataContext;
+        }
+
         [FunctionName(nameof(LearnerMatchingApprenticeshipOrchestrator))]
         public async Task RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context)
         {
@@ -68,40 +74,43 @@ namespace SFA.DAS.Payments.EI.TestClient
             await PerformLearnerMatch(context, incentive);
         }
 
-        private static async Task PerformLearnerMatch(IDurableOrchestrationContext context, ApprenticeshipInput incentive)
+        private async Task PerformLearnerMatch(IDurableOrchestrationContext context, ApprenticeshipInput incentive)
         {
-            await context.CallActivityWithRetryAsync(nameof(LearnerMatchAndUpdate),
+            await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
                 incentive);
-            
+
             await Task.Delay(TimeSpan.FromMilliseconds(100));
 
-            await context.CallActivityWithRetryAsync(nameof(LearnerMatchAndUpdate),
+           var apprenticeshipOutPutResult = await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
                 incentive);
+
+            await _dataContext.ApprenticeshipOutPut.AddAsync(apprenticeshipOutPutResult);
+
+            await _dataContext.SaveChangesAsync();
+
         }
     }
 
 
     public class LearnerMatchAndUpdate
     {
-        private readonly TestDataContext _dataContext;
         private readonly HttpClient _client;
 
-        public LearnerMatchAndUpdate(TestDataContext dataContext, HttpClient client)
+        public LearnerMatchAndUpdate(HttpClient client)
         {
-            _dataContext = dataContext;
             _client = client;
         }
 
         [FunctionName(nameof(LearnerMatchAndUpdate))]
-        public async Task Create([ActivityTrigger] ApprenticeshipInput apprenticeshipInput)
+        public async Task<ApprenticeshipOutPut> Create([ActivityTrigger] ApprenticeshipInput apprenticeshipInput)
         {
             var response = await _client.GetAsync($"api/v1/{apprenticeshipInput.Ukprn}/{apprenticeshipInput.Uln}?");
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                return;
+                return null;
             }
 
             response.EnsureSuccessStatusCode();
@@ -115,9 +124,7 @@ namespace SFA.DAS.Payments.EI.TestClient
                 throw new InvalidOperationException(jsonString);
             }
 
-            await _dataContext.ApprenticeshipOutPut.AddAsync(new ApprenticeshipOutPut { Ukprn = apprenticeshipInput.Ukprn, Uln = apprenticeshipInput.Uln, LearnerJson = jsonString });
-            
-            await _dataContext.SaveChangesAsync();
+            return new ApprenticeshipOutPut { Ukprn = apprenticeshipInput.Ukprn, Uln = apprenticeshipInput.Uln, LearnerJson = jsonString };
         }
     }
 }
