@@ -40,6 +40,14 @@ jobs:
       arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
   - task: DotNetCoreCLI@2
+    displayName: 'Publish Test Client Function App Payments Matched Learner'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/SFA.DAS.Payments.EI.TestClient/SFA.DAS.Payments.EI.TestClient.csproj'
+      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
+
+  - task: DotNetCoreCLI@2
     displayName: 'dotnet build Acceptance Tests'
     inputs: 
       command: build
