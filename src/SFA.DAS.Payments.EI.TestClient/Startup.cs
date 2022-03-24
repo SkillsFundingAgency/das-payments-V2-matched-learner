@@ -3,6 +3,7 @@ using System.Net.Http;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.Payments.EI.TestClient;
 
@@ -18,17 +19,8 @@ namespace SFA.DAS.Payments.EI.TestClient
 
             var configuration = builder.GetContext().Configuration;
 
-            var connectionString = configuration["ConnectionString"];
+            builder.Services.AddSingleton(configuration);
 
-            if (string.IsNullOrEmpty(connectionString))
-                throw new ApplicationException("Configuration is not initialized correctly");
-
-            builder.Services.AddDbContext<TestDataContext>((provider, dbContextOptionsBuilder) =>
-            {
-               dbContextOptionsBuilder.UseSqlServer(new SqlConnection(connectionString), optionsBuilder => optionsBuilder.CommandTimeout(540));
-            });
-
-            
             var matchedLearnerApiBaseUrl = configuration["matchedLearnerApiBaseUrl"];
 
             if (string.IsNullOrEmpty(matchedLearnerApiBaseUrl))

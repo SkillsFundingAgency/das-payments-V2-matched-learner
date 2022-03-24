@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SFA.DAS.Payments.MatchedLearner.Types;
@@ -45,9 +47,18 @@ namespace SFA.DAS.Payments.EI.TestClient
     {
         private readonly TestDataContext _dataContext;
 
-        public GetAllApprenticeshipIncentives(TestDataContext dataContext)
+        public GetAllApprenticeshipIncentives(IConfiguration configuration)
         {
-            _dataContext = dataContext;
+            var connectionString = configuration["ConnectionString"];
+
+            if (string.IsNullOrEmpty(connectionString))
+                throw new ApplicationException("Configuration is not initialized correctly");
+
+            var options = new DbContextOptionsBuilder()
+                .UseSqlServer(new SqlConnection(connectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
+                .Options;
+
+            _dataContext = new TestDataContext(options);
         }
 
         [FunctionName(nameof(GetAllApprenticeshipIncentives))]
@@ -62,9 +73,19 @@ namespace SFA.DAS.Payments.EI.TestClient
     public class LearnerMatchingApprenticeshipOrchestrator
     {
         private readonly TestDataContext _dataContext;
-        public LearnerMatchingApprenticeshipOrchestrator(TestDataContext dataContext)
+        public LearnerMatchingApprenticeshipOrchestrator(IConfiguration configuration)
         {
-            _dataContext = dataContext;
+            var connectionString = configuration["ConnectionString"];
+
+            if (string.IsNullOrEmpty(connectionString))
+                throw new ApplicationException("Configuration is not initialized correctly");
+
+            var options = new DbContextOptionsBuilder()
+                .UseSqlServer(new SqlConnection(connectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
+                .Options;
+
+            _dataContext = new TestDataContext(options);
+
         }
 
         [FunctionName(nameof(LearnerMatchingApprenticeshipOrchestrator))]
@@ -72,11 +93,6 @@ namespace SFA.DAS.Payments.EI.TestClient
         {
             var incentive = context.GetInput<ApprenticeshipInput>();
 
-            await PerformLearnerMatch(context, incentive);
-        }
-
-        private async Task PerformLearnerMatch(IDurableOrchestrationContext context, ApprenticeshipInput incentive)
-        {
             var apprenticeshipOutPutResult = await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
                 incentive);
