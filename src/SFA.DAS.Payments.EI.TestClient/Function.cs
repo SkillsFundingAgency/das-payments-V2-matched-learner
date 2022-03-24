@@ -77,14 +77,7 @@ namespace SFA.DAS.Payments.EI.TestClient
 
         private async Task PerformLearnerMatch(IDurableOrchestrationContext context, ApprenticeshipInput incentive)
         {
-            await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
-                new RetryOptions(TimeSpan.FromSeconds(1), 3),
-                incentive);
-
-            var deadline = context.CurrentUtcDateTime.Add(TimeSpan.FromMilliseconds(100));
-            await context.CreateTimer(deadline, CancellationToken.None);
-
-           var apprenticeshipOutPutResult = await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
+            var apprenticeshipOutPutResult = await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
                 incentive);
 
@@ -92,6 +85,12 @@ namespace SFA.DAS.Payments.EI.TestClient
 
             await _dataContext.SaveChangesAsync();
 
+            var deadline = context.CurrentUtcDateTime.Add(TimeSpan.FromMilliseconds(100));
+            await context.CreateTimer(deadline, CancellationToken.None);
+
+            await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
+                new RetryOptions(TimeSpan.FromSeconds(1), 3),
+                incentive);
         }
     }
 
