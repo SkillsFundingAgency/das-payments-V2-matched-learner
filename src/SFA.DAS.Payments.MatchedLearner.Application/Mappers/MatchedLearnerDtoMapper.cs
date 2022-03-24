@@ -125,7 +125,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
                         .Where(f => f.DataLockEventNonPayablePeriodId ==
                                     nonPayablePeriod.DataLockEventNonPayablePeriodId).ToList();
 
-                    var apprenticeship = matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.First().ApprenticeshipId);
+                    var apprenticeship = matchedLearnerDataLockInfo.Apprenticeships.FirstOrDefault(a => a.Id == failures.FirstOrDefault()?.ApprenticeshipId);
 
                     return new PeriodDto
                     {
