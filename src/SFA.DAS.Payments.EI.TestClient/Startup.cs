@@ -23,13 +23,9 @@ namespace SFA.DAS.Payments.EI.TestClient
             if (string.IsNullOrEmpty(connectionString))
                 throw new ApplicationException("Configuration is not initialized correctly");
 
-            builder.Services.AddTransient(_ =>
+            builder.Services.AddDbContext<TestDataContext>((provider, dbContextOptionsBuilder) =>
             {
-                var options = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(connectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
-                    .Options;
-
-                return new TestDataContext(options);
+               dbContextOptionsBuilder.UseSqlServer(new SqlConnection(connectionString), optionsBuilder => optionsBuilder.CommandTimeout(540));
             });
 
             
