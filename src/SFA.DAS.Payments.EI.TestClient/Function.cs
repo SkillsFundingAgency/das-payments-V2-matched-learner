@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -80,7 +81,8 @@ namespace SFA.DAS.Payments.EI.TestClient
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
                 incentive);
 
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            var deadline = context.CurrentUtcDateTime.Add(TimeSpan.FromMilliseconds(100));
+            await context.CreateTimer(deadline, CancellationToken.None);
 
            var apprenticeshipOutPutResult = await context.CallActivityWithRetryAsync<ApprenticeshipOutPut>(nameof(LearnerMatchAndUpdate),
                 new RetryOptions(TimeSpan.FromSeconds(1), 3),
