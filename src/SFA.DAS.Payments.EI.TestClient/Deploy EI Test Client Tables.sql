@@ -18,6 +18,7 @@ CREATE TABLE [Payments2].[ApprenticeshipOutPut](
 	[Id] [bigint] IDENTITY(1,1) NOT NULL,
 	[Ukprn] [bigint] NOT NULL,
 	[Uln] [bigint] NOT NULL,
+	[LearnerJson] [nvarchar](max) NOT NULL,
 	[CreationDate] [datetimeoffset](7) NOT NULL,
  CONSTRAINT [PK_ApprenticeshipOutPut] PRIMARY KEY CLUSTERED 
 (
