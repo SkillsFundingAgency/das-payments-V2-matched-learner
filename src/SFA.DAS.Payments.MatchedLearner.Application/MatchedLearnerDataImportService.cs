@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 
@@ -17,15 +18,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
     {
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
         private readonly IPaymentsRepository _paymentsRepository;
+        private readonly ILogger<MatchedLearnerDataImportService> _logger;
 
-        public MatchedLearnerDataImportService(IMatchedLearnerRepository matchedLearnerRepository, IPaymentsRepository paymentsRepository)
+        public MatchedLearnerDataImportService(IMatchedLearnerRepository matchedLearnerRepository, IPaymentsRepository paymentsRepository, ILogger<MatchedLearnerDataImportService> logger)
         {
             _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
             _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
         {
+            _logger.LogInformation($"Started MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}");
+
             var collectionPeriods = new List<byte> { importMatchedLearnerData.CollectionPeriod };
 
             if (importMatchedLearnerData.CollectionPeriod != 1)
@@ -67,9 +72,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
                 });
 
                 await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+
+                _logger.LogInformation($"Finished MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}");
             }
-            catch
+            catch (Exception exception)
             {
+                _logger.LogError($"Error in MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}, Inner Exception {exception}");
+
                await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
                throw;
             }
