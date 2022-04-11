@@ -29,18 +29,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
             sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
 
-            var sql = $"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )"; //NOSONAR
+            var sql = $"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )";
             
-            await Database.ExecuteSqlRawAsync(sql, sqlParameters);
+            await Database.ExecuteSqlRawAsync(sql, sqlParameters); //NOSONAR
         }
 
         public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
         {
             var sqlParameters = apprenticeshipIds.Select((item, index) => new SqlParameter($"@Id{index}", item)).ToList();
 
-            var sql = $"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )"; //NOSONAR
+            var sql = $"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )";
 
-            await Database.ExecuteSqlRawAsync(sql, sqlParameters);
+            await Database.ExecuteSqlRawAsync(sql, sqlParameters); //NOSONAR
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
