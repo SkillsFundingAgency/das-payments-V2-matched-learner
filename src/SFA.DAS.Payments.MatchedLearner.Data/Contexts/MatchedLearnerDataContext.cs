@@ -30,7 +30,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
             sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
 
-            await Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ({ sqlParamName })", sqlParameters);
+            var sql = $"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ( {sqlParamName} )";
+            
+            await Database.ExecuteSqlRawAsync(sql, sqlParameters);
         }
 
         public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
@@ -38,7 +40,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
             var sqlParameters = apprenticeshipIds.Select((item, index) => new SqlParameter($"@Id{index}", item)).ToList();
             var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
 
-            await Database.ExecuteSqlRawAsync($"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {sqlParamName} )", sqlParameters);
+            var sql = $"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {sqlParamName} )";
+
+            await Database.ExecuteSqlRawAsync(sql, sqlParameters);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
