@@ -97,30 +97,29 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddSingleton(endpointInstance);
         }
 
-#pragma warning disable 4792
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
         {
             var nLogConfiguration = new NLogConfiguration();
 
-            serviceCollection.AddLogging(options =>
+            serviceCollection.AddLogging(options => //NOSONAR
             {
-                options.AddFilter("SFA.DAS", LogLevel.Debug); // this is because all logging is filtered out by default
-                options.AddFilter("Microsoft.AspNetCore.*", LogLevel.Warning);
-                options.AddFilter("Host.*", LogLevel.Warning);
-                options.AddFilter("Microsoft.Azure.WebJobs.Hosting.*", LogLevel.Warning);
-                options.SetMinimumLevel(LogLevel.Trace);
+                options.AddFilter("SFA.DAS", LogLevel.Debug); //NOSONAR this is because all logging is filtered out by default
+                options.AddFilter("Microsoft.AspNetCore.*", LogLevel.Warning); //NOSONAR
+                options.AddFilter("Host.*", LogLevel.Warning); //NOSONAR
+                options.AddFilter("Microsoft.Azure.WebJobs.Hosting.*", LogLevel.Warning); //NOSONAR
+                options.SetMinimumLevel(LogLevel.Trace); //NOSONAR
 
-                options.AddNLog(new NLogProviderOptions
+                options.AddNLog(new NLogProviderOptions //NOSONAR
                 {
-                    CaptureMessageTemplates = true,
-                    CaptureMessageProperties = true
-                });
+                    CaptureMessageTemplates = true, //NOSONAR
+                    CaptureMessageProperties = true //NOSONAR
+                }); //NOSONAR
                 options.AddConsole(); //NOSONAR
 
-                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment);
-            });
+                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment); //NOSONAR
+            });//NOSONAR
         }
-#pragma warning restore 4792
+
         public static ApplicationSettings AddApplicationSettings(this IServiceCollection services, IConfiguration configuration)
         {
             var applicationSettings = configuration
