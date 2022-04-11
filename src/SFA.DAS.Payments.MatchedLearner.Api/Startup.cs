@@ -90,7 +90,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
         {
             if (Configuration.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage(); //NOSONAR
             }
             else
             {

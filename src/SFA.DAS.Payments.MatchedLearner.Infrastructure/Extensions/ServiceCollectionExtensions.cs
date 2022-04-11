@@ -114,10 +114,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                     CaptureMessageTemplates = true,
                     CaptureMessageProperties = true
                 });
-                options.AddConsole();
+                options.AddConsole(); //NOSONAR
 
                 nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment);
-            });
+            }); //NOSONAR
         }
 
         public static ApplicationSettings AddApplicationSettings(this IServiceCollection services, IConfiguration configuration)

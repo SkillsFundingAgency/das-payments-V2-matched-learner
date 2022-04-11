@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration
                 AddAppInsights(config);
             }
 
-            LogManager.Configuration = config;
+            LogManager.Configuration = config; //NOSONAR
         }
 
         private static void AddLocalTarget(LoggingConfiguration config, string serviceName)
