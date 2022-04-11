@@ -97,6 +97,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddSingleton(endpointInstance);
         }
 
+#pragma warning disable S4792
         public static void AddNLog(this IServiceCollection serviceCollection, ApplicationSettings applicationSettings, string serviceNamePostFix)
         {
             var nLogConfiguration = new NLogConfiguration();
@@ -119,7 +120,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
                 nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment);
             }); //NOSONAR
         }
-
+#pragma warning restore S4792
         public static ApplicationSettings AddApplicationSettings(this IServiceCollection services, IConfiguration configuration)
         {
             var applicationSettings = configuration
