@@ -25,12 +25,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         {
 
             var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
-            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
 
             sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
             sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
 
-            var sql = $"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ( {sqlParamName} )";
+            var sql = $"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )";
             
             await Database.ExecuteSqlRawAsync(sql, sqlParameters);
         }
@@ -38,9 +37,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)
         {
             var sqlParameters = apprenticeshipIds.Select((item, index) => new SqlParameter($"@Id{index}", item)).ToList();
-            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
 
-            var sql = $"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {sqlParamName} )";
+            var sql = $"DELETE FROM Payments2.Apprenticeship WHERE id IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )";
 
             await Database.ExecuteSqlRawAsync(sql, sqlParameters);
         }
