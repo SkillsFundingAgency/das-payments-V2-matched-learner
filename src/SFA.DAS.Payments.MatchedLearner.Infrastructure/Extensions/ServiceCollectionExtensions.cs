@@ -27,7 +27,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var options = new DbContextOptionsBuilder()
-                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
                     .Options;
 
                 return new PaymentsDataContext(options);
@@ -49,7 +49,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
@@ -58,7 +58,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
