@@ -33,5 +33,7 @@ Create Unique Index UX_DataLockEvent_LogicalDuplicates on Payments2.DataLockEven
 	[LearningAimPathwayCode], [LearningAimFundingLineType], [LearningStartDate], [DuplicateNumber])
 GO
 
-CREATE INDEX [IX_DataLockEvent_Submission] ON [Payments2].[DataLockEvent] ([JobId], [Ukprn], [AcademicYear], [CollectionPeriod], [IlrSubmissionDateTime])
+CREATE INDEX [IX_DataLockEvent_Submission] ON [Payments2].[DataLockEvent] ([Ukprn], [LearnerUln], [LearningAimReference], [LearningStartDate])
 GO
+
+CREATE NONCLUSTERED INDEX [IX_DataLockEvent_RemoveSubmission] ON [Payments2].[DataLockEvent] ([AcademicYear], [Ukprn], [CollectionPeriod])

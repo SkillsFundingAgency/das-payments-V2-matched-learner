@@ -32,6 +32,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
         public async Task Import(ImportMatchedLearnerData importMatchedLearnerData, List<DataLockEventModel> dataLockEvents)
         {
+            _logger.LogInformation($"Started MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}");
+
             var collectionPeriods = new List<byte> { importMatchedLearnerData.CollectionPeriod };
 
             if (importMatchedLearnerData.CollectionPeriod != 1)

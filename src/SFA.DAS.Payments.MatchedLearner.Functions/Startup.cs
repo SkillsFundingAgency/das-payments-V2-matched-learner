@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
+using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 

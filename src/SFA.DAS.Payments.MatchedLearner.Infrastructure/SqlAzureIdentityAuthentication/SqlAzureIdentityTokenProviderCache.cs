@@ -12,7 +12,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
         private readonly ISqlAzureIdentityTokenProvider _inner;
         private readonly IMemoryCache _cache;
         private readonly ILogger<SqlAzureIdentityTokenProviderCache> _logger;
-
+        
         public SqlAzureIdentityTokenProviderCache(
             ISqlAzureIdentityTokenProvider inner,
             IMemoryCache cache,
@@ -31,7 +31,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.SqlAzureIdentityAuthent
 
                 var token = await _inner.GetAccessTokenAsync(cancellationToken);
 
-                cacheEntry.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddHours(1));
+                cacheEntry.SetAbsoluteExpiration(DateTimeOffset.UtcNow.AddMinutes(50));
 
                 _logger.LogInformation("Caching SQL Access Token for an hour");
 

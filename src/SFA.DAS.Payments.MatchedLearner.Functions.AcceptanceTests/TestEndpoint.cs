@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
-using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests

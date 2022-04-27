@@ -27,7 +27,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var options = new DbContextOptionsBuilder()
-                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
                     .Options;
 
                 return new PaymentsDataContext(options);
@@ -44,12 +44,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
             services.Decorate<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProviderCache>();
 
-            services.AddSingleton(provider => new SqlAzureIdentityAuthenticationDbConnectionInterceptor(provider.GetService<ISqlAzureIdentityTokenProvider>(), applicationSettings.ConnectionNeedsAccessToken));
+            services.AddSingleton(provider => new SqlAzureIdentityAuthenticationDbConnectionInterceptor(provider.GetService<ILogger<SqlAzureIdentityAuthenticationDbConnectionInterceptor>>(), provider.GetService<ISqlAzureIdentityTokenProvider>(), applicationSettings.ConnectionNeedsAccessToken));
 
             services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
@@ -58,7 +58,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(540))
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
@@ -101,23 +101,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
         {
             var nLogConfiguration = new NLogConfiguration();
 
-            serviceCollection.AddLogging(options =>
+            serviceCollection.AddLogging(options => //NOSONAR
             {
-                options.AddFilter("SFA.DAS", LogLevel.Debug); // this is because all logging is filtered out by default
-                options.AddFilter("Microsoft.AspNetCore.*", LogLevel.Warning);
-                options.AddFilter("Host.*", LogLevel.Warning);
-                options.AddFilter("Microsoft.Azure.WebJobs.Hosting.*", LogLevel.Warning);
-                options.SetMinimumLevel(LogLevel.Trace);
+                options.AddFilter("SFA.DAS", LogLevel.Debug); //NOSONAR this is because all logging is filtered out by default
+                options.AddFilter("Microsoft.AspNetCore.*", LogLevel.Warning); //NOSONAR
+                options.AddFilter("Host.*", LogLevel.Warning); //NOSONAR
+                options.AddFilter("Microsoft.Azure.WebJobs.Hosting.*", LogLevel.Warning); //NOSONAR
+                options.SetMinimumLevel(LogLevel.Trace); //NOSONAR
 
-                options.AddNLog(new NLogProviderOptions
+                options.AddNLog(new NLogProviderOptions //NOSONAR
                 {
-                    CaptureMessageTemplates = true,
-                    CaptureMessageProperties = true
-                });
-                options.AddConsole();
+                    CaptureMessageTemplates = true, //NOSONAR
+                    CaptureMessageProperties = true //NOSONAR
+                }); //NOSONAR
+                options.AddConsole(); //NOSONAR
 
-                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings);
-            });
+                nLogConfiguration.ConfigureNLog($"sfa-das-payments-matchedlearner-{serviceNamePostFix}", applicationSettings.IsDevelopment); //NOSONAR
+            });//NOSONAR
         }
 
         public static ApplicationSettings AddApplicationSettings(this IServiceCollection services, IConfiguration configuration)
