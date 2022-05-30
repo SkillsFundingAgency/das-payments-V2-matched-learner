@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
+using SFA.DAS.Payments.MatchedLearner.Data;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 
@@ -11,23 +12,25 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 {
     public interface IMatchedLearnerDataImportService
     {
-        Task Import(ImportMatchedLearnerData importMatchedLearnerData);
+        Task Import(ImportMatchedLearnerData importMatchedLearnerData, List<DataLockEventModel> dataLockEvents);
     }
 
     public class MatchedLearnerDataImportService : IMatchedLearnerDataImportService
     {
         private readonly IMatchedLearnerRepository _matchedLearnerRepository;
         private readonly IPaymentsRepository _paymentsRepository;
+        private readonly IMatchedLearnerDtoMapper _matchedLearnerDtoMapper;
         private readonly ILogger<MatchedLearnerDataImportService> _logger;
 
-        public MatchedLearnerDataImportService(IMatchedLearnerRepository matchedLearnerRepository, IPaymentsRepository paymentsRepository, ILogger<MatchedLearnerDataImportService> logger)
+        public MatchedLearnerDataImportService(IMatchedLearnerRepository matchedLearnerRepository, IPaymentsRepository paymentsRepository, IMatchedLearnerDtoMapper matchedLearnerDtoMapper, ILogger<MatchedLearnerDataImportService> logger)
         {
             _matchedLearnerRepository = matchedLearnerRepository ?? throw new ArgumentNullException(nameof(matchedLearnerRepository));
             _paymentsRepository = paymentsRepository ?? throw new ArgumentNullException(nameof(paymentsRepository));
+            _matchedLearnerDtoMapper = matchedLearnerDtoMapper ?? throw new ArgumentNullException(nameof(matchedLearnerDtoMapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task Import(ImportMatchedLearnerData importMatchedLearnerData)
+        public async Task Import(ImportMatchedLearnerData importMatchedLearnerData, List<DataLockEventModel> dataLockEvents)
         {
             _logger.LogInformation($"Started MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}");
 
@@ -40,47 +43,49 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
 
             try
             {
-                await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
+                var apprenticeshipIds =
+                    dataLockEvents.SelectMany(d => d.PayablePeriods).Select(a => a.ApprenticeshipId ?? 0).Union(
+                    dataLockEvents.SelectMany(d => d.NonPayablePeriods)
+                        .SelectMany(d => d.Failures).Select(f => f.ApprenticeshipId ?? 0))
+                    .Distinct()
+                    .ToList();
+
+                var apprenticeshipDetails = new List<ApprenticeshipModel>();
+                if (apprenticeshipIds.Any())
+                {
+                    apprenticeshipDetails = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
+                }
+
+                await _matchedLearnerRepository.BeginTransactionAsync();
 
                 await _matchedLearnerRepository.RemovePreviousSubmissionsData(importMatchedLearnerData.Ukprn, importMatchedLearnerData.AcademicYear, collectionPeriods);
 
-                var dataLockEvents = await _paymentsRepository.GetDataLockEvents(importMatchedLearnerData);
 
-                var apprenticeshipIds = dataLockEvents
-                    .SelectMany(dle => dle.PayablePeriods)
-                    .Select(dlepp => dlepp.ApprenticeshipId ?? 0)
-                    .Union(dataLockEvents.SelectMany(dle => dle.NonPayablePeriods).SelectMany(dlenpp => dlenpp.Failures)
-                        .Select(dlenppf => dlenppf.ApprenticeshipId ?? 0))
-                    .ToList();
+                var trainings = _matchedLearnerDtoMapper.MapToModel(dataLockEvents, apprenticeshipDetails);
 
-                var apprenticeships = await _paymentsRepository.GetApprenticeships(apprenticeshipIds);
 
-                await _matchedLearnerRepository.RemoveApprenticeships(apprenticeshipIds);
-
-                await _matchedLearnerRepository.StoreApprenticeships(apprenticeships, CancellationToken.None);
-
-                await _matchedLearnerRepository.StoreDataLocks(dataLockEvents, CancellationToken.None);
-
-                await _matchedLearnerRepository.SaveSubmissionJob(new SubmissionJobModel
+                try
                 {
-                    CollectionPeriod = importMatchedLearnerData.CollectionPeriod,
-                    DcJobId = importMatchedLearnerData.JobId,
-                    Ukprn = importMatchedLearnerData.Ukprn,
-                    AcademicYear = importMatchedLearnerData.AcademicYear,
-                    IlrSubmissionDateTime = importMatchedLearnerData.IlrSubmissionDateTime,
-                    EventTime = importMatchedLearnerData.EventTime
-                });
+                    await _matchedLearnerRepository.SaveTrainings(trainings.Clone());
+                }
+                catch (Exception e)
+                {
+                    if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
 
-                await _matchedLearnerRepository.CommitTransactionAsync(CancellationToken.None);
+                    _logger.LogWarning($"Batch contained a duplicate DataLock.  Will store each individually and discard duplicate. Inner exception {e}");
 
-                _logger.LogInformation($"Finished MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}");
+                    await _matchedLearnerRepository.SaveTrainingsIndividually(trainings);
+                }
+
+                await _matchedLearnerRepository.CommitTransactionAsync();
             }
-            catch (Exception exception)
+            catch(Exception exception)
             {
-                _logger.LogError($"Error in MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}, Inner Exception {exception}");
+                await _matchedLearnerRepository.RollbackTransactionAsync();
 
-               await _matchedLearnerRepository.RollbackTransactionAsync(CancellationToken.None);
-               throw;
+                _logger.LogError(exception,$"Error Importing Training Data. JobId: {importMatchedLearnerData.JobId}, AcademicYear: {importMatchedLearnerData.AcademicYear}, CollectionPeriod: {importMatchedLearnerData.CollectionPeriod}, Inner Exception {exception}");
+
+                throw;
             }
         }
     }

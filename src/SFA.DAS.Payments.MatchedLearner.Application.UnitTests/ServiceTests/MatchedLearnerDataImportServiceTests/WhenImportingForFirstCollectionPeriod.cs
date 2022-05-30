@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 
@@ -11,12 +12,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
     [TestFixture]
     public class WhenImportingForFirstCollectionPeriod
     {
+        private ImportMatchedLearnerData _importMatchedLearnerData;
+        private MatchedLearnerDataImportService _sut;
+        
         private Mock<IMatchedLearnerRepository> _mockMatchedLearnerRepository;
         private Mock<IPaymentsRepository> _mockPaymentsRepository;
         private Mock<ILogger<MatchedLearnerDataImportService>> _mockLogger;
-
-        private ImportMatchedLearnerData _importMatchedLearnerData;
-        private MatchedLearnerDataImportService _sut;
 
         [SetUp]
         public async Task SetUp()
@@ -39,9 +40,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
             _mockPaymentsRepository.Setup(x => x.GetApprenticeships(It.IsAny<List<long>>()))
                 .ReturnsAsync(new List<ApprenticeshipModel>());
 
-            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, _mockLogger.Object);
+            _sut = new MatchedLearnerDataImportService(_mockMatchedLearnerRepository.Object, _mockPaymentsRepository.Object, new MatchedLearnerDtoMapper(), _mockLogger.Object);
 
-            await _sut.Import(_importMatchedLearnerData);
+            await _sut.Import(_importMatchedLearnerData, new List<DataLockEventModel>());
         }
 
         [Test]

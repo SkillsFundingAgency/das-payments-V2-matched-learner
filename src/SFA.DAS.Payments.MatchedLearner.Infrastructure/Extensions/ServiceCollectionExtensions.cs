@@ -71,7 +71,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             var conventions = endpointConfiguration.Conventions();
 
             conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
-            conventions.DefiningCommandsAs(t => typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
+            conventions.DefiningCommandsAs(t => typeof(MigrateProviderMatchedLearnerData).IsAssignableFrom(t) || typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
 
             endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
             endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
@@ -125,6 +125,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             var applicationSettings = configuration
                 .GetSection(ApplicationSettingsKeys.MatchedLearnerConfigKey)
                 .Get<ApplicationSettings>();
+
+            applicationSettings.UseV1Api = configuration.GetValue<bool>("UseV1Api");
+            applicationSettings.AppInsightsInstrumentationKey = configuration.GetValue<string>("APPINSIGHTS_INSTRUMENTATIONKEY");
 
             if (applicationSettings == null)
                 throw new InvalidOperationException("invalid Configuration, unable find 'MatchedLearner' Configuration section");

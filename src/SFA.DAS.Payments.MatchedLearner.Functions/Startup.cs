@@ -36,7 +36,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
             var managementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
 
             EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
-
+            EnsureQueueAndSubscription(managementClient, applicationSettings.MigrationQueue);
             EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 

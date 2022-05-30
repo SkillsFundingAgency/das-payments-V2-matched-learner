@@ -23,6 +23,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 { "PaymentsServiceBusConnectionString", TestConfiguration.TestApplicationSettings.PaymentsServiceBusConnectionString },
                 { "MatchedLearnerQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerQueue },
                 { "MatchedLearnerImportQueue", TestConfiguration.TestApplicationSettings.MatchedLearnerImportQueue },
+                { "MigrationQueue", TestConfiguration.TestApplicationSettings.MigrationQueue },
             };
 
             var directory = Directory.GetCurrentDirectory();
@@ -39,16 +40,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 EnvironmentName = "Development"
             };
 
-            _host = new HostBuilder()
-                .ConfigureAppConfiguration(a =>
-                {
-                    a.AddInMemoryCollection(appConfig);
-                })
-                .ConfigureWebJobs(builder => builder
-                    .AddAzureStorageCoreServices()
-                    .AddServiceBus()
-                    .UseWebJobsStartup(typeof(Startup), context, NullLoggerFactory.Instance))
-                .Build();
+            try
+            {
+                _host = new HostBuilder()
+                    .ConfigureAppConfiguration(a =>
+                    {
+                        a.AddInMemoryCollection(appConfig);
+                    })
+                    .ConfigureWebJobs(builder => builder
+                        .AddAzureStorageCoreServices()
+                        .AddServiceBus()
+                        .AddHttp()
+                        .UseWebJobsStartup(typeof(Startup), context, NullLoggerFactory.Instance))
+                    .Build();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
         }
 
         public async Task StartHost()

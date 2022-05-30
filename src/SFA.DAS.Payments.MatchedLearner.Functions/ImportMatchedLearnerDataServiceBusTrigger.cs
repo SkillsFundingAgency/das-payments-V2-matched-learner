@@ -10,12 +10,12 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 {
     public class ImportMatchedLearnerDataServiceBusTrigger
     {
-        private readonly IMatchedLearnerDataImportService _matchedLearnerDataImportService;
+        private readonly IMatchedLearnerDataImporter _matchedLearnerDataImporter;
         private readonly ILogger<ImportMatchedLearnerDataServiceBusTrigger> _logger;
 
-        public ImportMatchedLearnerDataServiceBusTrigger(IMatchedLearnerDataImportService matchedLearnerDataImportService, ILogger<ImportMatchedLearnerDataServiceBusTrigger> logger)
+        public ImportMatchedLearnerDataServiceBusTrigger(IMatchedLearnerDataImporter matchedLearnerDataImporter, ILogger<ImportMatchedLearnerDataServiceBusTrigger> logger)
         {
-            _matchedLearnerDataImportService = matchedLearnerDataImportService ?? throw new ArgumentNullException(nameof(matchedLearnerDataImportService));
+            _matchedLearnerDataImporter = matchedLearnerDataImporter ?? throw new ArgumentNullException(nameof(matchedLearnerDataImporter));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -28,11 +28,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
                 if (importMatchedLearnerData == null) throw new InvalidOperationException("Error parsing ImportMatchedLearnerData message");
 
-                await _matchedLearnerDataImportService.Import(importMatchedLearnerData);
+                await _matchedLearnerDataImporter.Import(importMatchedLearnerData);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                _logger.LogError(e, $"Error Handling ImportMatchedLearnerData, Inner Exception {e}");
+                _logger.LogError(exception, $"Error Handling ImportMatchedLearnerData, Inner Exception {exception}");
                 throw;
             }
         }

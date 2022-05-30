@@ -11,12 +11,12 @@ using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
 
-namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.MatchedLearnerRepositoryTests
+namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.LegacyMatchedLearnerRepositoryTests
 {
     [TestFixture]
     public class WhenGettingDataLockEventsAcrossMultipleAcademicYears
     {
-        private IMatchedLearnerRepository _sut;
+        private ILegacyMatchedLearnerRepository _sut;
         private MatchedLearnerDataContext _dataDataContext;
         private DataLockEventModel _dataLockEventAy1;
         private DataLockEventPayablePeriodModel _dataLockEventPayablePeriodAy1;
@@ -55,7 +55,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
 
             var matchLearnerContextFactory = new MatchedLearnerDataContextFactory(bsContextOption);
 
-            _sut = new MatchedLearnerRepository(_dataDataContext, matchLearnerContextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
+            _sut = new LegacyMatchedLearnerRepository(_dataDataContext, matchLearnerContextFactory, fixture.Create<Mock<ILogger<MatchedLearnerRepository>>>().Object);
         }
 
         [TearDown]
@@ -122,6 +122,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventAy1.CollectionPeriod = 14;
             _dataLockEventAy1.AcademicYear = _academicYear1;
 
+            _dataLockEventAy1.PriceEpisodes.Clear();
+            _dataLockEventAy1.NonPayablePeriods.Clear();
+            _dataLockEventAy1.PayablePeriods.Clear();
+
             _dataDataContext.DataLockEvent.Add(_dataLockEventAy1);
 
 
@@ -130,6 +134,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEventAy2.LearningAimReference = "ZPROG001";
             _dataLockEventAy2.CollectionPeriod = 1;
             _dataLockEventAy2.AcademicYear = _academicYear2;
+
+            _dataLockEventAy2.PriceEpisodes.Clear();
+            _dataLockEventAy2.NonPayablePeriods.Clear();
+            _dataLockEventAy2.PayablePeriods.Clear();
 
             _dataDataContext.DataLockEvent.Add(_dataLockEventAy2);
 

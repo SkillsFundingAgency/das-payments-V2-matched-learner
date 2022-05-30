@@ -99,6 +99,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseHsts();
 
             app.UseRouting();
 

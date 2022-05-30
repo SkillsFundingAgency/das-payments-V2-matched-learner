@@ -105,6 +105,152 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 			await ClearMatchedLearnerDataLockEvent(ukprn, uln);
 		}
 
+		public async Task<long> AddMatchedLearnerTrainings(long ukprn, long uln, byte collectionPeriod, short academicYear)
+		{
+			var dataLockEventId = Guid.NewGuid();
+
+			var apprenticeshipId = ukprn + uln;
+
+			var training = new TrainingModel
+			{
+				EventId = dataLockEventId,
+				EventTime = DateTimeOffset.Now,
+				IlrSubmissionWindowPeriod = collectionPeriod,
+				AcademicYear = academicYear,
+				Ukprn = ukprn,
+				Uln = uln,
+				Reference = "ZPROG001",
+				ProgrammeType = 100,
+				StandardCode = 200,
+				FrameworkCode = 300,
+				PathwayCode = 400,
+				FundingLineType = "funding",
+				CompletionStatus = 0,
+				IlrSubmissionDate = new DateTime(2020, 10, 10),
+				StartDate = new DateTime(2020, 10, 09),
+				PriceEpisodes = new List<PriceEpisodeModel>
+				{
+					new PriceEpisodeModel
+					{
+						Identifier = "25-104-01/08/2020",
+						AgreedPrice = 3000,
+						StartDate = new DateTime(2020, 10, 07),
+						TotalNegotiatedPriceStartDate = new DateTime(2021, 01, 01),
+						PlannedEndDate = new DateTime(2021, 10, 11),
+						ActualEndDate = new DateTime(2021, 10, 12),
+						AcademicYear = academicYear,
+						CollectionPeriod = collectionPeriod,
+						CompletionAmount = 550,
+						InstalmentAmount = 50,
+						NumberOfInstalments = 12,
+						Periods = new List<PeriodModel>
+						{
+							new PeriodModel
+							{
+								Period = 1,
+								Amount = 100,
+								IsPayable = true,
+								TransactionType = 1,
+
+								ApprenticeshipId = apprenticeshipId,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+							},
+							new PeriodModel
+							{
+								Period = 2,
+								Amount = 200,
+								IsPayable = true,
+								TransactionType = 1,
+
+								ApprenticeshipId = apprenticeshipId,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+							},
+							new PeriodModel
+							{
+								Period = 3,
+								Amount = 300,
+								IsPayable = true,
+								TransactionType = 1,
+
+								ApprenticeshipId = apprenticeshipId,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+							},
+							new PeriodModel
+							{
+								Period = 3,
+								Amount = 400,
+								IsPayable = false,
+								TransactionType = 1,
+
+								ApprenticeshipId = 9876500,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+								FailedDataLock4 = true,
+								FailedDataLock5 = true,
+							},
+							new PeriodModel
+							{
+								Period = 4,
+								Amount = 500,
+								IsPayable = false,
+								TransactionType = 1,
+
+								ApprenticeshipId = apprenticeshipId,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+								FailedDataLock1 = true,
+							},
+							new PeriodModel
+							{
+								Period = 5,
+								Amount = 600,
+								IsPayable = false,
+								TransactionType = 1,
+
+								ApprenticeshipId = apprenticeshipId,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+								FailedDataLock2 = true,
+							},
+							new PeriodModel
+							{
+								Period = 6,
+								Amount = 600,
+								IsPayable = false,
+								TransactionType = 1,
+
+								ApprenticeshipId = apprenticeshipId,
+								AccountId = 1000,
+								TransferSenderAccountId = 500,
+								ApprenticeshipEmployerType = 3,
+								FailedDataLock3 = true,
+							}
+						}
+					}
+				}
+			};
+			
+			await _matchedLearnerDataContext.Trainings.AddAsync(training);
+			
+			await _matchedLearnerDataContext.SaveChangesAsync();
+
+			return training.Id;
+		}
+
+		public async Task ClearMatchedLearnerTrainings(long ukprn, long uln)
+		{
+			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync("DELETE dbo.Training WHERE Uln = @uln AND Ukprn = @ukprn;", new SqlParameter("ukprn", ukprn), new SqlParameter("uln", uln));
+		}
+
 		const string ClearDataLockEventSql = @"
             DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
             DELETE Payments2.Apprenticeship WHERE id = @apprenticeshipId;
@@ -171,6 +317,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 				.ThenInclude(npp => npp.Failures)
 				.Include(d => d.PayablePeriods)
 				.Include(d => d.PriceEpisodes)
+				.Where(d => d.Ukprn == ukprn)
+				.ToListAsync();
+		}
+
+		public async Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn)
+		{
+			return await _matchedLearnerDataContext.Trainings
+				.Include(d => d.PriceEpisodes)
+				.ThenInclude(d => d.Periods)
 				.Where(d => d.Ukprn == ukprn)
 				.ToListAsync();
 		}

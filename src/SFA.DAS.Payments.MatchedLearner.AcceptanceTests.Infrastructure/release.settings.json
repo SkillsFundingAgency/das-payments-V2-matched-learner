@@ -18,6 +18,7 @@
 
         "PaymentsConnectionString": "__PaymentsAcceptanceTestConnectionString__",
         "MatchedLearnerConnectionString": "__MatchedLearnerAcceptanceTestConnectionString__",
-        "ConnectionNeedsAccessToken": "__ConnectionNeedsAccessToken__"
+        "ConnectionNeedsAccessToken": "__ConnectionNeedsAccessToken__",
+	    "MigrationQueue": "__MigrationQueue__"
     }
 }

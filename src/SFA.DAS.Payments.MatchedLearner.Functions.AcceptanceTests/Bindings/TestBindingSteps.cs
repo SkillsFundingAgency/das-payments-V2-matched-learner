@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using TechTalk.SpecFlow;
 
 namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
 {
     [Binding]
-    public class TestBindingSteps
+    [Scope(Feature = "SmokeTests")]
+    public class TestBindingSteps : TestBindingBase
     {
         private readonly TestContext _testContext;
         private readonly long _ukprn;
         private readonly long _learnerUln;
         private readonly long _apprenticeshipId;
-        private readonly TestApplicationSettings _settings;
 
         public TestBindingSteps(TestContext testContext)
         {
@@ -29,13 +26,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
             _apprenticeshipId = _ukprn + _learnerUln;
 
             _testContext = testContext;
-            _settings = TestConfiguration.TestApplicationSettings;
         }
 
         [Given("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
         [When("A Submission Job Succeeded for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task GivenASuccessfulSubmissionIsCompletedForPeriod(byte collectionPeriod, short academicYear)
         {
+            await _testContext.TestRepository.ClearMatchedLearnerTrainings(_ukprn, _learnerUln);
             await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
             await _testContext.TestRepository.AddDataLockEvent(_ukprn, _learnerUln, collectionPeriod, academicYear, false);
         }
@@ -57,59 +54,41 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Given("the matched Learners are only Imported for CollectionPeriod (.*) and AcademicYear (.*)")]
         public async Task ThenTheMatchedLearnersAreOnlyImportedForCollectionPeriodAndAcademicYear(byte collectionPeriod, short academicYear)
         {
-            var timer = new Stopwatch();
+            var dataLockEventsForPeriod = new List<DataLockEventModel>();
 
-            timer.Start();
-
-            var dataLockEvents = new List<DataLockEventModel>();
-
-            while (!dataLockEvents.Any() && timer.Elapsed < _settings.TimeToWait)
+            await WaitForIt(async () =>
             {
-                dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
+                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
 
-                if (!dataLockEvents.Any())
-                    Thread.Sleep(_settings.TimeToPause);
-                else
-                    Thread.Sleep(_settings.TimeToWait - timer.Elapsed);
-            }
+                dataLockEventsForPeriod = dataLockEvents
+                    .Where(x => x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod)
+                    .ToList();
 
-            var dataLockEventsForPeriod = dataLockEvents.Where(x =>
-                x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod).ToList();
+                return dataLockEvents.Any();
 
-            if (dataLockEventsForPeriod.Count != 1)
-            {
-                Console.WriteLine($"Failed to Find matching dataLockEvents For Period {collectionPeriod} : {academicYear}, ukprn {_ukprn}, learnerUln {_learnerUln}");
-            }
+            }, $"Failed to Find matching dataLockEvents For Period {collectionPeriod} : {academicYear}, ukprn {_ukprn}, learnerUln {_learnerUln}");
 
             dataLockEventsForPeriod.Count.Should().Be(1);
 
             AssertSingleDataLockEventForPeriod(dataLockEventsForPeriod.First(), collectionPeriod, academicYear);
 
             await _testContext.TestRepository.ClearDataLockEvent(_ukprn, _learnerUln);
-
-            timer.Stop();
         }
 
         [Then("the existing matched Learners are NOT deleted")]
         public async Task ThenTheExistingMatchedLearnersAreNotDeleted()
         {
-            var timer = new Stopwatch();
-
-            timer.Start();
-
             IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
-            var first = true;
 
-            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _settings.TimeToWaitUnexpected))
+            await WaitForUnexpected(async () =>
             {
-                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
-                existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
+                existingMatchedLearnerDataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
 
-                Thread.Sleep(_settings.TimeToPause);
-                first = false;
-            }
+                existingMatchedLearnerDataLockEvents = existingMatchedLearnerDataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId);
 
-            timer.Stop();
+                return existingMatchedLearnerDataLockEvents.Any();
+
+            }, $"Expected matched Learner dataLockEvents to be NOT deleted for Ukprn: {_ukprn}");
 
             existingMatchedLearnerDataLockEvents.Should().NotBeEmpty();
         }
@@ -117,24 +96,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests.Bindings
         [Then("the existing matched Learners are deleted")]
         public async Task ThenTheExistingMatchedLearnersAreDeleted()
         {
-            var timer = new Stopwatch();
-
-            timer.Start();
-
             IEnumerable<DataLockEventModel> existingMatchedLearnerDataLockEvents = new List<DataLockEventModel>();
-            var first = true;
 
-            while (first || (existingMatchedLearnerDataLockEvents.Any() && timer.Elapsed < _settings.TimeToWait))
+            await WaitForIt(async () =>
             {
-                var dataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
-                existingMatchedLearnerDataLockEvents = dataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId).ToList();
+                existingMatchedLearnerDataLockEvents = await _testContext.TestRepository.GetMatchedLearnerDataLockEvents(_ukprn);
 
-                if (existingMatchedLearnerDataLockEvents.Any())
-                    Thread.Sleep(_settings.TimeToPause);
-                first = false;
-            }
+                existingMatchedLearnerDataLockEvents = existingMatchedLearnerDataLockEvents.Where(x => x.EventId == _testContext.ExistingMatchedLearnerDataLockId);
 
-            timer.Stop();
+                return !existingMatchedLearnerDataLockEvents.Any();
+            }, $"Expected matched Learner dataLockEvents to be deleted for Ukprn: {_ukprn}");
 
             existingMatchedLearnerDataLockEvents.Should().BeEmpty();
         }

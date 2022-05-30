@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -20,7 +22,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
         private static HttpClient _client = new HttpClient();
         private readonly string _url;
 
-        public TestClient()
+        public TestClient(bool useV1Api)
         {
             _url = TestConfiguration.TestAzureAdClientSettings.ApiBaseUrl;
             if (!string.IsNullOrEmpty(_url))
@@ -39,11 +41,14 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             var factory = new WebApplicationFactory<Startup>().WithWebHostBuilder(builder =>
             {
+                var path = Path.GetDirectoryName(typeof(Startup).Assembly.Location);
+                builder.UseContentRoot(path);
                 builder.ConfigureAppConfiguration((context, configurationBuilder) =>
                 {
                     configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
                     {
-                        {"EnvironmentName", "Development"},
+                        { "EnvironmentName", "Development" },
+                        { "UseV1Api", useV1Api ? "True" : "False" },
                     });
                 });
             });
@@ -82,7 +87,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             var authority = $"https://login.microsoftonline.com/{TestConfiguration.TestAzureAdClientSettings.Tenant}";
             var clientCredential = new ClientCredential(_configuration.ClientId, _configuration.ClientSecret);
             var context = new AuthenticationContext(authority, true);
-            var result = await context.AcquireTokenAsync(_configuration.IdentifierUri, clientCredential).ConfigureAwait(false);
+            var result = await context.AcquireTokenAsync(_configuration.IdentifierUri, clientCredential);
 
             return result.AccessToken;
         }

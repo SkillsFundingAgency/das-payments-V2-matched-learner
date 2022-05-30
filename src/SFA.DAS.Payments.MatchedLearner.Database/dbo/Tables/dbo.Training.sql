@@ -1,10 +1,10 @@
 ﻿CREATE TABLE [dbo].[Training]
 (
-	[Id] BIGINT NOT NULL CONSTRAINT PK_Training PRIMARY KEY CLUSTERED, 
+	[Id] BIGINT NOT NULL IDENTITY(1,1) CONSTRAINT PK_Training PRIMARY KEY CLUSTERED, 
 	[EventTime] DATETIMEOFFSET NOT NULL,
 	[EventId] UNIQUEIDENTIFIER NOT NULL,
 	[IlrSubmissionDate] DATETIME2 NOT NULL, 
-    [IlrSubmissionWindowPeriod] TINYINT NOT NULL,
+	[IlrSubmissionWindowPeriod] TINYINT NOT NULL,
 	[AcademicYear] SMALLINT NOT NULL,
 	[Ukprn] BIGINT NOT NULL,
 	[Uln] BIGINT NOT NULL,
@@ -18,3 +18,7 @@
 	[CompletionStatus] INT NULL,
 	[CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_Training__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
 )
+GO
+
+Create Unique Index UX_Training_LogicalDuplicates on dbo.Training([IlrSubmissionWindowPeriod], [AcademicYear], [Ukprn], [Uln], [Reference], [ProgrammeType], [StandardCode], [FrameworkCode], [PathwayCode], [FundingLineType], [StartDate], [CompletionStatus])
+GO

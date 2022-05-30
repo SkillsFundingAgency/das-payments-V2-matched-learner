@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[PriceEpisode]
 (
-	[Id] BIGINT NOT NULL CONSTRAINT PK_PriceEpisode PRIMARY KEY CLUSTERED, 
-    [TrainingId] BIGINT NOT NULL CONSTRAINT FK_PriceEpisode__Training FOREIGN KEY REFERENCES [dbo].[Training] (Id),
+    [Id] BIGINT NOT NULL IDENTITY(1,1) CONSTRAINT PK_PriceEpisode PRIMARY KEY CLUSTERED, 
+    [TrainingId] BIGINT NOT NULL CONSTRAINT FK_PriceEpisode__Training FOREIGN KEY REFERENCES [dbo].[Training] (Id) ON DELETE CASCADE,
     [Identifier] NVARCHAR(50) NOT NULL, 
     [AcademicYear] SMALLINT NOT NULL, 
     [CollectionPeriod] TINYINT NOT NULL, 
@@ -15,3 +15,4 @@
     [TotalNegotiatedPriceStartDate] DATETIME2 NULL,
     [CreationDate]  DATETIMEOFFSET NOT NULL CONSTRAINT DF_PriceEpisode__CreationDate DEFAULT (SYSDATETIMEOFFSET()),
 )
+GO

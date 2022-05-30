@@ -104,6 +104,9 @@
         "matchedLearnerQueue": {
             "type": "string"
         },
+        "MigrationQueue": {
+            "type": "string"
+        },
         "paymentsServiceBusConnectionString": {
             "type": "string"
         },
@@ -403,6 +406,10 @@
                                 {
                                     "name": "MatchedLearnerQueue",
                                     "value": "[parameters('matchedLearnerQueue')]"
+                                },
+                                {
+                                    "name": "MigrationQueue",
+                                    "value": "[parameters('MigrationQueue')]"
                                 },
                                 {
                                     "name": "PaymentsServiceBusConnectionString",

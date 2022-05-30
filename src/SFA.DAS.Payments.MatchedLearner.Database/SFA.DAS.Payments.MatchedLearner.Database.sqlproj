@@ -78,6 +78,7 @@
     <Build Include="dbo\Tables\dbo.Training.sql" />
     <Build Include="dbo\Tables\dbo.PriceEpisode.sql" />
     <Build Include="dbo\Tables\dbo.Period.sql" />
+    <Build Include="Payments2\Tables\Payments2.MigrationRunAttempt.sql" />
     <Build Include="dbo\Tables\dbo.SubmissionJob.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -99,5 +100,8 @@
       <DefaultValue>From Local Machine</DefaultValue>
       <Value>$(SqlCmdVar__3)</Value>
     </SqlCmdVariable>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="SFA.DAS.Payments.MatchedLearner.Database.refactorlog" />
   </ItemGroup>
 </Project>

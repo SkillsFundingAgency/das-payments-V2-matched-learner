@@ -7,10 +7,10 @@ using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Types;
 
-namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
+namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.LegacyMatchedLearnerDtoMapperTests
 {
     [TestFixture]
-    public class MapTests
+    public class LegacyMatchedLearnerDtoMapperTest
     {
         private MatchedLearnerDto _actual;
 
@@ -141,7 +141,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                 }
             };
 
-            var sut = new MatchedLearnerDtoMapper();
+            var sut = new LegacyMatchedLearnerDtoMapper();
 
             _actual = sut.Map(testInput);
         }

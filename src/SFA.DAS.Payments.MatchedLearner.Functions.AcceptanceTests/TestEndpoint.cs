@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
 
             var endpointConfiguration = CreateEndpointConfiguration();
 
-            _endpointInstance = await Endpoint.Start(endpointConfiguration).ConfigureAwait(false);
+            _endpointInstance = await Endpoint.Start(endpointConfiguration);
 
             return _endpointInstance;
         }
@@ -41,6 +41,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
             var conventions = endpointConfiguration.Conventions();
 
             conventions.DefiningEventsAs(t => typeof(SubmissionJobSucceeded).IsAssignableFrom(t));
+            conventions.DefiningCommandsAs(t => typeof(MigrateProviderMatchedLearnerData).IsAssignableFrom(t) || typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
 
             var persistence = endpointConfiguration.UsePersistence<AzureStoragePersistence>();
 
@@ -86,6 +87,17 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 JobId = 123,
                 IlrSubmissionDateTime = DateTime.Now
             });
+        }
+        
+        public async Task PublishProviderLevelMigrationRequest(long ukprn)
+        {
+            var options = new SendOptions();
+            options.SetDestination(_testConfiguration.MigrationQueue);
+            await _endpointInstance.Send(new MigrateProviderMatchedLearnerData
+            {
+                Ukprn = ukprn,
+                MigrationRunId = Guid.NewGuid(),
+            }, options);
         }
     }
 }

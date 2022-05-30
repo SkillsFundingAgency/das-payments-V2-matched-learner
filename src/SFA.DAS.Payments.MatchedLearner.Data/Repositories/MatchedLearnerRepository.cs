@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -16,15 +15,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 {
     public interface IMatchedLearnerRepository
     {
-        Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
+        Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln);
+        Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn);
+        Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds);
         Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
-        Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
-        Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
-        Task RemoveApprenticeships(List<long> apprenticeshipIds);
-        Task BeginTransactionAsync(CancellationToken cancellationToken);
-        Task CommitTransactionAsync(CancellationToken cancellationToken);
-        Task RollbackTransactionAsync(CancellationToken cancellationToken);
-        Task SaveSubmissionJob(SubmissionJobModel latestSubmissionJob);
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+        Task SaveTrainingsIndividually(List<TrainingModel> trainings);
+        Task SaveTrainings(IList<TrainingModel> trainings);
+        Task SaveSubmissionJob(SubmissionJobModel submissionJob);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -41,239 +41,135 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+        public async Task BeginTransactionAsync()
         {
-            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            _transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
         }
 
-        public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+        public async Task CommitTransactionAsync()
         {
-            await _transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.CommitAsync();
         }
 
-        public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+        public async Task RollbackTransactionAsync()
         {
-            await _transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+            await _transaction.RollbackAsync();
         }
 
-        public async Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln)
+        public async Task<List<TrainingModel>> GetMatchedLearnerTrainings(long ukprn, long uln)
         {
-            var stopwatch = Stopwatch.StartNew();
+            return await _dataContext.Trainings
+                 .Include(t => t.PriceEpisodes)
+                 .ThenInclude(p => p.Periods)
+                 .Where(t => t.Ukprn == ukprn && t.Uln == uln)
+                 .ToListAsync();
+        }
 
-            var transactionTypes = new List<byte> { 1, 2, 3 };
-
-            var dataLockEvents = await _dataContext.DataLockEvent
-                .Where(x =>
-                    x.LearningAimReference == "ZPROG001" &&
-                    x.Ukprn == ukprn &&
-                    x.LearnerUln == uln)
-                .OrderBy(x => x.LearningStartDate)
+        public async Task<List<DataLockEventModel>> GetDataLockEventsForMigration(long ukprn)
+        {
+            return await _dataContext.DataLockEvent
+                .Include(d => d.NonPayablePeriods)
+                .ThenInclude(npp => npp.Failures)
+                .Include(d => d.PayablePeriods)
+                .Include(d => d.PriceEpisodes)
+                .Where(d => d.Ukprn == ukprn)
                 .ToListAsync();
+        }
 
-            if (dataLockEvents == null)
+        public async Task<List<ApprenticeshipModel>> GetApprenticeshipsForMigration(List<long> apprenticeshipIds)
+        {
+            var apprenticeshipModels = new List<ApprenticeshipModel>();
+
+            var apprenticeshipIdBatches = apprenticeshipIds.Batch(2000);
+
+            foreach (var batch in apprenticeshipIdBatches)
             {
-                stopwatch.Stop();
-                _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
-                return new MatchedLearnerDataLockInfo();
+                var apprenticeshipBatch = await _dataContext.Apprenticeship
+                    .Where(a => batch.Contains(a.Id))
+                    .ToListAsync();
+
+                apprenticeshipModels.AddRange(apprenticeshipBatch);
             }
 
-            _logger.LogInformation($"Started Getting DataLock Event Data from database for Uln: {uln}");
-
-            var eventIds = dataLockEvents.Select(d => d.EventId).ToList();
-
-            var dataLockEventPriceEpisodes = await _dataContext.DataLockEventPriceEpisode
-                .Where(d => eventIds.Contains(d.DataLockEventId) && d.PriceEpisodeIdentifier != null)
-                .OrderBy(p => p.StartDate)
-                .ThenBy(p => p.PriceEpisodeIdentifier)
-                .ToListAsync();
-
-            var dataLockEventPayablePeriods = await _dataContext.DataLockEventPayablePeriod
-                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                .OrderBy(p => p.DeliveryPeriod)
-                .ToListAsync();
-
-            var dataLockEventNonPayablePeriods = await _dataContext.DataLockEventNonPayablePeriod
-                .Where(d => eventIds.Contains(d.DataLockEventId) && transactionTypes.Contains(d.TransactionType) && d.PriceEpisodeIdentifier != null && d.Amount != 0)
-                .OrderBy(p => p.DeliveryPeriod)
-                .ToListAsync();
-
-            var dataLockEventNonPayablePeriodIds = dataLockEventNonPayablePeriods.Select(d => d.DataLockEventNonPayablePeriodId).ToList();
-
-            var dataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>();
-            if (dataLockEventNonPayablePeriodIds.Any())
-            {
-                dataLockEventNonPayablePeriodFailures = await _dataContext.DataLockEventNonPayablePeriodFailures
-                .Where(d => dataLockEventNonPayablePeriodIds.Contains(d.DataLockEventNonPayablePeriodId))
-                .ToListAsync();
-            }
-
-            var apprenticeshipIds = dataLockEventPayablePeriods.Select(d => d.ApprenticeshipId)
-                 .Union(dataLockEventNonPayablePeriodFailures.Select(d => d.ApprenticeshipId))
-                 .Distinct()
-                 .ToList();
-
-            var apprenticeshipDetails = new List<ApprenticeshipModel>();
-            if (apprenticeshipIds.Any())
-            {
-                apprenticeshipDetails = await _dataContext.Apprenticeship.Where(a => apprenticeshipIds.Contains(a.Id)).ToListAsync();
-            }
-
-            var result = new MatchedLearnerDataLockInfo
-            {
-                DataLockEvents = dataLockEvents,
-                DataLockEventPriceEpisodes = dataLockEventPriceEpisodes,
-                DataLockEventPayablePeriods = dataLockEventPayablePeriods,
-                DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods,
-                DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
-                Apprenticeships = apprenticeshipDetails
-            };
-
-            stopwatch.Stop();
-
-            _logger.LogInformation($"Finished Getting DataLock Event Data from database for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
-
-            return result;
+            return apprenticeshipModels;
         }
-
-
 
         public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
         {
-            await _dataContext.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
+            _logger.LogInformation($"Removed Previous Submissions Training Data. Ukprn: {ukprn}, AcademicYear: {academicYear}, CollectionPeriods: {string.Join(", ", collectionPeriod)} ");
+
+            var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
+            var sqlParamName = string.Join(", ", sqlParameters.Select(pn => pn.ParameterName));
+
+            sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
+            sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
+
+            await _dataContext.Database.ExecuteSqlRawAsync($"DELETE FROM dbo.Training WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND IlrSubmissionWindowPeriod IN ({ sqlParamName })", sqlParameters);
         }
 
-        public async Task RemoveApprenticeships(List<long> apprenticeshipIds)
+        public async Task SaveTrainings(IList<TrainingModel> trainings)
         {
-            var apprenticeshipBatches = apprenticeshipIds.Batch(2000);
+            _logger.LogInformation($"Saving Submissions Training Data in Bulk. TrainingCount {trainings.Count}");
 
-            foreach (var batch in apprenticeshipBatches)
-            {
-                await _dataContext.RemoveApprenticeships(batch);
-            }
+            var bulkConfig = new BulkConfig { SetOutputIdentity = true, PreserveInsertOrder = true, BulkCopyTimeout = 150, UseTempDB = true };
+
+            await _dataContext.BulkInsertAsync(trainings, bulkConfig.Clone());
+
+            var priceEpisodes = trainings
+                .SelectMany(training =>
+                {
+                    foreach (var priceEpisode in training.PriceEpisodes)
+                    {
+                        priceEpisode.TrainingId = training.Id;
+                    }
+                    return training.PriceEpisodes;
+                })
+                .ToList();
+
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig.Clone());
+
+            var periods = priceEpisodes
+                .SelectMany(priceEpisode =>
+                {
+                    foreach (var period in priceEpisode.Periods)
+                    {
+                        period.PriceEpisodeId = priceEpisode.Id;
+                    }
+                    return priceEpisode.Periods;
+                })
+                .ToList();
+
+            await _dataContext.BulkInsertAsync(periods, bulkConfig);
         }
 
-
-
-        public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
+        public async Task SaveTrainingsIndividually(List<TrainingModel> trainings)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            _logger.LogInformation($"Saving Submissions Training Data Individually. TrainingCount {trainings.Count}");
 
-            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task StoreApprenticeships(List<ApprenticeshipModel> models, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await SaveApprenticeships(models, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
-
-                _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
-
-                await SaveApprenticeshipsIndividually(models, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        public async Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await SaveDataLockEvents(models, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                if (!e.IsUniqueKeyConstraintException() && !e.IsDeadLockException()) throw;
-
-                _logger.LogInformation("Batch contained a duplicate DataLock.  Will store each individually and discard duplicate.");
-
-                await SaveDataLocksIndividually(models, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        private async Task SaveApprenticeshipsIndividually(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
-        {
             var mainContext = _retryDataContextFactory.Create();
 
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
+            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted);
 
-            foreach (var apprenticeship in apprenticeships)
+            foreach (var training in trainings)
             {
                 try
                 {
                     var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.Apprenticeship.AddAsync(apprenticeship, cancellationToken).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    if (!e.IsUniqueKeyConstraintException()) throw;
-
-                    _logger.LogInformation($"Discarding duplicate apprenticeship. Id: {apprenticeship.Id}, ukprn: {apprenticeship.Ukprn}");
-                }
-            }
-
-            await tx.CommitAsync(cancellationToken);
-        }
-
-        private async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
-        {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
-
-            var priceEpisodes = dataLockEvents
-                .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
-                .ToList();
-            var payablePeriods = dataLockEvents
-                .SelectMany(dataLockEvent => dataLockEvent.PayablePeriods)
-                .ToList();
-            var nonPayablePeriods = dataLockEvents
-                .SelectMany(dataLockEvent => dataLockEvent.NonPayablePeriods)
-                .ToList();
-            var failures = dataLockEvents
-                .SelectMany(dataLockEvent => dataLockEvent.NonPayablePeriods
-                .SelectMany(npp => npp.Failures))
-                .ToList();
-
-            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        private async Task SaveDataLocksIndividually(List<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
-        {
-            var mainContext = _retryDataContextFactory.Create();
-
-            await using var tx = await mainContext.Database.BeginTransactionAsync(IsolationLevel.ReadUncommitted, cancellationToken).ConfigureAwait(false);
-
-            foreach (var dataLockEvent in dataLockEvents)
-            {
-                try
-                {
-                    var retryDataContext = _retryDataContextFactory.Create(tx.GetDbTransaction());
-                    await retryDataContext.DataLockEvent.AddAsync(dataLockEvent, cancellationToken).ConfigureAwait(false);
-                    await retryDataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await retryDataContext.Trainings.AddAsync(training);
+                    await retryDataContext.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
                     if (e.IsUniqueKeyConstraintException())
                     {
-                        _logger.LogInformation($"Discarding duplicate DataLock event. Event Id: {dataLockEvent.EventId}, JobId: {dataLockEvent.JobId}, Learn ref: {dataLockEvent.LearnerReferenceNumber},  Event Type: {dataLockEvent.EventType}");
+                        _logger.LogInformation($"Discarding duplicate DataLock event. Event Id: {training.EventId}, Learn ref: {training.Uln}");
                         continue;
                     }
                     throw;
                 }
             }
 
-            await tx.CommitAsync(cancellationToken);
+            await tx.CommitAsync();
         }
 
         public async Task SaveSubmissionJob(SubmissionJobModel submissionJob)
