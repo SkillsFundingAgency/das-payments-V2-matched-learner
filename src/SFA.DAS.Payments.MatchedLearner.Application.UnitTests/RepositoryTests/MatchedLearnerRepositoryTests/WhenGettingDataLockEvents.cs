@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoFixture;
+﻿using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -11,6 +8,9 @@ using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.MatchedLearnerRepositoryTests
 {
@@ -156,7 +156,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         }
 
         [Test]
-        public async Task ThenRetrievesLatestSuccessfulJobsForProvider()
+        public async Task AndThereIsOnlyOneProviderSubmissionJob_ThenReturnsIt()
         {
             //Arrange
             AttachPriceEpisodeToDataLock();
@@ -171,6 +171,34 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             //Assert
             result.LatestProviderSubmissionJob.Should().NotBeNull();
             result.LatestProviderSubmissionJob.Should().Be(_submissionJob);
+        }
+
+        [Test]
+        public async Task AndThereAreMultipleProviderSubmissionJobs_ThenReturnsLatest()
+        {
+            //Arrange
+            AttachPriceEpisodeToDataLock();
+            AttachPayablePeriodToDataLock();
+
+            var expectedLatestSubmissionJob = new SubmissionJobModel
+            {
+                AcademicYear = short.MaxValue,
+                CollectionPeriod = byte.MaxValue,
+                IlrSubmissionDateTime = DateTime.MaxValue,
+                EventTime = DateTimeOffset.MaxValue,
+                Ukprn = _ukprn
+            };
+
+            await AddDataLockToDb(_dataLockEvent);
+            await AddSubmissionJobToDb(_submissionJob);
+            await AddSubmissionJobToDb(expectedLatestSubmissionJob);
+
+            //Act
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
+
+            //Assert
+            result.LatestProviderSubmissionJob.Should().NotBeNull();
+            result.LatestProviderSubmissionJob.Should().Be(expectedLatestSubmissionJob);
         }
 
         private void AttachPriceEpisodeToDataLock()
