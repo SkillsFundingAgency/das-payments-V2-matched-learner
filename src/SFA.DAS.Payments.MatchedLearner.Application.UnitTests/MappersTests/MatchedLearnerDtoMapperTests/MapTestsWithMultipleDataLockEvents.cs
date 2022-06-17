@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Application.Mappers;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using NLog.LayoutRenderers.Wrappers;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
 {
@@ -20,19 +21,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
 
             var event2 = Guid.NewGuid();
 
-            //TODO: Fix this
-            //_testInput.LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
-            //{
-            //    new LatestSuccessfulJobModel
-            //    {
-            //        CollectionPeriod = 14,
-            //        AcademicYear = 1920,
-            //        IlrSubmissionTime = DateTime.Now,
-            //        Ukprn = 1234,
-            //        JobId = 1,
-            //        DcJobId = 1,
-            //    }
-            //};
+            _testInput.LatestProviderSubmissionJob = new SubmissionJobModel
+            {
+                CollectionPeriod = 1,
+                AcademicYear = 2021,
+                IlrSubmissionDateTime = DateTime.Now,
+                Ukprn = 1234,
+                DcJobId = 2,
+            };
 
             _testInput.DataLockEvents = new List<DataLockEventModel>
             {
@@ -69,7 +65,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     PriceEpisodeIdentifier = "2-2-01/08/2020",
                 }
             };
+
             var nonPayableEventId1 = Guid.NewGuid();
+
             _testInput.DataLockEventNonPayablePeriods = new List<DataLockEventNonPayablePeriodModel>
             {
                 new DataLockEventNonPayablePeriodModel
@@ -80,6 +78,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     DeliveryPeriod = 2,
                 }
             };
+
             _testInput.DataLockEventNonPayablePeriodFailures = new List<DataLockEventNonPayablePeriodFailureModel>
             {
                 new DataLockEventNonPayablePeriodFailureModel
@@ -95,6 +94,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     DataLockFailureId = 3,
                 },
             };
+
             _testInput.DataLockEventPayablePeriods = new List<DataLockEventPayablePeriodModel>
             {
                 new DataLockEventPayablePeriodModel
@@ -104,20 +104,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     DeliveryPeriod = 1,
                 },
             };
-
-            //TODO: Fix this
-            //_testInput.LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
-            //{
-            //    new LatestSuccessfulJobModel
-            //    {
-            //        CollectionPeriod = 1,
-            //        AcademicYear = 2021,
-            //        IlrSubmissionTime = DateTime.Now,
-            //        Ukprn = 1234,
-            //        JobId = 2,
-            //        DcJobId = 2,
-            //    }
-            //};
 
             _testInput.DataLockEvents.Add(new DataLockEventModel
             {
@@ -180,6 +166,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     DataLockFailureId = 250,
                 }
             });
+
             _testInput.DataLockEventPayablePeriods.AddRange(new List<DataLockEventPayablePeriodModel>
             {
                 new DataLockEventPayablePeriodModel
@@ -189,6 +176,23 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
                     DeliveryPeriod = 100,
                 }
             });
+        }
+
+        [Test]
+        public void WhenMappingDto_ThenHeaderMappedCorrectly()
+        {
+            //Arrange
+            var sut = new MatchedLearnerDtoMapper();
+
+            //Act
+            var result = sut.Map(_testInput);
+
+            //Assert
+            result.Ukprn.Should().Be(1234);
+            result.AcademicYear.Should().Be(2021);
+            result.IlrSubmissionWindowPeriod.Should().Be(1);
+            result.IlrSubmissionDate.Should().BeBefore(DateTime.Now);
+            result.IlrSubmissionDate.Should().BeAfter(DateTime.Now.AddMinutes(-1));
         }
 
         [Test]
