@@ -26,7 +26,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
         Task SaveSubmissionJob(SubmissionJobModel latestSubmissionJob);
-        Task<List<SubmissionJobModel>> GetSubmissionJobsForProvider(long ukprn);
+        Task<SubmissionJobModel> GetLatestSubmissionJobForProvider(long ukprn);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -64,7 +64,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var providerSubmissions = await GetSubmissionJobsForProvider(ukprn);
+            var latestProviderSubmittedJob = await GetLatestSubmissionJobForProvider(ukprn);
 
             var dataLockEvents = await _dataContext.DataLockEvent
                 .Where(x =>
@@ -130,7 +130,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods,
                 DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
                 Apprenticeships = apprenticeshipDetails,
-                ProviderSubmissions = providerSubmissions
+                LatestProviderSubmissionJob = latestProviderSubmittedJob
             };
 
             stopwatch.Stop();
@@ -303,7 +303,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
         }
 
-        public async Task<List<SubmissionJobModel>> GetSubmissionJobsForProvider(long ukprn)
+        public async Task<SubmissionJobModel> GetLatestSubmissionJobForProvider(long ukprn)
         {
             return await _dataContext.SubmissionJobs
                 .Where(where => where.Ukprn == ukprn)
@@ -318,7 +318,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                     join => new { join.AcademicYear, join.Ukprn, join.IlrSubmissionDateTime },
                     on => new { on.AcademicYear, on.Ukprn, on.IlrSubmissionDateTime },
                     (group, submissionJob) => submissionJob)
-                .ToListAsync();
+                .OrderByDescending(x => x.AcademicYear)
+                .ThenByDescending(x => x.CollectionPeriod)
+                .FirstOrDefaultAsync();
         }
     }
 }
