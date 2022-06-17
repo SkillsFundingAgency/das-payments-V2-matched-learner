@@ -29,10 +29,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.Mappers
             {
                 StartDate = firstEvent.LearningStartDate.GetValueOrDefault(),
                 EventTime = firstEvent.EventTime,
-                IlrSubmissionDate = firstEvent.IlrSubmissionDateTime,
-                IlrSubmissionWindowPeriod = firstEvent.CollectionPeriod,
-                AcademicYear = firstEvent.AcademicYear,
-                Ukprn = firstEvent.Ukprn,
+                IlrSubmissionDate = matchedLearnerDataLockInfo.LatestProviderSubmissionJob.IlrSubmissionDateTime,
+                IlrSubmissionWindowPeriod = matchedLearnerDataLockInfo.LatestProviderSubmissionJob.CollectionPeriod,
+                AcademicYear = matchedLearnerDataLockInfo.LatestProviderSubmissionJob.AcademicYear,
+                Ukprn = matchedLearnerDataLockInfo.LatestProviderSubmissionJob.Ukprn,
                 Uln = firstEvent.LearnerUln,
                 Training = MapTraining(matchedLearnerDataLockInfo)
             };
