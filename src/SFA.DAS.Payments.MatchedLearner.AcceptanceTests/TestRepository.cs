@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
+using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 {
@@ -43,10 +46,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             VALUES  (@dataLockEventId1, '25-104-01/08/2019', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
                     (@dataLockEventId1, '25-104-01/08/2019', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
                     (@dataLockEventId1, '25-104-01/08/2019', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
-
-
-
-
 
             INSERT INTO Payments2.DataLockEvent (EventId, EarningEventId, Ukprn, ContractType, CollectionPeriod, AcademicYear, LearnerReferenceNumber, LearnerUln, LearningAimReference, LearningAimProgrammeType, LearningAimStandardCode, LearningAimFrameworkCode, LearningAimPathwayCode, LearningAimFundingLineType, IlrSubmissionDateTime, IsPayable, DataLockSourceId, JobId, EventTime, LearningStartDate)
             VALUES (@dataLockEventId2, NewID(), @ukprn, 1, 1, 2021, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', '2020-10-10', 0, 0, 123, @testDateTime, '2020-10-09 0:00 +00:00')
@@ -149,5 +148,31 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 				new SqlParameter("ukprn", ukprn),
 				new SqlParameter("uln", uln));
 		}
+
+        public async Task<SubmissionJobModel> AddProviderSubmissionJob(short academicYear, byte collectionPeriod, long ukprn, DateTime ilrSubmisssionTime)
+        {
+            var submissionJob = new SubmissionJobModel
+            {
+                AcademicYear = academicYear,
+                CollectionPeriod = collectionPeriod,
+                Ukprn = ukprn,
+                IlrSubmissionDateTime = ilrSubmisssionTime,
+            };
+
+            _matchedLearnerDataContext.SubmissionJobs.Add(submissionJob);
+
+            await _matchedLearnerDataContext.SaveChangesAsync();
+
+            return submissionJob;
+        }
+
+        public async Task ClearProviderSubmissionJobs(long ukprn)
+        {
+            var providerSubmissionJobs = await _matchedLearnerDataContext.SubmissionJobs.Where(x => x.Ukprn == ukprn).ToListAsync();
+
+            _matchedLearnerDataContext.SubmissionJobs.RemoveRange(providerSubmissionJobs);
+
+            await _matchedLearnerDataContext.SaveChangesAsync();
+        }
 	}
 }

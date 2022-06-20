@@ -46,7 +46,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         {
             var repository = new TestRepository();
             await repository.ClearLearner(_ukprn, _learnerUln);
+            await repository.ClearProviderSubmissionJobs(_ukprn);
             await repository.AddDataLockEvent(_ukprn, _learnerUln);
+            await repository.AddProviderSubmissionJob(2122, 1, _ukprn, new DateTime(2021, 3, 1));
         }
 
         [Given("we have created (.*) sample learners")]
@@ -96,9 +98,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             actual.Should().NotBeNull();
             
             actual.StartDate.Date.Should().Be(new DateTime(2020, 10, 9));
-            actual.IlrSubmissionDate.Date.Should().Be(new DateTime(2020, 10, 10));
+            actual.IlrSubmissionDate.Date.Should().Be(new DateTime(2021, 3, 1));
             actual.IlrSubmissionWindowPeriod.Should().Be(1);
-            actual.AcademicYear.Should().Be(2021);
+            actual.AcademicYear.Should().Be(2122);
             actual.Ukprn.Should().Be(_ukprn);
             actual.Uln.Should().Be(_learnerUln);
             actual.Training.Should().HaveCount(1);
