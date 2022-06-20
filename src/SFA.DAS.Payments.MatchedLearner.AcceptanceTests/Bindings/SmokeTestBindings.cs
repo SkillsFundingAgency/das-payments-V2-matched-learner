@@ -45,10 +45,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public async Task GivenWeHaveCreatedASampleLearner()
         {
             var repository = new TestRepository();
-            await repository.ClearLearner(_ukprn, _learnerUln);
-            await repository.ClearProviderSubmissionJobs(_ukprn);
+            await repository.ClearTestData(_ukprn, _learnerUln);
             await repository.AddDataLockEvent(_ukprn, _learnerUln);
-            await repository.AddProviderSubmissionJob(2122, 1, _ukprn, new DateTime(2021, 3, 1));
+            await repository.AddProviderSubmissionJob(2122, 1, _ukprn);
         }
 
         [Given("we have created (.*) sample learners")]
@@ -57,7 +56,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             var repository = new TestRepository();
             for (var index = 1; index < learnerCount + 1; index++)
             {
-                await repository.ClearLearner(index, index);
+                await repository.ClearTestData(index, index);
                 await repository.AddDataLockEvent(index, index);
             }
         }

@@ -94,7 +94,76 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 				new SqlParameter("dataLockEventFailureId4", dataLockEventFailureId4));
 		}
 
-		public async Task ClearLearner(long ukprn, long uln)
+        public async Task AddApprenticeship(long ukprn, long uln)
+        {
+            const string sql = @"
+            declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
+
+            INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate, Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status, IsLevyPayer, ApprenticeshipEmployerType)
+            VALUES (@apprenticeshipId, 1000, @testDateTime, @uln, @ukprn, @testDateTime, @testDateTime, 1, 100, 200, 300, 400, 500, 0, 0, 3)
+
+            ";
+
+            var apprenticeshipId = ukprn + uln;
+
+            await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(sql,
+                new SqlParameter("apprenticeshipId", apprenticeshipId),
+                new SqlParameter("ukprn", ukprn),
+                new SqlParameter("uln", uln));
+        }
+
+		public async Task AddDataLockEventForAcademicYear(long ukprn, long uln, short academicYear, byte collectionPeriod, Guid dataLockEventId)
+		{
+			const string sql = @"
+            declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
+
+            INSERT INTO Payments2.DataLockEvent (EventId, EarningEventId, Ukprn, ContractType, CollectionPeriod, AcademicYear, LearnerReferenceNumber, LearnerUln, LearningAimReference, LearningAimProgrammeType, LearningAimStandardCode, LearningAimFrameworkCode, LearningAimPathwayCode, LearningAimFundingLineType, IlrSubmissionDateTime, IsPayable, DataLockSourceId, JobId, EventTime, LearningStartDate)
+            VALUES (@dataLockEventId, NewID(), @ukprn, 1, @collectionPeriod, @academicYear, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', '2020-10-10', 0, 0, 123, @testDateTime, '2020-10-09 0:00 +00:00')
+
+            INSERT INTO Payments2.DataLockEventPriceEpisode (DataLockEventId, PriceEpisodeIdentifier, SfaContributionPercentage, TotalNegotiatedPrice1, TotalNegotiatedPrice2, TotalNegotiatedPrice3, TotalNegotiatedPrice4, StartDate, EffectiveTotalNegotiatedPriceStartDate, PlannedEndDate, ActualEndDate, NumberOfInstalments, InstalmentAmount, CompletionAmount, Completed)
+            VALUES (@dataLockEventId, '25-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
+
+            INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
+            VALUES  (@dataLockEventId, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
+
+            INSERT INTO Payments2.DataLockEventNonPayablePeriod (DataLockEventId, DataLockEventNonPayablePeriodId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
+            VALUES  (@dataLockEventId, @dataLockEventFailureId1, '25-104-01/08/2020', 1, 3, 400, 1),
+                    (@dataLockEventId, @dataLockEventFailureId2, '25-104-01/08/2020', 1, 4, 500, 1),
+                    (@dataLockEventId, @dataLockEventFailureId3, '25-104-01/08/2020', 1, 5, 600, 1),
+                    (@dataLockEventId, @dataLockEventFailureId4, '25-104-01/08/2020', 1, 6, 600, 1)
+
+            INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DataLockEventNonPayablePeriodId, DataLockFailureId, ApprenticeshipId)
+            VALUES  (@dataLockEventFailureId1, 1, @apprenticeshipId), 
+                    (@dataLockEventFailureId1, 2, @apprenticeshipId), 
+                    (@dataLockEventFailureId1, 3, @apprenticeshipId), 
+                    (@dataLockEventFailureId2, 7, @apprenticeshipId), 
+                    (@dataLockEventFailureId3, 9, @apprenticeshipId),
+                    (@dataLockEventFailureId4, 1, 12345600)
+            ";
+
+			var dataLockEventFailureId1 = Guid.NewGuid();
+			var dataLockEventFailureId2 = Guid.NewGuid();
+			var dataLockEventFailureId3 = Guid.NewGuid();
+			var dataLockEventFailureId4 = Guid.NewGuid();
+
+			var apprenticeshipId = ukprn + uln;
+
+			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(sql,
+				new SqlParameter("apprenticeshipId", apprenticeshipId),
+				new SqlParameter("ukprn", ukprn),
+				new SqlParameter("uln", uln),
+				new SqlParameter("collectionPeriod", collectionPeriod),
+				new SqlParameter("academicYear", academicYear),
+				new SqlParameter("dataLockEventId", dataLockEventId),
+				new SqlParameter("dataLockEventFailureId1", dataLockEventFailureId1),
+				new SqlParameter("dataLockEventFailureId2", dataLockEventFailureId2),
+				new SqlParameter("dataLockEventFailureId3", dataLockEventFailureId3),
+				new SqlParameter("dataLockEventFailureId4", dataLockEventFailureId4));
+		}
+
+		public async Task ClearTestData(long ukprn, long uln)
 		{
 			const string sql = @"
             DELETE Payments2.Apprenticeship WHERE Uln = @uln AND Ukprn = @ukprn;
@@ -139,6 +208,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             DELETE Payments2.DataLockEvent
             WHERE LearnerUln = @uln
             AND Ukprn = @ukprn 
+
+            DELETE dbo.SubmissionJob
+            WHERE Ukprn = @ukprn
             ";
 
 			var apprenticeshipId = ukprn + uln;
@@ -149,14 +221,15 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 				new SqlParameter("uln", uln));
 		}
 
-        public async Task<SubmissionJobModel> AddProviderSubmissionJob(short academicYear, byte collectionPeriod, long ukprn, DateTime ilrSubmisssionTime)
+        public async Task<SubmissionJobModel> AddProviderSubmissionJob(short academicYear, byte collectionPeriod, long ukprn)
         {
             var submissionJob = new SubmissionJobModel
             {
                 AcademicYear = academicYear,
                 CollectionPeriod = collectionPeriod,
                 Ukprn = ukprn,
-                IlrSubmissionDateTime = ilrSubmisssionTime,
+                IlrSubmissionDateTime = DateTime.UtcNow,
+                EventTime = DateTime.UtcNow
             };
 
             _matchedLearnerDataContext.SubmissionJobs.Add(submissionJob);
@@ -164,15 +237,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             await _matchedLearnerDataContext.SaveChangesAsync();
 
             return submissionJob;
-        }
-
-        public async Task ClearProviderSubmissionJobs(long ukprn)
-        {
-            var providerSubmissionJobs = await _matchedLearnerDataContext.SubmissionJobs.Where(x => x.Ukprn == ukprn).ToListAsync();
-
-            _matchedLearnerDataContext.SubmissionJobs.RemoveRange(providerSubmissionJobs);
-
-            await _matchedLearnerDataContext.SaveChangesAsync();
         }
 	}
 }
