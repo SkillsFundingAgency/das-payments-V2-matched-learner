@@ -114,25 +114,29 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
 		public async Task AddDataLockEventForAcademicYear(long ukprn, long uln, short academicYear, byte collectionPeriod, Guid dataLockEventId)
 		{
-			const string sql = @"
+			string sql = @"
             declare @testDateTime as DateTimeOffset = SysDateTimeOffset()
+            
+            IF NOT EXISTS ( SELECT * FROM  Payments2.Apprenticeship where Id = @apprenticeshipId)
+            INSERT INTO Payments2.Apprenticeship (Id, AccountId, AgreedOnDate, Uln, Ukprn, EstimatedStartDate, EstimatedEndDate, Priority, StandardCode, ProgrammeType, FrameworkCode, PathwayCode, TransferSendingEmployerAccountId, Status, IsLevyPayer, ApprenticeshipEmployerType)
+            VALUES (@apprenticeshipId, 1000, @testDateTime, @uln, @ukprn, @testDateTime, @testDateTime, 1, 100, 200, 300, 400, 500, 0, 0, 3)
 
             INSERT INTO Payments2.DataLockEvent (EventId, EarningEventId, Ukprn, ContractType, CollectionPeriod, AcademicYear, LearnerReferenceNumber, LearnerUln, LearningAimReference, LearningAimProgrammeType, LearningAimStandardCode, LearningAimFrameworkCode, LearningAimPathwayCode, LearningAimFundingLineType, IlrSubmissionDateTime, IsPayable, DataLockSourceId, JobId, EventTime, LearningStartDate)
             VALUES (@dataLockEventId, NewID(), @ukprn, 1, @collectionPeriod, @academicYear, 'ref#', @uln, 'ZPROG001', 100, 200, 300, 400, 'funding', '2020-10-10', 0, 0, 123, @testDateTime, '2020-10-09 0:00 +00:00')
 
             INSERT INTO Payments2.DataLockEventPriceEpisode (DataLockEventId, PriceEpisodeIdentifier, SfaContributionPercentage, TotalNegotiatedPrice1, TotalNegotiatedPrice2, TotalNegotiatedPrice3, TotalNegotiatedPrice4, StartDate, EffectiveTotalNegotiatedPriceStartDate, PlannedEndDate, ActualEndDate, NumberOfInstalments, InstalmentAmount, CompletionAmount, Completed)
-            VALUES (@dataLockEventId, '25-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
+            VALUES (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
 
             INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
-            VALUES  (@dataLockEventId, '25-104-01/08/2020', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
-                    (@dataLockEventId, '25-104-01/08/2020', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
-                    (@dataLockEventId, '25-104-01/08/2020', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
+            VALUES  (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
 
             INSERT INTO Payments2.DataLockEventNonPayablePeriod (DataLockEventId, DataLockEventNonPayablePeriodId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
-            VALUES  (@dataLockEventId, @dataLockEventFailureId1, '25-104-01/08/2020', 1, 3, 400, 1),
-                    (@dataLockEventId, @dataLockEventFailureId2, '25-104-01/08/2020', 1, 4, 500, 1),
-                    (@dataLockEventId, @dataLockEventFailureId3, '25-104-01/08/2020', 1, 5, 600, 1),
-                    (@dataLockEventId, @dataLockEventFailureId4, '25-104-01/08/2020', 1, 6, 600, 1)
+            VALUES  (@dataLockEventId, @dataLockEventFailureId1, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 3, 400, 1),
+                    (@dataLockEventId, @dataLockEventFailureId2, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 4, 500, 1),
+                    (@dataLockEventId, @dataLockEventFailureId3, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 5, 600, 1),
+                    (@dataLockEventId, @dataLockEventFailureId4, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 6, 600, 1)
 
             INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DataLockEventNonPayablePeriodId, DataLockFailureId, ApprenticeshipId)
             VALUES  (@dataLockEventFailureId1, 1, @apprenticeshipId), 

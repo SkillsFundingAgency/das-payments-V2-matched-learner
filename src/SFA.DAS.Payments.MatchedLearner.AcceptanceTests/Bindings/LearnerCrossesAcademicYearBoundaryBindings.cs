@@ -28,11 +28,16 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             _repository = new TestRepository();
         }
 
+        [BeforeScenario]
+        [AfterScenario]
+        public async Task SetUp()
+        {
+            await _repository.ClearTestData(_ukprn, _learnerUln);
+        }
+
         [Given(@"the provider submitted a learner in Academic Year (.*) and Collection Period (.*)")]
         public async Task GivenTheProviderSubmittedALearnerInAcademicYearAndCollectionPeriod(short academicYear, byte collectionPeriod)
         {
-            await _repository.ClearTestData(_ukprn, _learnerUln);
-
             var dataLockEventId = Guid.NewGuid();
 
             await _repository.AddDataLockEventForAcademicYear(_ukprn, _learnerUln, academicYear, collectionPeriod, dataLockEventId);
@@ -47,8 +52,8 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         {
         }
 
-        [Given(@"the provider then submitted again in Academic Year (.*) and Collection Period (.*)")]
-        public async Task GivenTheProviderThenSubmittedAgainInAcademicYearAndCollectionPeriod(short academicYear, byte collectionPeriod)
+        [Given(@"the provider then submitted without the learner in Academic Year (.*) and Collection Period (.*)")]
+        public async Task GivenTheProviderThenSubmittedWithoutTheLearnerInAcademicYearAndCollectionPeriod(short academicYear, byte collectionPeriod)
         {
             var submissionJob = await _repository.AddProviderSubmissionJob(academicYear, collectionPeriod, _ukprn);
 
@@ -70,16 +75,20 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             _textContext.MatchedLearnerDto.IlrSubmissionWindowPeriod.Should().Be(collectionPeriod);
         }
 
-        [Then(@"the latest price episode Academic Year should be (.*)")]
-        public void ThenTheLatestPriceEpisodeAcademicYearShouldBe(short academicYear)
+        [Then(@"the latest price episode should have Academic Year (.*) and Collection Period (.*)")]
+        public void ThenTheLatestPriceEpisodeShouldHaveAcademicYearAndCollectionPeriod(short academicYear, byte collectionPeriod)
         {
             _textContext.MatchedLearnerDto.Training.First().PriceEpisodes.First().AcademicYear.Should().Be(academicYear);
-        }
-
-        [Then(@"the latest price episode CollectionPeriod should be (.*)")]
-        public void ThenTheLatestPriceEpisodeCollectionPeriodShouldBe(byte collectionPeriod)
-        {
             _textContext.MatchedLearnerDto.Training.First().PriceEpisodes.First().CollectionPeriod.Should().Be(collectionPeriod);
         }
+
+        [Then(@"the price episode from Academic Year (.*) and Collection Period (.*) submission is also returned")]
+        public void ThenThePriceEpisodeFromAcademicYearAndCollectionPeriodSubmissionIsAlsoReturned(short academicYear, byte collectionPeriod)
+        {
+            _textContext.MatchedLearnerDto.Training.First().PriceEpisodes
+                .First(x => x.AcademicYear == academicYear && collectionPeriod == collectionPeriod).Should()
+                .NotBeNull();
+        }
+
     }
 }
