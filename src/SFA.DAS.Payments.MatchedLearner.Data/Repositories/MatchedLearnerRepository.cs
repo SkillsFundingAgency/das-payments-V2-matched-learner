@@ -64,8 +64,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
             var transactionTypes = new List<byte> { 1, 2, 3 };
 
-            var latestProviderSubmittedJob = await GetLatestSubmissionJobForProvider(ukprn);
-
             var dataLockEvents = await _dataContext.DataLockEvent
                 .Where(x =>
                     x.LearningAimReference == "ZPROG001" &&
@@ -80,6 +78,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
                 return new MatchedLearnerDataLockInfo();
             }
+
+            var latestProviderSubmittedJob = await GetLatestSubmissionJobForProvider(ukprn);
 
             _logger.LogInformation($"Started Getting DataLock Event Data from database for Uln: {uln}");
 
