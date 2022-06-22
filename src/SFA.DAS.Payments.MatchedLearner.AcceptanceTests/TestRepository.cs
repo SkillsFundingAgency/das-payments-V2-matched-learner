@@ -128,15 +128,15 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
             VALUES (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 1000, 2000, 0, 0, '2020-10-07', '2021-01-01', '2020-10-11', '2020-10-12', 12, 50, 550, 0)
 
             INSERT INTO Payments2.DataLockEventPayablePeriod (DataLockEventId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage, LearningStartDate, ApprenticeshipId)
-            VALUES  (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
-                    (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
-                    (@dataLockEventId, Convert(varchar, @AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
+            VALUES  (@dataLockEventId, @priceEpisodeIdentifier, 1, 1, 100, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId, @priceEpisodeIdentifier, 1, 2, 200, 1, @testDateTime, @apprenticeshipId),
+                    (@dataLockEventId, @priceEpisodeIdentifier, 1, 3, 300, 1, @testDateTime, @apprenticeshipId)
 
             INSERT INTO Payments2.DataLockEventNonPayablePeriod (DataLockEventId, DataLockEventNonPayablePeriodId, PriceEpisodeIdentifier, TransactionType, DeliveryPeriod, Amount, SfaContributionPercentage)
-            VALUES  (@dataLockEventId, @dataLockEventFailureId1, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 3, 400, 1),
-                    (@dataLockEventId, @dataLockEventFailureId2, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 4, 500, 1),
-                    (@dataLockEventId, @dataLockEventFailureId3, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 5, 600, 1),
-                    (@dataLockEventId, @dataLockEventFailureId4, Convert(varchar,@AcademicYear + @collectionPeriod) + '-104-01/08/2020', 1, 6, 600, 1)
+            VALUES  (@dataLockEventId, @dataLockEventFailureId1, @priceEpisodeIdentifier, 1, 3, 400, 1),
+                    (@dataLockEventId, @dataLockEventFailureId2, @priceEpisodeIdentifier, 1, 4, 500, 1),
+                    (@dataLockEventId, @dataLockEventFailureId3, @priceEpisodeIdentifier, 1, 5, 600, 1),
+                    (@dataLockEventId, @dataLockEventFailureId4, @priceEpisodeIdentifier, 1, 6, 600, 1)
 
             INSERT INTO Payments2.DataLockEventNonPayablePeriodFailures (DataLockEventNonPayablePeriodId, DataLockFailureId, ApprenticeshipId)
             VALUES  (@dataLockEventFailureId1, 1, @apprenticeshipId), 
@@ -147,6 +147,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                     (@dataLockEventFailureId4, 1, 12345600)
             ";
 
+            var priceEpisodeIdentifier = $"{academicYear}{collectionPeriod}-104-01/08/2020";
 			var dataLockEventFailureId1 = Guid.NewGuid();
 			var dataLockEventFailureId2 = Guid.NewGuid();
 			var dataLockEventFailureId3 = Guid.NewGuid();
@@ -156,6 +157,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
 			await _matchedLearnerDataContext.Database.ExecuteSqlRawAsync(sql,
 				new SqlParameter("apprenticeshipId", apprenticeshipId),
+				new SqlParameter("priceEpisodeIdentifier", priceEpisodeIdentifier),
 				new SqlParameter("ukprn", ukprn),
 				new SqlParameter("uln", uln),
 				new SqlParameter("collectionPeriod", collectionPeriod),
@@ -232,7 +234,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
                 AcademicYear = academicYear,
                 CollectionPeriod = collectionPeriod,
                 Ukprn = ukprn,
-                IlrSubmissionDateTime = DateTime.UtcNow,
+                IlrSubmissionDateTime = new DateTime(2021, 03, 01),
                 EventTime = DateTime.UtcNow
             };
 
