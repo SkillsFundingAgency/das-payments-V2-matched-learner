@@ -86,7 +86,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public void ThenThePriceEpisodeFromAcademicYearAndCollectionPeriodSubmissionIsAlsoReturned(short academicYear, byte collectionPeriod)
         {
             _textContext.MatchedLearnerDto.Training.First().PriceEpisodes
-                .First(x => x.AcademicYear == academicYear && collectionPeriod == collectionPeriod).Should()
+                .First(x => x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod).Should()
                 .NotBeNull();
         }
 
