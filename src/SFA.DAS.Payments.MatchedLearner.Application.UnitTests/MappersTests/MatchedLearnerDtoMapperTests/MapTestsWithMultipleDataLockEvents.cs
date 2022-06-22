@@ -5,7 +5,6 @@ using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NLog.LayoutRenderers.Wrappers;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.MatchedLearnerDtoMapperTests
 {

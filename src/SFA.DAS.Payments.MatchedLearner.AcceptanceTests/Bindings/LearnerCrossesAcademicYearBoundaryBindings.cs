@@ -13,7 +13,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 
         private readonly long _ukprn;
         private readonly long _learnerUln;
-        private readonly long _apprenticeshipId;
         private readonly TestRepository _repository;
 
         public LearnerCrossesAcademicYearBoundaryBindings(SmokeTestContext textContext)
@@ -24,7 +23,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 
             _ukprn = random.Next(100000);
             _learnerUln = random.Next(100000);
-            _apprenticeshipId = _ukprn + _learnerUln;
             _repository = new TestRepository();
         }
 
@@ -61,7 +59,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         }
 
         [When(@"the Api is called in AY (.*) and Collection Period (.*)")]
-        public async Task WhenTheApiIsCalledInAYAndCollectionPeriod(short academicYear, byte collectionPeriod)
+        public async Task WhenTheApiIsCalledInAyAndCollectionPeriod(short academicYear, byte collectionPeriod)
         {
             var request = new TestClient();
 
@@ -69,7 +67,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         }
 
         [Then(@"the header should have AY (.*) and Collection Period (.*)")]
-        public void ThenTheHeaderShouldHaveAYAndCollectionPeriod(short academicYear, byte collectionPeriod)
+        public void ThenTheHeaderShouldHaveAyAndCollectionPeriod(short academicYear, byte collectionPeriod)
         {
             _textContext.MatchedLearnerDto.AcademicYear.Should().Be(academicYear);
             _textContext.MatchedLearnerDto.IlrSubmissionWindowPeriod.Should().Be(collectionPeriod);

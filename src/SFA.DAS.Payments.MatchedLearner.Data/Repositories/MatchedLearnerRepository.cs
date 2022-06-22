@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
@@ -18,7 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
     public interface IMatchedLearnerRepository
     {
         Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
-        Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
+        Task RemovePreviousSubmissionsData(long ukprn, short academicYear, byte collectionPeriod);
         Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
         Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
         Task RemoveApprenticeships(List<long> apprenticeshipIds);
@@ -26,7 +25,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         Task CommitTransactionAsync(CancellationToken cancellationToken);
         Task RollbackTransactionAsync(CancellationToken cancellationToken);
         Task SaveSubmissionJob(SubmissionJobModel latestSubmissionJob);
-        Task<SubmissionJobModel> GetLatestSubmissionJobForProvider(long ukprn);
     }
 
     public class MatchedLearnerRepository : IMatchedLearnerRepository
@@ -142,7 +140,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
 
 
-        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
+        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, byte collectionPeriod)
         {
             await _dataContext.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
         }
@@ -158,10 +156,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
 
-
-        public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
+        private async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 7200, PreserveInsertOrder = false };
 
             await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
         }
@@ -225,7 +222,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         private async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 7200, PreserveInsertOrder = false };
 
             var priceEpisodes = dataLockEvents
                 .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
@@ -303,7 +300,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
             }
         }
 
-        public async Task<SubmissionJobModel> GetLatestSubmissionJobForProvider(long ukprn)
+        private async Task<SubmissionJobModel> GetLatestSubmissionJobForProvider(long ukprn)
         {
             return await _dataContext.SubmissionJobs
                 .Where(where => where.Ukprn == ukprn)

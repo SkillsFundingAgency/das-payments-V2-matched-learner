@@ -34,7 +34,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
                 AcademicYear = 2021,
                 JobId = 123,
             };
-            
+
             _mockMatchedLearnerRepository = new Mock<IMatchedLearnerRepository>();
             _mockPaymentsRepository = new Mock<IPaymentsRepository>();
             _mockLogger = new Mock<ILogger<MatchedLearnerDataImportService>>();
@@ -95,21 +95,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.ServiceTests.Mat
         [Test]
         public void ThenRemovesPreviousSubmissionDataForCurrentPeriod()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_importMatchedLearnerData.Ukprn, _importMatchedLearnerData.AcademicYear, It.Is<IList<byte>>(y => y.Contains(_importMatchedLearnerData.CollectionPeriod))));
+            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_importMatchedLearnerData.Ukprn, _importMatchedLearnerData.AcademicYear, It.Is<byte>(y => y == _importMatchedLearnerData.CollectionPeriod)));
         }
 
         [Test]
         public void ThenRemovesPreviousSubmissionDataForPreviousPeriod()
         {
-            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_importMatchedLearnerData.Ukprn, _importMatchedLearnerData.AcademicYear, It.Is<IList<byte>>(y => y.Contains(_importMatchedLearnerData.CollectionPeriod))));
+            _mockMatchedLearnerRepository.Verify(x => x.RemovePreviousSubmissionsData(_importMatchedLearnerData.Ukprn, _importMatchedLearnerData.AcademicYear, It.Is<byte>(y => y == _importMatchedLearnerData.CollectionPeriod)));
         }
 
         [Test]
         public void ThenRemovesPreviousApprenticeshipData()
         {
             _mockMatchedLearnerRepository.Verify(x => x.RemoveApprenticeships(It.Is<List<long>>(
-                y => y.Count == 2 
-                     && y.Contains(112) 
+                y => y.Count == 2
+                     && y.Contains(112)
                      && y.Contains(114))));
         }
 

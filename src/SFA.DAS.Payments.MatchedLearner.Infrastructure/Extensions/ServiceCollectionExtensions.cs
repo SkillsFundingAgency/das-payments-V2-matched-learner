@@ -27,7 +27,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var options = new DbContextOptionsBuilder()
-                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
+                    .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(7200)) //7200=2hours
                     .Options;
 
                 return new PaymentsDataContext(options);
@@ -36,20 +36,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
 
         public static void AddMatchedLearnerDataContext(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            services.AddMemoryCache();
-
             services.AddSingleton(new AzureServiceTokenProvider());
 
             services.AddSingleton<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProvider>();
-
-            services.Decorate<ISqlAzureIdentityTokenProvider, SqlAzureIdentityTokenProviderCache>();
 
             services.AddSingleton(provider => new SqlAzureIdentityAuthenticationDbConnectionInterceptor(provider.GetService<ILogger<SqlAzureIdentityAuthenticationDbConnectionInterceptor>>(), provider.GetService<ISqlAzureIdentityTokenProvider>(), applicationSettings.ConnectionNeedsAccessToken));
 
             services.AddTransient<IMatchedLearnerDataContextFactory>(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(7200)) //7200=2hours
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContextFactory(matchedLearnerOptions);
@@ -58,7 +54,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             services.AddTransient(provider =>
             {
                 var matchedLearnerOptions = new DbContextOptionsBuilder()
-                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(1800)) //1800=30min
+                    .UseSqlServer(new SqlConnection(applicationSettings.MatchedLearnerConnectionString), optionsBuilder => optionsBuilder.CommandTimeout(7200)) //7200=2hours
                     .AddInterceptors(provider.GetRequiredService<SqlAzureIdentityAuthenticationDbConnectionInterceptor>())
                     .Options;
                 return new MatchedLearnerDataContext(matchedLearnerOptions);
