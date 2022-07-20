@@ -40,9 +40,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 
             await _repository.AddDataLockEventForAcademicYear(_ukprn, _learnerUln, academicYear, collectionPeriod, dataLockEventId);
 
-            var submissionJob = await _repository.AddProviderSubmissionJob(academicYear, collectionPeriod, _ukprn);
-
-            _textContext.ProviderSubmissions.Add(submissionJob);
+            await _repository.AddProviderSubmissionJob(academicYear, collectionPeriod, _ukprn);
         }
 
         [Given(@"the learner then had a break in learning")]
@@ -53,9 +51,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         [Given(@"the provider then submitted without the learner in Academic Year (.*) and Collection Period (.*)")]
         public async Task GivenTheProviderThenSubmittedWithoutTheLearnerInAcademicYearAndCollectionPeriod(short academicYear, byte collectionPeriod)
         {
-            var submissionJob = await _repository.AddProviderSubmissionJob(academicYear, collectionPeriod, _ukprn);
-
-            _textContext.ProviderSubmissions.Add(submissionJob);
+            await _repository.AddProviderSubmissionJob(academicYear, collectionPeriod, _ukprn);
         }
 
         [When(@"the Api is called in AY (.*) and Collection Period (.*)")]
@@ -87,6 +83,5 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
                 .First(x => x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod).Should()
                 .NotBeNull();
         }
-
     }
 }

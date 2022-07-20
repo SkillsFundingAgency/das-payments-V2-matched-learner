@@ -5,6 +5,10 @@
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="Features\PV2-2833-Learner-Crosses-Academic-Year-Boundary.feature" />
+    <None Include="Features\SmokeTests.feature" />
+  </ItemGroup>
 	<ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.19" />
