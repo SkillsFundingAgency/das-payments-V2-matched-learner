@@ -40,7 +40,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _academicYear2 = fixture.Create<short>();
 
             _dataLockEventAy1 = fixture.Create<DataLockEventModel>();
+            _dataLockEventAy1.PriceEpisodes.Clear();
+            _dataLockEventAy1.NonPayablePeriods.Clear();
+            _dataLockEventAy1.PayablePeriods.Clear();
+
             _dataLockEventAy2 = fixture.Create<DataLockEventModel>();
+            _dataLockEventAy2.PriceEpisodes.Clear();
+            _dataLockEventAy2.NonPayablePeriods.Clear();
+            _dataLockEventAy2.PayablePeriods.Clear();
 
             _dataLockEventPayablePeriodAy1 = fixture.Create<DataLockEventPayablePeriodModel>();
             _dataLockEventPayablePeriodAy2 = fixture.Create<DataLockEventPayablePeriodModel>();

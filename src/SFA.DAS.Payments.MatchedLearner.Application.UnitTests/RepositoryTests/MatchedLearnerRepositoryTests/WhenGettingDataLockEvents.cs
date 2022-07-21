@@ -42,6 +42,10 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _uln = fixture.Create<long>();
 
             _dataLockEvent = fixture.Create<DataLockEventModel>();
+            _dataLockEvent.PriceEpisodes.Clear();
+            _dataLockEvent.NonPayablePeriods.Clear();
+            _dataLockEvent.PayablePeriods.Clear();
+            
             _dataLockEvent.LearnerUln = _uln;
             _dataLockEvent.Ukprn = _ukprn;
             _dataLockEvent.EventId = Guid.NewGuid();
