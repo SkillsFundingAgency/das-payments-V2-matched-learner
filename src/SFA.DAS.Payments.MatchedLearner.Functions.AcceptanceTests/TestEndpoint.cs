@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using NServiceBus;
 using NServiceBus.Features;
 using SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Infrastructure;
@@ -60,7 +63,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                 .Transactions(TransportTransactionMode.ReceiveOnly)
                 .SubscriptionRuleNamingConvention(rule => rule.Name.Split('.').LastOrDefault() ?? rule.Name);
 
-            endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+            var noBomEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: false);
+            var serialization = endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
+            serialization.WriterCreator(stream =>
+            {
+                var streamWriter = new StreamWriter(stream, noBomEncoding);
+                return new JsonTextWriter(streamWriter)
+                {
+                    Formatting = Formatting.None
+                };
+            });
 
             endpointConfiguration.EnableInstallers();
 

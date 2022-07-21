@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
         {
             try
             {
-                var submissionSucceededEvent = JsonConvert.DeserializeObject<SubmissionJobSucceeded>(message);
+                var submissionSucceededEvent = JsonConvert.DeserializeObject<SubmissionJobSucceeded>(message);//.Trim('\uFEFF', '\u200B'));
 
                 if (submissionSucceededEvent == null) throw new InvalidOperationException("Error parsing SubmissionJobSucceeded message");
 

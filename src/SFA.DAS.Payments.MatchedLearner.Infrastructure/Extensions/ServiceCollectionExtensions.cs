@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using NLog.Extensions.Logging;
 using NServiceBus;
 using NServiceBus.Features;
@@ -24,7 +26,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
     {
         public static void AddPaymentsDataContext(this IServiceCollection services, ApplicationSettings applicationSettings)
         {
-            services.AddTransient(provider =>
+            services.AddTransient(_ =>
             {
                 var options = new DbContextOptionsBuilder()
                     .UseSqlServer(applicationSettings.PaymentsConnectionString, optionsBuilder => optionsBuilder.CommandTimeout(7200)) //7200=2hours
@@ -70,10 +72,21 @@ namespace SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions
             conventions.DefiningCommandsAs(t => typeof(ImportMatchedLearnerData).IsAssignableFrom(t));
 
             endpointConfiguration.UseTransport<AzureServiceBusTransport>().ConnectionString(applicationSettings.PaymentsServiceBusConnectionString);
-            endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+
+            var noBomEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: false);
+            var serialization = endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
+            serialization.WriterCreator(stream =>
+            {
+                var streamWriter = new StreamWriter(stream, noBomEncoding);
+                return new JsonTextWriter(streamWriter)
+                {
+                    Formatting = Formatting.None
+                };
+            });
+
             endpointConfiguration.SendOnly();
 
-            endpointConfiguration.CustomDiagnosticsWriter(diagnostics => Task.CompletedTask);
+            endpointConfiguration.CustomDiagnosticsWriter(_ => Task.CompletedTask);
 
             endpointConfiguration.DisableFeature<TimeoutManager>();
             endpointConfiguration.EnableInstallers();

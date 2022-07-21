@@ -70,7 +70,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
 
-            if (dataLockEvents == null)
+            if (dataLockEvents.Count == 0)
             {
                 stopwatch.Stop();
                 _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
@@ -160,7 +160,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         {
             var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 7200, PreserveInsertOrder = false };
 
-            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, null, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task StoreApprenticeships(List<ApprenticeshipModel> models, CancellationToken cancellationToken)
@@ -238,15 +238,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .SelectMany(npp => npp.Failures))
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
         }
 
