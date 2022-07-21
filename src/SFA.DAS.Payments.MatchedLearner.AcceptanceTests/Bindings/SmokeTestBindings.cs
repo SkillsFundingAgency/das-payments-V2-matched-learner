@@ -114,7 +114,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             training.StartDate.Date.Should().Be(new DateTime(2020, 10, 9));
             training.PriceEpisodes.Should().HaveCount(2);
 
-            //TODO: Fix this
             var priceEpisode = training.PriceEpisodes.ElementAt(1);
             priceEpisode.Identifier.Should().Be("25-104-01/08/2019");
             priceEpisode.AcademicYear.Should().Be(1920);
@@ -157,7 +156,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             });
             
 
-            //TODO: Fix this
             var priceEpisode2 = training.PriceEpisodes.First();
             priceEpisode2.Identifier.Should().Be("25-104-01/08/2020");
             priceEpisode2.AcademicYear.Should().Be(2021);

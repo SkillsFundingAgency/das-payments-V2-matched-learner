@@ -39,7 +39,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             var factory = new WebApplicationFactory<Startup>().WithWebHostBuilder(builder =>
             {
-                builder.ConfigureAppConfiguration((context, configurationBuilder) =>
+                builder.ConfigureAppConfiguration((_, configurationBuilder) =>
                 {
                     configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
                     {
@@ -50,7 +50,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests
 
             _client = factory.CreateClient();
 
-            _url = _client.BaseAddress.ToString();
+            _url = _client.BaseAddress?.ToString();
         }
 
         public async Task<MatchedLearnerDto> Handle(long ukprn, long uln)
