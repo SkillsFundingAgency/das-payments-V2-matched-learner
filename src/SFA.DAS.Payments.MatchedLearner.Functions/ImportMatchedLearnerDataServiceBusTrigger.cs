@@ -24,7 +24,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
         {
             try
             {
-                var importMatchedLearnerData = JsonConvert.DeserializeObject<ImportMatchedLearnerData>(message);
+                var importMatchedLearnerData = JsonConvert.DeserializeObject<ImportMatchedLearnerData>(message.Trim('\uFEFF', '\u200B'));
 
                 if (importMatchedLearnerData == null) throw new InvalidOperationException("Error parsing ImportMatchedLearnerData message");
 
