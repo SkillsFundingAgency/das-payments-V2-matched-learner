@@ -109,6 +109,10 @@
         },
         "matchedLearnerImportQueue": {
             "type": "string"
+        },
+        "utcValue": {
+            "type": "string",
+            "defaultValue": "[utcNow('yyMMddHHmmss')]"
         }
     },
     "variables": {
@@ -132,7 +136,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "api-app-service-certificate",
+            "name": "[concat(variables('apiAppServiceName'), '-api-app-service-certificate-', parameters('utcValue'))]",
             "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -156,7 +160,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "api-application-insights",
+            "name": "[concat(variables('apiAppServiceName'), '-api-application-insights-', parameters('utcValue'))]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
@@ -177,7 +181,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "api-app-service",
+            "name": "[concat(variables('apiAppServiceName'), '-api-app-service-', parameters('utcValue'))]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
@@ -220,7 +224,7 @@
                                 },
                                 {
                                     "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                                    "value": "[reference('api-application-insights').outputs.InstrumentationKey.value]"
+                                    "value": "[reference(concat(variables('apiAppServiceName'), '-api-application-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
                                 },
                                 {
                                     "name": "EnvironmentName",
@@ -241,7 +245,7 @@
                         "value": "[parameters('apiCustomHostname')]"
                     },
                     "certificateThumbprint": {
-                        "value": "[reference('api-app-service-certificate').outputs.certificateThumbprint.value]"
+                        "value": "[reference(concat(variables('apiAppServiceName'), '-api-app-service-certificate-', parameters('utcValue'))).outputs.certificateThumbprint.value]"
                     },
                     "ipSecurityRestrictions": {
                         "value": "[parameters('backEndAccessRestrictions')]"
@@ -251,7 +255,7 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "function-app-service-plan",
+            "name": "[concat(variables('functionAppName'), '-function-app-service-plan-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -275,7 +279,7 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "function-app-subnet",
+            "name": "[concat(parameters('subnetObject').name, '-function-app-subnet-', parameters('utcValue'))]",
             "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -305,7 +309,7 @@
         },
         {
             "apiVersion": "2021-04-01",
-            "name": "function-app-sql-firewall-rule",
+            "name": "[concat(parameters('subnetObject').name, '-function-app-sql-firewall-rule-', parameters('utcValue'))]",
             "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -319,14 +323,14 @@
                         "value": "[parameters('sharedSQLServerName')]"
                     },
                     "subnetResourceIdList": {
-                        "value": "[createArray(reference('function-app-subnet').outputs.SubnetResourceId.value)]"
+                        "value": "[createArray(reference(concat(parameters('subnetObject').name, '-function-app-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value)]"
                     }
                 }
             }
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "function-app-insights",
+            "name": "[concat(variables('functionAppName'), '-function-app-insights-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -347,7 +351,7 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "function-app",
+            "name": "[concat(variables('functionAppName'), '-function-app-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -367,7 +371,7 @@
                         "value": "[variables('resourceGroupName')]"
                     },
                     "subnetResourceId": {
-                        "value": "[reference('function-app-subnet').outputs.SubnetResourceId.value]"
+                        "value": "[reference(concat(parameters('subnetObject').name, '-function-app-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
                     },
                     "functionAppAppSettings": {
                         "value": {
@@ -378,7 +382,7 @@
                                 },
                                 {
                                     "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                                    "value": "[reference('function-app-insights').outputs.InstrumentationKey.value]"
+                                    "value": "[reference(concat(variables('functionAppName'), '-function-app-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
                                 },
                                 {
                                     "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -433,13 +437,13 @@
                 }
             },
             "dependsOn": [
-                "function-app-service-plan",
-                "function-app-insights"
+                "[concat(variables('functionAppName'), '-function-app-service-plan-', parameters('utcValue'))]",
+                "[concat(variables('functionAppName'), '-function-app-insights-', parameters('utcValue'))]"
             ]
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "sql-database",
+            "name": "[concat(variables('databaseName'), '-sql-database-', parameters('utcValue'))]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
             "properties": {
