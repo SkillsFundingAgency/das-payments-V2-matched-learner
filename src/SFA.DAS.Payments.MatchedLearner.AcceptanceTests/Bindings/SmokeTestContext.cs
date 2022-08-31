@@ -5,6 +5,7 @@ using SFA.DAS.Payments.MatchedLearner.Types;
 
 namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class SmokeTestContext
     {
         public Func<Task> FailedRequest { get; set; }

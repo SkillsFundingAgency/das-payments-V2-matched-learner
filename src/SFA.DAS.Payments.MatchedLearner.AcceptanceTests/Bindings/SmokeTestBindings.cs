@@ -45,8 +45,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
         public async Task GivenWeHaveCreatedASampleLearner()
         {
             var repository = new TestRepository();
-            await repository.ClearLearner(_ukprn, _learnerUln);
+            await repository.ClearTestData(_ukprn, _learnerUln);
             await repository.AddDataLockEvent(_ukprn, _learnerUln);
+            await repository.AddProviderSubmissionJob(2122, 1, _ukprn);
         }
 
         [Given("we have created (.*) sample learners")]
@@ -55,7 +56,7 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             var repository = new TestRepository();
             for (var index = 1; index < learnerCount + 1; index++)
             {
-                await repository.ClearLearner(index, index);
+                await repository.ClearTestData(index, index);
                 await repository.AddDataLockEvent(index, index);
             }
         }
@@ -96,9 +97,9 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             actual.Should().NotBeNull();
             
             actual.StartDate.Date.Should().Be(new DateTime(2020, 10, 9));
-            actual.IlrSubmissionDate.Date.Should().Be(new DateTime(2020, 10, 10));
+            actual.IlrSubmissionDate.Date.Should().Be(new DateTime(2021, 3, 1));
             actual.IlrSubmissionWindowPeriod.Should().Be(1);
-            actual.AcademicYear.Should().Be(2021);
+            actual.AcademicYear.Should().Be(2122);
             actual.Ukprn.Should().Be(_ukprn);
             actual.Uln.Should().Be(_learnerUln);
             actual.Training.Should().HaveCount(1);
@@ -113,7 +114,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             training.StartDate.Date.Should().Be(new DateTime(2020, 10, 9));
             training.PriceEpisodes.Should().HaveCount(2);
 
-            //TODO: Fix this
             var priceEpisode = training.PriceEpisodes.ElementAt(1);
             priceEpisode.Identifier.Should().Be("25-104-01/08/2019");
             priceEpisode.AcademicYear.Should().Be(1920);
@@ -156,7 +156,6 @@ namespace SFA.DAS.Payments.MatchedLearner.AcceptanceTests.Bindings
             });
             
 
-            //TODO: Fix this
             var priceEpisode2 = training.PriceEpisodes.First();
             priceEpisode2.Identifier.Should().Be("25-104-01/08/2020");
             priceEpisode2.AcademicYear.Should().Be(2021);

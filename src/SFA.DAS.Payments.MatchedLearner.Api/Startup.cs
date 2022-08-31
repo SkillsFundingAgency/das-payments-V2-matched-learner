@@ -5,7 +5,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -71,7 +70,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
                     o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string> { PolicyNames.Default }));
                 }
                 o.Conventions.Add(new ApiExplorerGroupPerVersionConvention());
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            });
 
             services.AddSwaggerGen(c =>
             {
@@ -115,7 +114,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Api
                 endpoints.MapHealthChecks("/ping", new HealthCheckOptions
                 {
                     Predicate = _ => false,
-                    ResponseWriter = (context, report) =>
+                    ResponseWriter = (context, _) =>
                     {
                         context.Response.ContentType = "application/json";
                         return context.Response.WriteAsync("");

@@ -18,7 +18,9 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         private readonly DateTime _expectedEventTime = new DateTime(2020, 05, 05);
         private readonly DateTime _expectedIlrSubmissionDate = new DateTime(2020, 04, 04);
         private readonly byte _expectedIlrSubmissionWindowPeriod = 6;
+        private readonly byte _expectedHeaderIlrSubmissionWindowPeriod = 8;
         private readonly short _expectedAcademicYear = 2021;
+        private readonly short _expectedHeaderAcademicYear = 2122;
         private readonly long _expectedUkprn = 3457922;
         private readonly long _expectedUln = 228711;
         private readonly byte _expectedApprenticeshipEmployerType = 2;
@@ -31,7 +33,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         private readonly string _expectedTrainingFundingLineType = "LineTypeTwo";
 
         private readonly string _expectedPriceEpisodeIdentifier = "1-1-01/08/2020";
-        private readonly DateTime _expectedPriceEpisodeIdentifierDatePart = new DateTime(2020,08,01);
+        private readonly DateTime _expectedPriceEpisodeIdentifierDatePart = new DateTime(2020, 08, 01);
         private readonly DateTime _expectedPriceEpisodeStartDate = new DateTime(2020, 02, 01);
         private readonly DateTime _expectedPriceEpisodeEndDate = new DateTime(2021, 08, 08);
         private readonly int _expectedPriceEpisodeNumberOfInstalments = 5;
@@ -44,19 +46,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         {
             var testInput = new MatchedLearnerDataLockInfo
             {
-                //TODO: Fix this
-                //LatestSuccessfulJobs = new List<LatestSuccessfulJobModel>
-                //{
-                //    new LatestSuccessfulJobModel
-                //    {
-                //        CollectionPeriod = _expectedIlrSubmissionWindowPeriod,
-                //        AcademicYear = _expectedAcademicYear,
-                //        IlrSubmissionTime = _expectedIlrSubmissionDate,
-                //        Ukprn = _expectedUkprn,
-                //        JobId = 1,
-                //        DcJobId = 1,
-                //    }
-                //},
+                LatestProviderSubmissionJob = new SubmissionJobModel
+                {
+                    CollectionPeriod = _expectedHeaderIlrSubmissionWindowPeriod,
+                    AcademicYear = _expectedHeaderAcademicYear,
+                    IlrSubmissionDateTime = _expectedIlrSubmissionDate,
+                    Ukprn = _expectedUkprn,
+                    DcJobId = 1
+                },
                 DataLockEvents = new List<DataLockEventModel>
                 {
                     new DataLockEventModel
@@ -186,13 +183,13 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.MappersTests.Mat
         [Test]
         public void InputWithPayablePeriod_Should_MapIlrSubmissionWindowPeriod()
         {
-            _actual.IlrSubmissionWindowPeriod.Should().Be(_expectedIlrSubmissionWindowPeriod);
+            _actual.IlrSubmissionWindowPeriod.Should().Be(_expectedHeaderIlrSubmissionWindowPeriod);
         }
 
         [Test]
         public void InputWithPayablePeriod_Should_MapAcademicYear()
         {
-            _actual.AcademicYear.Should().Be(_expectedAcademicYear);
+            _actual.AcademicYear.Should().Be(_expectedHeaderAcademicYear);
         }
 
         [Test]

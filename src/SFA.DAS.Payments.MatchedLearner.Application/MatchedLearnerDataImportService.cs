@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,18 +30,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Application
         {
             _logger.LogInformation($"Started MatchedLearner Data Import for ukprn {importMatchedLearnerData.Ukprn}");
 
-            var collectionPeriods = new List<byte> { importMatchedLearnerData.CollectionPeriod };
-
-            if (importMatchedLearnerData.CollectionPeriod != 1)
-            {
-                collectionPeriods.Add((byte)(importMatchedLearnerData.CollectionPeriod - 1));
-            }
-
             try
             {
                 await _matchedLearnerRepository.BeginTransactionAsync(CancellationToken.None);
 
-                await _matchedLearnerRepository.RemovePreviousSubmissionsData(importMatchedLearnerData.Ukprn, importMatchedLearnerData.AcademicYear, collectionPeriods);
+                await _matchedLearnerRepository.RemovePreviousSubmissionsData(importMatchedLearnerData.Ukprn, importMatchedLearnerData.AcademicYear, importMatchedLearnerData.CollectionPeriod);
 
                 var dataLockEvents = await _paymentsRepository.GetDataLockEvents(importMatchedLearnerData);
 

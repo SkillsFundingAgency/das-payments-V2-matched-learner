@@ -10,5 +10,6 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Entities
         public List<DataLockEventNonPayablePeriodModel> DataLockEventNonPayablePeriods { get; set; } = new List<DataLockEventNonPayablePeriodModel>();
         public List<DataLockEventNonPayablePeriodFailureModel> DataLockEventNonPayablePeriodFailures { get; set; } = new List<DataLockEventNonPayablePeriodFailureModel>();
         public List<ApprenticeshipModel> Apprenticeships { get; set; } = new List<ApprenticeshipModel>();
+        public SubmissionJobModel LatestProviderSubmissionJob { get; set; } = new SubmissionJobModel();
     }
 }

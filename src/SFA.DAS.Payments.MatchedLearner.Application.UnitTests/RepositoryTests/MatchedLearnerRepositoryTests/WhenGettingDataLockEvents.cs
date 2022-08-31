@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoFixture;
+﻿using AutoFixture;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -11,6 +8,9 @@ using NUnit.Framework;
 using SFA.DAS.Payments.MatchedLearner.Data.Contexts;
 using SFA.DAS.Payments.MatchedLearner.Data.Entities;
 using SFA.DAS.Payments.MatchedLearner.Data.Repositories;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.MatchedLearnerRepositoryTests
 {
@@ -20,6 +20,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
         private IMatchedLearnerRepository _sut;
         private MatchedLearnerDataContext _dataDataContext;
         private DataLockEventModel _dataLockEvent;
+        private SubmissionJobModel _submissionJob;
         private DataLockEventNonPayablePeriodModel _dataLockEventNonPayablePeriod;
         private DataLockEventPayablePeriodModel _dataLockEventPayablePeriod;
         private DataLockEventPriceEpisodeModel _dataLockEventPriceEpisode;
@@ -41,6 +42,19 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _uln = fixture.Create<long>();
 
             _dataLockEvent = fixture.Create<DataLockEventModel>();
+            _dataLockEvent.PriceEpisodes.Clear();
+            _dataLockEvent.NonPayablePeriods.Clear();
+            _dataLockEvent.PayablePeriods.Clear();
+            
+            _dataLockEvent.LearnerUln = _uln;
+            _dataLockEvent.Ukprn = _ukprn;
+            _dataLockEvent.EventId = Guid.NewGuid();
+            _dataLockEvent.LearningAimReference = "ZPROG001";
+            _dataLockEvent.CollectionPeriod = 11;
+            _dataLockEvent.AcademicYear = 2021;
+
+            _submissionJob = fixture.Create<SubmissionJobModel>();
+            _submissionJob.Ukprn = _ukprn;
 
             _dataLockEventNonPayablePeriod = fixture.Freeze<DataLockEventNonPayablePeriodModel>();
             _dataLockEventPayablePeriod = fixture.Freeze<DataLockEventPayablePeriodModel>();
@@ -75,8 +89,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachNonPayablePeriodToDataLock();
 
-            //await AddLatestSuccessfulJobToDb();
-            await AddDataLockToDb();
+            await AddDataLockToDb(_dataLockEvent);
 
             //Act
             var result = await _sut.GetDataLockEvents(_ukprn, _uln);
@@ -96,8 +109,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachNonPayablePeriodToDataLock();
 
-            //await AddLatestSuccessfulJobToDb();
-            await AddDataLockToDb();
+            await AddDataLockToDb(_dataLockEvent);
 
             //Act
             var result = await _sut.GetDataLockEvents(_ukprn, _uln);
@@ -117,8 +129,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachPayablePeriodToDataLock();
 
-            //await AddLatestSuccessfulJobToDb();
-            await AddDataLockToDb();
+            await AddDataLockToDb(_dataLockEvent);
 
             //Act
             var result = await _sut.GetDataLockEvents(_ukprn, _uln);
@@ -138,8 +149,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             AttachPriceEpisodeToDataLock();
             AttachPayablePeriodToDataLock();
 
-            //await AddLatestSuccessfulJobToDb();
-            await AddDataLockToDb();
+            await AddDataLockToDb(_dataLockEvent);
 
             //Act
             var result = await _sut.GetDataLockEvents(_ukprn, _uln);
@@ -149,10 +159,51 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             result.DataLockEventPayablePeriods.Count.Should().Be(1);
         }
 
-        //private async Task AddLatestSuccessfulJobToDb()
-        //{
-        //    await _dataDataContext.SaveChangesAsync();
-        //}
+        [Test]
+        public async Task AndThereIsOnlyOneProviderSubmissionJob_ThenReturnsIt()
+        {
+            //Arrange
+            AttachPriceEpisodeToDataLock();
+            AttachPayablePeriodToDataLock();
+
+            await AddDataLockToDb(_dataLockEvent);
+            await AddSubmissionJobToDb(_submissionJob);
+
+            //Act
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
+
+            //Assert
+            result.LatestProviderSubmissionJob.Should().NotBeNull();
+            result.LatestProviderSubmissionJob.Should().Be(_submissionJob);
+        }
+
+        [Test]
+        public async Task AndThereAreMultipleProviderSubmissionJobs_ThenReturnsLatest()
+        {
+            //Arrange
+            AttachPriceEpisodeToDataLock();
+            AttachPayablePeriodToDataLock();
+
+            var expectedLatestSubmissionJob = new SubmissionJobModel
+            {
+                AcademicYear = short.MaxValue,
+                CollectionPeriod = byte.MaxValue,
+                IlrSubmissionDateTime = DateTime.MaxValue,
+                EventTime = DateTimeOffset.MaxValue,
+                Ukprn = _ukprn
+            };
+
+            await AddDataLockToDb(_dataLockEvent);
+            await AddSubmissionJobToDb(_submissionJob);
+            await AddSubmissionJobToDb(expectedLatestSubmissionJob);
+
+            //Act
+            var result = await _sut.GetDataLockEvents(_ukprn, _uln);
+
+            //Assert
+            result.LatestProviderSubmissionJob.Should().NotBeNull();
+            result.LatestProviderSubmissionJob.Should().Be(expectedLatestSubmissionJob);
+        }
 
         private void AttachPriceEpisodeToDataLock()
         {
@@ -176,16 +227,16 @@ namespace SFA.DAS.Payments.MatchedLearner.Application.UnitTests.RepositoryTests.
             _dataLockEvent.PayablePeriods.Add(_dataLockEventPayablePeriod);
         }
 
-        private async Task AddDataLockToDb()
+        private async Task AddDataLockToDb(DataLockEventModel dataLockEvent)
         {
-            _dataLockEvent.LearnerUln = _uln;
-            _dataLockEvent.Ukprn = _ukprn;
-            _dataLockEvent.EventId = Guid.NewGuid();
-            _dataLockEvent.LearningAimReference = "ZPROG001";
-            _dataLockEvent.CollectionPeriod = 11;
-            _dataLockEvent.AcademicYear = 2021;
+            _dataDataContext.DataLockEvent.Add(dataLockEvent);
 
-            _dataDataContext.DataLockEvent.Add(_dataLockEvent);
+            await _dataDataContext.SaveChangesAsync();
+        }
+
+        private async Task AddSubmissionJobToDb(SubmissionJobModel submissionJob)
+        {
+            _dataDataContext.SubmissionJobs.Add(submissionJob);
 
             await _dataDataContext.SaveChangesAsync();
         }

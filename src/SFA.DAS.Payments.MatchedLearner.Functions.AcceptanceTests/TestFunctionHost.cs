@@ -45,7 +45,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions.AcceptanceTests
                     a.AddInMemoryCollection(appConfig);
                 })
                 .ConfigureWebJobs(builder => builder
-                    .AddAzureStorageCoreServices()
+                    //.AddAzureStorageCoreServices()
                     .AddServiceBus()
                     .UseWebJobsStartup(typeof(Startup), context, NullLoggerFactory.Instance))
                 .Build();

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Threading;
+using Azure.Messaging.ServiceBus.Administration;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SFA.DAS.Payments.MatchedLearner.Functions;
 using SFA.DAS.Payments.MatchedLearner.Functions.Ioc;
-using SFA.DAS.Payments.MatchedLearner.Infrastructure.Configuration;
 using SFA.DAS.Payments.MatchedLearner.Infrastructure.Extensions;
 using SFA.DAS.Payments.Monitoring.Jobs.Messages.Events;
 
@@ -33,14 +31,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
 
             builder.Services.AddAppDependencies(applicationSettings);
 
-            var managementClient = new ManagementClient(applicationSettings.PaymentsServiceBusConnectionString);
+            var managementClient = new ServiceBusAdministrationClient(applicationSettings.PaymentsServiceBusConnectionString);
 
             EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerQueue, typeof(SubmissionJobSucceeded));
 
             EnsureQueueAndSubscription(managementClient, applicationSettings.MatchedLearnerImportQueue);
         }
 
-        private static void EnsureQueueAndSubscription(ManagementClient managementClient, string queue, Type messageType = null)
+        private static void EnsureQueueAndSubscription(ServiceBusAdministrationClient managementClient, string queue, Type messageType = null)
         {
             try
             {
@@ -58,37 +56,37 @@ namespace SFA.DAS.Payments.MatchedLearner.Functions
             }
         }
 
-        private static void EnsureQueue(ManagementClient managementClient, string queue)
+        private static void EnsureQueue(ServiceBusAdministrationClient managementClient, string queue)
         {
             if (managementClient.QueueExistsAsync(queue, CancellationToken.None).GetAwaiter().GetResult()) return;
 
-            var queueDescription = new QueueDescription(queue)
+            var queueDescription = new CreateQueueOptions(queue)
             {
                 DefaultMessageTimeToLive = TimeSpan.FromDays(7),
-                EnableDeadLetteringOnMessageExpiration = true,
+                DeadLetteringOnMessageExpiration = true,
                 LockDuration = TimeSpan.FromMinutes(5),
                 MaxDeliveryCount = 1,
-                MaxSizeInMB = 5120,
-                Path = queue
+                MaxSizeInMegabytes = 5120,
+                //Path = queue
             };
 
             managementClient.CreateQueueAsync(queueDescription, CancellationToken.None).GetAwaiter().GetResult();
         }
 
-        private static void EnsureSubscription(ManagementClient managementClient, string queue, Type messageType)
+        private static void EnsureSubscription(ServiceBusAdministrationClient managementClient, string queue, Type messageType)
         {
             const string topicPath = "bundle-1";
-            var ruleDescription = new RuleDescription(messageType.Name, new SqlFilter($"[NServiceBus.EnclosedMessageTypes] LIKE '%{messageType.FullName}%'"));
+            var ruleDescription = new CreateRuleOptions(messageType.Name, new SqlRuleFilter($"[NServiceBus.EnclosedMessageTypes] LIKE '%{messageType.FullName}%'"));
 
             if (managementClient.SubscriptionExistsAsync(topicPath, queue, CancellationToken.None).GetAwaiter().GetResult())
             {
                 managementClient.DeleteSubscriptionAsync(topicPath, queue, CancellationToken.None).GetAwaiter().GetResult();
             }
 
-            var subscriptionDescription = new SubscriptionDescription(topicPath, queue)
+            var subscriptionDescription = new CreateSubscriptionOptions(topicPath, queue)
             {
                 DefaultMessageTimeToLive = TimeSpan.FromDays(7),
-                EnableDeadLetteringOnMessageExpiration = true,
+                DeadLetteringOnMessageExpiration = true,
                 LockDuration = TimeSpan.FromMinutes(5),
                 MaxDeliveryCount = 1,
                 SubscriptionName = queue,

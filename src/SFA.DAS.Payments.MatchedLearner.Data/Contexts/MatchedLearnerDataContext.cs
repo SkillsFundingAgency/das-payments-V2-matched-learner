@@ -21,17 +21,18 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Contexts
         public DbSet<DataLockEventPriceEpisodeModel> DataLockEventPriceEpisode { get; set; }
         public DbSet<SubmissionJobModel> SubmissionJobs { get; set; }
 
-        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
+        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, byte collectionPeriod)
         {
+            var sqlParameters = new List<SqlParameter>
+            {
+                new SqlParameter("@ukprn", ukprn),
+                new SqlParameter("@academicYear", academicYear),
+                new SqlParameter("@collectionPeriod", collectionPeriod),
+            };
 
-            var sqlParameters = collectionPeriod.Select((item, index) => new SqlParameter($"@period{index}", item)).ToList();
-
-            sqlParameters.Add(new SqlParameter("@ukprn", ukprn));
-            sqlParameters.Add(new SqlParameter("@academicYear", academicYear));
-
-            var sql = $"DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod IN ( {string.Join(", ", sqlParameters.Select(pn => pn.ParameterName))} )";
+            const string sql = "DELETE FROM Payments2.DataLockEvent WHERE ukprn = @ukprn AND AcademicYear = @academicYear AND CollectionPeriod <= @collectionPeriod";
             
-            await Database.ExecuteSqlRawAsync(sql, sqlParameters); //NOSONAR
+            await Database.ExecuteSqlRawAsync(sql, sqlParameters);
         }
 
         public async Task RemoveApprenticeships(IEnumerable<long> apprenticeshipIds)

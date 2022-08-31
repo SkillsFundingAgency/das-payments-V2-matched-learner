@@ -17,7 +17,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
     public interface IMatchedLearnerRepository
     {
         Task<MatchedLearnerDataLockInfo> GetDataLockEvents(long ukprn, long uln);
-        Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod);
+        Task RemovePreviousSubmissionsData(long ukprn, short academicYear, byte collectionPeriod);
         Task StoreApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken);
         Task StoreDataLocks(List<DataLockEventModel> models, CancellationToken cancellationToken);
         Task RemoveApprenticeships(List<long> apprenticeshipIds);
@@ -70,12 +70,14 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .OrderBy(x => x.LearningStartDate)
                 .ToListAsync();
 
-            if (dataLockEvents == null)
+            if (dataLockEvents.Count == 0)
             {
                 stopwatch.Stop();
                 _logger.LogInformation($"No Data for Uln: {uln}, Duration: {stopwatch.ElapsedMilliseconds}");
                 return new MatchedLearnerDataLockInfo();
             }
+
+            var latestProviderSubmittedJob = await GetLatestSubmissionJobForProvider(ukprn);
 
             _logger.LogInformation($"Started Getting DataLock Event Data from database for Uln: {uln}");
 
@@ -125,7 +127,8 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 DataLockEventPayablePeriods = dataLockEventPayablePeriods,
                 DataLockEventNonPayablePeriods = dataLockEventNonPayablePeriods,
                 DataLockEventNonPayablePeriodFailures = dataLockEventNonPayablePeriodFailures,
-                Apprenticeships = apprenticeshipDetails
+                Apprenticeships = apprenticeshipDetails,
+                LatestProviderSubmissionJob = latestProviderSubmittedJob
             };
 
             stopwatch.Stop();
@@ -137,7 +140,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
 
 
-        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, IList<byte> collectionPeriod)
+        public async Task RemovePreviousSubmissionsData(long ukprn, short academicYear, byte collectionPeriod)
         {
             await _dataContext.RemovePreviousSubmissionsData(ukprn, academicYear, collectionPeriod);
         }
@@ -153,12 +156,11 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
         }
 
 
-
-        public async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
+        private async Task SaveApprenticeships(List<ApprenticeshipModel> apprenticeships, CancellationToken cancellationToken)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 7200, PreserveInsertOrder = false };
 
-            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, cancellationToken).ConfigureAwait(false);
+            await _dataContext.BulkInsertAsync(apprenticeships, bulkConfig, null, null, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task StoreApprenticeships(List<ApprenticeshipModel> models, CancellationToken cancellationToken)
@@ -220,7 +222,7 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
         private async Task SaveDataLockEvents(IList<DataLockEventModel> dataLockEvents, CancellationToken cancellationToken)
         {
-            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 60, PreserveInsertOrder = false };
+            var bulkConfig = new BulkConfig { SetOutputIdentity = false, BulkCopyTimeout = 7200, PreserveInsertOrder = false };
 
             var priceEpisodes = dataLockEvents
                 .SelectMany(dataLockEvent => dataLockEvent.PriceEpisodes)
@@ -236,15 +238,15 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
                 .SelectMany(npp => npp.Failures))
                 .ToList();
 
-            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(dataLockEvents, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(priceEpisodes, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(payablePeriods, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(nonPayablePeriods, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
-            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, cancellationToken)
+            await _dataContext.BulkInsertAsync(failures, bulkConfig, null, null, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -296,6 +298,26 @@ namespace SFA.DAS.Payments.MatchedLearner.Data.Repositories
 
                 throw;
             }
+        }
+
+        private async Task<SubmissionJobModel> GetLatestSubmissionJobForProvider(long ukprn)
+        {
+            return await _dataContext.SubmissionJobs
+                .Where(where => where.Ukprn == ukprn)
+                .GroupBy(groupBy => new { groupBy.AcademicYear, groupBy.Ukprn})
+                .Select(select => new SubmissionJobModel
+                {
+                    AcademicYear = select.Key.AcademicYear,
+                    Ukprn = select.Key.Ukprn,
+                    IlrSubmissionDateTime = select.Max(x => x.IlrSubmissionDateTime)
+                })
+                .Join(_dataContext.SubmissionJobs,
+                    join => new { join.AcademicYear, join.Ukprn, join.IlrSubmissionDateTime },
+                    on => new { on.AcademicYear, on.Ukprn, on.IlrSubmissionDateTime },
+                    (group, submissionJob) => submissionJob)
+                .OrderByDescending(x => x.AcademicYear)
+                .ThenByDescending(x => x.CollectionPeriod)
+                .FirstOrDefaultAsync();
         }
     }
 }
