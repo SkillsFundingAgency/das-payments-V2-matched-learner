@@ -26,10 +26,6 @@
         "sharedStorageAccountConnectionString": {
             "type": "securestring"
         },
-         "functionsExtensionVersion": {
-            "type": "string",
-            "defaultValue": "~3"
-        },
         "backEndAccessRestrictions": {
             "type": "array"
         },
@@ -386,7 +382,7 @@
                                 },
                                 {
                                     "name": "FUNCTIONS_EXTENSION_VERSION",
-                                    "value": "[parameters('functionsExtensionVersion')]"
+                                    "value": "~4"
                                 },
                                 {
                                     "name": "WEBSITE_RUN_FROM_PACKAGE",
