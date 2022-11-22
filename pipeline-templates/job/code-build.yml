@@ -19,7 +19,7 @@ jobs:
 
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
     parameters:
-        SonarCloudProjectKey: SkillsFundingAgency_das-payments-V2-matched-learner
+      RunAcceptanceTests: false
 
   - task: DotNetCoreCLI@2
     displayName: Publish Payments V2 Matched Learner Api
