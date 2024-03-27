@@ -15,7 +15,6 @@
     <PackageReference Include="SFA.DAS.NLog.Targets.Redis" Version="1.2.1" />
     <PackageReference Include="SFA.DAS.Payments.Monitoring.Jobs.Messages" Version="0.0.14" />
     <PackageReference Include="System.Net.Security" Version="4.3.2" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="6.0.0" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.7" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.35.0" />
