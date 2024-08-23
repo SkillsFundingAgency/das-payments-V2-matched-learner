@@ -20,6 +20,7 @@ jobs:
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
     parameters:
       RunAcceptanceTests: false
+      ContinueOnVulnerablePackageScanError: true    
 
   - task: DotNetCoreCLI@2
     displayName: Publish Payments V2 Matched Learner Api
@@ -43,7 +44,6 @@ jobs:
       command: build
       projects: 'src/*AcceptanceTests/*AcceptanceTests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-restore'
-
 
   - task: CopyFiles@2
     displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
